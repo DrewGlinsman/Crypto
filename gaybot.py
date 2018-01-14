@@ -3,12 +3,17 @@ import hmac
 import hashlib
 import time
 import math
+import datetime
+from multiprocessing import Pool
 
 try:
     from urlib import urlencode
 
 except ImportError:
     from urllib.parse import urlencode
+
+#open a file for appending (a). + creates file if does not exist
+file = open("log.txt", "a+")
 
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
@@ -27,7 +32,7 @@ minTransactionAmount = {'BTC': 0.003, 'ETH': 0.01, 'Dash': 0.01, 'LTC': 0.01, 'E
 
 stepsizes = {}
 
-potentialCurrency = []
+potentialCurrency = {}
 
 currencyToTrade = {}
 
@@ -40,6 +45,8 @@ currentCurrency = ''
 minimumPercentIncrease = 5.0
 
 zeroCounter = 0
+
+today = datetime.date.today()
 
 
 def buyBin(symbol):
@@ -61,13 +68,15 @@ def buyBin(symbol):
     # and then convert quantity from BTC price to amount of coin
     balancetospend = float(balance) * percent_to_spend
     ratio = getbinanceprice(symbol)
-    quantity = balancetospend / float(ratio)
+    quantity = balancetospend / float(ratio) * .95
 
     # set the step size for the given coin
     stepsize = stepsizes[symbol]
-    print("Stepsize of " + symbol + " is " + stepsize)
+    print("Stepsize of " + symbol + " is " + stepsize + "\n")
+    file.write("Stepsize of " + symbol + " is " + stepsize + "\n")
     # making the quantity to buy
     print("Balance: " + str(balance))
+    file.write("Balance: " + str(balance) + "\n")
     quantity = float(quantity)
 
     # based on the stepsize of the currency round the quantity to that amount
@@ -81,6 +90,7 @@ def buyBin(symbol):
         quantity = math.floor(quantity * 1000) / 1000
 
     print('Quantity to buy: ' + str(quantity) + 'of' + symbol)
+    file.write('Quantity to buy: ' + str(quantity) + 'of' + symbol + "\n")
 
     #building the query string for buying(signed)
     buyParameters = {'symbol': symbol, 'side': 'buy', 'type': 'market', 'timestamp': timestamp, 'quantity': quantity}
@@ -89,8 +99,9 @@ def buyBin(symbol):
     query += "&signature=" + signature
 
     #actually buying
-    #testBuy = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
-    #print(testBuy.text)
+    testBuy = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
+    print(testBuy.text)
+    file.write(testBuy.text + "\n")
 
 
 def sellBin(symbol):
@@ -121,6 +132,7 @@ def sellBin(symbol):
 
     #iterating through the account info to find the balance of the coin we're selling
     print(accountInfo.json())
+    file.write(accountInfo.json() + "\n")
     for i in accountInfo.json()["balances"]:
         if (i["asset"] == asset):
             balance = i["free"]
@@ -128,8 +140,10 @@ def sellBin(symbol):
     #set the step size for the given coin
     stepsize = stepsizes[symbol]
     print("Stepsize of " + symbol + " is " + stepsize)
+    file.write("Stepsize of " + symbol + " is " + stepsize + "\n")
     #making the quantity to sell
     print("Balance: " + str(balance))
+    file.write("Balance: " + str(balance) + "\n")
     quantity = float(balance)
 
 
@@ -144,6 +158,7 @@ def sellBin(symbol):
         quantity = math.floor(quantity*1000)/1000
 
     print('Quantity to sell: ' + str(quantity) + ' of ' + symbol + ' with stepsize ' + stepsize)
+    file.write('Quantity to sell: ' + str(quantity) + ' of ' + symbol + ' with stepsize ' + stepsize + "\n")
 
     #building the sell query string
     sellParameters = {'symbol': symbol, 'side': 'sell', 'type': 'market', 'timestamp': timestamp, 'quantity': quantity}
@@ -152,8 +167,9 @@ def sellBin(symbol):
     query += "&signature=" + signature
 
     #actually selling
-    #testSell = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
-    #print(testSell.text)
+    testSell = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
+    print(testSell.text)
+    file.write(testSell.text + "\n")
 
 
 def binStepSize():
@@ -169,6 +185,7 @@ def binStepSize():
         stepsizes.update(temp)
         if(float(stepsize) != 1 and float(stepsize) != 0.1 and float(stepsize) != 0.01 and float(stepsize) != 0.001 and 'BTC' in symbol and 'USDT' not in symbol):
             print(str(symbol) + " stepsize: " + stepsize)
+            file.write(str(symbol) + " stepsize: " + stepsize + "\n")
 
 
 def getbinanceprice(currency):
@@ -184,6 +201,7 @@ def getbinanceprice(currency):
 
 def pickCrypto():
     #iterates through our dictionary of every price symbol and find the percent change through api
+    startTime = int(time.time()*1000)
     for key, value in priceSymbols.items():
         parameter = {'symbol': value}
         percentChange = requests.get("https://api.binance.com/api/v1/ticker/24hr", params=parameter)
@@ -193,7 +211,9 @@ def pickCrypto():
         if (float(percentChange) >= float(minimumPercentIncrease)):
             entry = {value: percentChange}
             currencyToTrade.update(entry)
-
+    endTime = int(time.time()*1000)
+    realTime = startTime - endTime
+    print(str(realTime))
 
 def priceGetter():
     #creates a list of prices based on the list of 15 cryptos we are looking at
@@ -201,7 +221,6 @@ def priceGetter():
         price = getbinanceprice(key)
         priceS = {key: price}
         priceList.update(priceS)
-
 
 
 def priceChecker():
@@ -218,36 +237,48 @@ def priceChecker():
     maxPercentChange = 0 #moved out of for loop
     for key, value in priceList.items():
         percentChange = ((float(newPriceList[key]) - float(priceList[key]))/float(priceList[key])) * 100.0
-        print("New Price is " + str(newPriceList[key]) + " Old price was: " + str(priceList[key]) + " which gives you a percent change of " + str(percentChange))
+        print(key + " New Price is " + str(newPriceList[key]) + " Old price was: " + str(priceList[key]) + " which gives you a percent change of " + str(percentChange))
+        file.write(key + " New Price is " + str(newPriceList[key]) + " Old price was: " + str(priceList[key]) + " which gives you a percent change of " + str(percentChange) + "\n")
         if(percentChange > maxPercentChange):
             maxPercentChange = percentChange
             symbol = key
             currencyToBuy = symbol
 
     print("Coin with the highest percent change is " + currencyToBuy + " which is " + str(maxPercentChange))
+    file.write("Coin with the highest percent change is " + currencyToBuy + " which is " + str(maxPercentChange) + "\n")
     return currencyToBuy #potential runtime error if all negative todo
 
 
 def main():
+    file.write("\n")
+    print('------------------------------------------------------------------------------------')
+    file.write('------------------------------------------------------------------------------------' + "\n")
 
-    #pickCrypto()
+    pickCrypto()
     binStepSize()
-    '''
+
     x=0
     currentCurrency = ''
 
     while(x<24):
         priceGetter()
         time.sleep(3600)
+        pickCrypto()
         oldCurrency = currentCurrency
         currentCurrency = priceChecker()
         if(oldCurrency != currentCurrency and oldCurrency != ''):
             sellBin(oldCurrency)
         if(oldCurrency != currentCurrency):
             buyBin(currentCurrency)
+
         x+=1
 
     sellBin(currentCurrency)
-    '''
+
+
+    print('---------------------------||||||||||||||||----------------------------------------')
+    file.write('---------------------------||||||||||||||||----------------------------------------' + "\n")
+    file.write("\n" + "\n" + "\n")
+
 if __name__ == "__main__":
     main()
