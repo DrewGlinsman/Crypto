@@ -1,0 +1,40 @@
+#korbit pricing stuff
+#btc price
+parameter = {'currency_pair': 'btc_krw'}
+korBTCData = requests.get('https://api.korbit.co.kr/v1/ticker', params = parameter)
+korBTC = korBTCData.json()["last"]
+
+#XRP korbit price ratio
+parameter = {'currency_pair': 'xrp_krw'}
+korXRPData = requests.get('https://api.korbit.co.kr/v1/ticker', params = parameter)
+korXRP = korXRPData.json()["last"]
+korXRPRatio = int(korXRP)/int(korBTC)
+print('korXRP: ' + str(korXRPRatio))
+
+#ETH korbit price ratio
+parameter = {'currency_pair': 'eth_krw'}
+korETHData = requests.get('https://api.korbit.co.kr/v1/ticker', params=parameter)
+korETH = korETHData.json()["last"]
+korETHRatio = int(korETH)/int(korBTC)
+print('korETH: ' + str(korETHRatio))
+
+#ETC korbit price ratio
+parameter = {'currency_pair': 'etc_krw'}
+korETCData = requests.get('https://api.korbit.co.kr/v1/ticker', params=parameter)
+korETC = korETCData.json()["last"]
+korETCRatio = int(korETC)/int(korBTC)
+print('korETC: ' + str(korETCRatio))
+
+#BTG korbit price ratio
+parameter = {'currency_pair': 'btg_krw'}
+korBTGData = requests.get('https://api.korbit.co.kr/v1/ticker', params=parameter)
+korBTG = korBTGData.json()["last"]
+korBTGRatio = int(korBTG)/int(korBTC)
+print('korBTG: ' + str(korBTGRatio))
+
+#BCC korbit price ratio
+parameter = {'currency_pair': 'bch_krw'}
+korBCHData = requests.get('https://api.korbit.co.kr/v1/ticker', params=parameter)
+korBCH = korBCHData.json()["last"]
+korBCHRatio = int(korBCH)/int(korBTC)
+print('korBCH: ' + str(korBCHRatio))

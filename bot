@@ -1,0 +1,143 @@
+import requests
+
+
+btc = requests.get(https://api.korbit.co.kr/v1/ticker)
+
+ripple = requests.get(https://api.korbit.co.kr/v1/ticker, xrp_krw)
+
+print(btc)
+print(ripple)
+
+#sending crypto from binance to korbit successfully sends
+
+timestamp = int(time.time()*1000)
+
+parameters = {'asset': 'XRP', 'address': 'rBTjeJu1Rvnbq476Y7PDnvnXUeERV9CxEQ', 'amount': 23.0, 'recvWindow': 5000, 'timestamp': timestamp, 'addressTag': '40334952'}
+
+query = urlencode(sorted(parameters.items()))
+
+print('this is the query string: ' + query)
+
+signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
+
+print('this is the signature: ' + signature)
+
+parameter = {'signature': signature}
+
+parameters.update(parameter)
+
+headers = {'X-MBX-APIKEY': api_key}
+
+query += "&signature=" + signature
+print(query)
+
+queryURL = 'https://api.binance.com/wapi/v3/withdraw.html?' + query
+print(queryURL)
+#testSend = requests.post(queryURL, headers=headers)
+
+#print(testSend.text)
+
+
+
+#trading on korbit
+
+korbitAPIKey='4S3LUjzRxGOXHGBcQW2urnz031f0Q2bptU4EQ9AFpZkftRkPaZOt0pEAsB9Ic'
+
+korbitSecretKey='x8evqbLSlbgZqN5va9FPjngAHbr9BmRKwLgvwbF8ERPmJNc9RxGi5lXpvZoHc'
+
+#authentication
+parameters = {'client_id': korbitAPIKey, 'client_secret': korbitSecretKey, 'username': 'kmsjasmin@naver.com', 'password':'kms123456789', 'grant_type': "password"}
+
+query = urlencode(sorted(parameters.items()))
+nonce = int(time.time() * 1000)
+
+queryURL = 'https://api.korbit.co.kr/v1/oauth2/access_token?' + query
+testAuthenticate = requests.post(queryURL)
+
+token = testAuthenticate.json()["access_token"]
+refreshToken = testAuthenticate.json()["refresh_token"]
+
+#set access token to header
+headers = {'Accept': 'application/json', 'Authorization': "{} {}".format(testAuthenticate.json()['token_type'], testAuthenticate.json()['access_token'])}
+
+#trading ripple for won
+parameters = {'currency_pair': 'xrp_krw', 'type': 'market', 'coin_amount': .00371482, 'nonce': nonce}
+
+query = urlencode(sorted(parameters.items()))
+queryURL = 'https://api.korbit.co.kr/v1/user/orders/sell?' + query
+#testSell = requests.post(queryURL, headers=headers)
+
+#trading won for ethereum classic
+parameters ={'currency_pair': 'btc_krw', 'type': 'market', 'fiat_amount': '90830', 'nonce': nonce}
+
+query = urlencode(sorted(parameters.items()))
+queryURL = 'https://api.korbit.co.kr/v1/user/orders/buy?' + query
+#Buy = requests.post(queryURL, headers=headers)
+
+#sending btc back from korbit to binance
+balance = requests.get('https://api.korbit.co.kr/v1/user/balances', headers=headers)
+spendable = balance.json()['btc']["available"]
+
+spendable = float(spendable)
+
+btcAddress = '12TcYMVbdUrRVmWiaM1mp6pHTvg2Bj6A9g'
+
+parameters={'currency': 'btc', 'amount': spendable-.001, 'address': btcAddress, 'nonce': nonce, 'fee_priority': "normal"}
+
+query=urlencode(sorted(parameters.items()))
+queryURL='https://api.korbit.co.kr/v1/user/coins/out?' + query
+#testSend = requests.post(queryURL, headers=headers)
+
+#trade logic
+
+'''
+startTime = timestamp - 3600000
+endTime = timestamp
+parameter = {'symbol': 'BTCUSDT', 'startTime' : startTime, 'endTime': timestamp}
+#binBTCData = requests.get("https://api.binance.com/api/v1/aggTrades", params=parameter)
+#binBTC = binBTCData.json()[1]['p']
+#print('BTC: ' + binBTC)
+
+#XRP binance price data
+parameter = {'symbol': 'XRPBTC', 'startTime': startTime, 'endTime':timestamp}
+#binXRPData = requests.get("https://api.binance.com/api/v1/aggTrades", params=parameter)
+#binXRP = binXRPData.json()[1]['p']
+#print('XRP: '+ binXRP)
+
+#ETH binance price data
+parameter = {'symbol': 'ETHBTC', 'startTime': startTime, 'endTime':timestamp}
+binETHData = requests.get("https://api.binance.com/api/v1/aggTrades", params=parameter)
+binETH = binETHData.json()[1]['p']
+print('ETH: ' + binETH)
+
+#ETC binance price data
+parameter = {'symbol': 'ETCBTC', 'startTime': startTime, 'endTime':timestamp}
+binETCData = requests.get("https://api.binance.com/api/v1/aggTrades", params=parameter)
+binETC = binETCData.json()[1]['p']
+print('ETC: ' + binETC )
+
+#BTG binance price data
+parameter = {'symbol': 'BTGBTC', 'startTime': startTime, 'endTime':timestamp}
+binBTGData = requests.get("https://api.binance.com/api/v1/aggTrades", params=parameter)
+binBTG = binBTGData.json()[1]['p']
+print('BTG: ' + binBTG)
+
+#BCC binance price data
+parameter = {'symbol': 'BCCBTC', 'startTime': startTime, 'endTime':timestamp}
+binBCCData = requests.get("https://api.binance.com/api/v1/aggTrades", params=parameter)
+binBCC = binBCCData.json()[1]['p']
+print('BCC: ' + binBCC)
+
+#Bithumb btc price data
+parameter = {'symbol': 'BTC'}
+btBTC = requests.get("https://api.bithumb.com/public/ticker/", params=parameter)
+btBTCprice = btBTC.json()['data']
+print(btBTCprice)
+
+
+print('Potential gain on XRP: ' + str())
+print('Potential gain on ETH: ' + str())
+print('Potential gain on ETC: ' + str())
+print('Potential gain on BTG: ' + str())
+print('Potential gain on BCC/BCH: ' + str())
+'''
