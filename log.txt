@@ -1,0 +1,85 @@
+
+------------------------------------------------------------------------------------
+WINGSBTC New Price is 0.00013159 Old price was: 0.00012879 which gives you a percent change of 2.17408183865208
+PPTBTC New Price is 0.00374580 Old price was: 0.00355080 which gives you a percent change of 5.491720175735054
+SNMBTC New Price is 0.00004190 Old price was: 0.00004210 which gives you a percent change of -0.47505938242279827
+ETCBTC New Price is 0.00309900 Old price was: 0.00318100 which gives you a percent change of -2.5778057214712233
+MDABTC New Price is 0.00031573 Old price was: 0.00032700 which gives you a percent change of -3.446483180428124
+BCDBTC New Price is 0.00970000 Old price was: 0.01019400 which gives you a percent change of -4.845987835981947
+OAXBTC New Price is 0.00014530 Old price was: 0.00014846 which gives you a percent change of -2.1285194665229623
+GASBTC New Price is 0.00427400 Old price was: 0.00419400 which gives you a percent change of 1.9074868860276637
+MCOBTC New Price is 0.00135400 Old price was: 0.00128300 which gives you a percent change of 5.53390491036632
+ICNBTC New Price is 0.00029912 Old price was: 0.00028953 which gives you a percent change of 3.3122647048665153
+WTCBTC New Price is 0.00198010 Old price was: 0.00202380 which gives you a percent change of -2.1593042790789725
+XZCBTC New Price is 0.00737800 Old price was: 0.00736900 which gives you a percent change of 0.12213326095807202
+LTCBTC New Price is 0.01883200 Old price was: 0.01835800 which gives you a percent change of 2.5819806079093706
+OMGBTC New Price is 0.00175100 Old price was: 0.00179600 which gives you a percent change of -2.505567928730519
+CDTBTC New Price is 0.00001423 Old price was: 0.00001421 which gives you a percent change of 0.14074595355383399
+GXSBTC New Price is 0.00068360 Old price was: 0.00070040 which gives you a percent change of -2.3986293546544792
+VIBBTC New Price is 0.00004500 Old price was: 0.00004808 which gives you a percent change of -6.405990016638929
+NEOBTC New Price is 0.00963100 Old price was: 0.00976500 which gives you a percent change of -1.3722478238607139
+ETHBTC New Price is 0.09666300 Old price was: 0.09686400 which gives you a percent change of -0.20750743310208822
+EOSBTC New Price is 0.00110405 Old price was: 0.00110588 which gives you a percent change of -0.1654790754873923
+EVXBTC New Price is 0.00034387 Old price was: 0.00035240 which gives you a percent change of -2.4205448354142947
+BNTBTC New Price is 0.00070719 Old price was: 0.00071065 which gives you a percent change of -0.48687821008934684
+HSRBTC New Price is 0.00142700 Old price was: 0.00134000 which gives you a percent change of 6.492537313432839
+Coin with the highest percent change is HSRBTC which is 6.492537313432839
+Stepsize of HSRBTC is 0.01000000
+Balance: 0.22036912
+Quantity to buy: 154.42ofHSRBTC
+{"code":-2010,"msg":"Account has insufficient balance for requested action."}
+
+------------------------------------------------------------------------------------
+OAXBTC New Price is 0.00013554 Old price was: 0.00014569 which gives you a percent change of -6.966847415745764
+BCDBTC New Price is 0.01088900 Old price was: 0.00899800 which gives you a percent change of 21.015781284729922
+EVXBTC New Price is 0.00034221 Old price was: 0.00034679 which gives you a percent change of -1.3206839874275382
+XZCBTC New Price is 0.00729200 Old price was: 0.00733000 which gives you a percent change of -0.5184174624829446
+WINGSBTC New Price is 0.00012737 Old price was: 0.00014500 which gives you a percent change of -12.158620689655177
+CDTBTC New Price is 0.00001670 Old price was: 0.00001417 which gives you a percent change of 17.8546224417784
+GXSBTC New Price is 0.00065710 Old price was: 0.00066520 which gives you a percent change of -1.21767889356585
+LTCBTC New Price is 0.01818300 Old price was: 0.01853800 which gives you a percent change of -1.9149854353220288
+WTCBTC New Price is 0.00190000 Old price was: 0.00194800 which gives you a percent change of -2.4640657084188953
+VIBBTC New Price is 0.00004503 Old price was: 0.00004425 which gives you a percent change of 1.7627118644067858
+OMGBTC New Price is 0.00175200 Old price was: 0.00174100 which gives you a percent change of 0.6318207926479126
+ETCBTC New Price is 0.00314000 Old price was: 0.00323200 which gives you a percent change of -2.8465346534653486
+PPTBTC New Price is 0.00372980 Old price was: 0.00372410 which gives you a percent change of 0.1530571144706097
+BNTBTC New Price is 0.00070419 Old price was: 0.00071098 which gives you a percent change of -0.9550198317814858
+GASBTC New Price is 0.00406100 Old price was: 0.00420000 which gives you a percent change of -3.3095238095237947
+ETHBTC New Price is 0.09637500 Old price was: 0.09691300 which gives you a percent change of -0.5551370817124605
+AIONBTC New Price is 0.00060310 Old price was: 0.00056270 which gives you a percent change of 7.179669450861917
+ICNBTC New Price is 0.00028842 Old price was: 0.00029981 which gives you a percent change of -3.799072746072516
+MCOBTC New Price is 0.00135700 Old price was: 0.00131500 which gives you a percent change of 3.1939163498098813
+ICXBTC New Price is 0.00073110 Old price was: 0.00073460 which gives you a percent change of -0.47644976858153043
+HSRBTC New Price is 0.00154900 Old price was: 0.00148500 which gives you a percent change of 4.309764309764312
+MDABTC New Price is 0.00031803 Old price was: 0.00030952 which gives you a percent change of 2.7494184543809896
+NEOBTC New Price is 0.00969700 Old price was: 0.00960200 which gives you a percent change of 0.9893772130806222
+Coin with the highest percent change is BCDBTC which is 21.015781284729922
+Stepsize of BCDBTC is 0.00100000
+Balance: 0.22036912
+Quantity to buy: 19.229ofBCDBTC
+{"symbol":"BCDBTC","orderId":3807443,"clientOrderId":"rpFMxDgHzQuv4xy7V1q1pa","transactTime":1515901653160,"price":"0.00000000","origQty":"19.22900000","executedQty":"19.22900000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"BUY"}
+OAXBTC New Price is 0.00013572 Old price was: 0.00013734 which gives you a percent change of -1.179554390563566
+BCDBTC New Price is 0.01070000 Old price was: 0.01098500 which gives you a percent change of -2.5944469731452027
+EVXBTC New Price is 0.00033733 Old price was: 0.00034221 which gives you a percent change of -1.4260249554367261
+XZCBTC New Price is 0.00720000 Old price was: 0.00729200 which gives you a percent change of -1.2616566099835447
+WINGSBTC New Price is 0.00013000 Old price was: 0.00012718 which gives you a percent change of 2.2173297688315587
+CDTBTC New Price is 0.00001568 Old price was: 0.00001680 which gives you a percent change of -6.666666666666663
+GXSBTC New Price is 0.00066200 Old price was: 0.00065680 which gives you a percent change of 0.7917174177831939
+LTCBTC New Price is 0.01772300 Old price was: 0.01815800 which gives you a percent change of -2.3956382861548704
+WTCBTC New Price is 0.00183270 Old price was: 0.00188680 which gives you a percent change of -2.867288530845869
+VIBBTC New Price is 0.00004539 Old price was: 0.00004499 which gives you a percent change of 0.8890864636585822
+OMGBTC New Price is 0.00175200 Old price was: 0.00175000 which gives you a percent change of 0.11428571428571707
+ETCBTC New Price is 0.00315200 Old price was: 0.00313800 which gives you a percent change of 0.44614404079030234
+PPTBTC New Price is 0.00366100 Old price was: 0.00371270 which gives you a percent change of -1.3925175748107848
+BNTBTC New Price is 0.00071223 Old price was: 0.00070419 which gives you a percent change of 1.1417373152132175
+GASBTC New Price is 0.00411600 Old price was: 0.00406200 which gives you a percent change of 1.3293943870014828
+SNMBTC New Price is 0.00003955 Old price was: 0.00003894 which gives you a percent change of 1.5665125834617253
+ETHBTC New Price is 0.09693700 Old price was: 0.09628100 which gives you a percent change of 0.6813389973099467
+AIONBTC New Price is 0.00059060 Old price was: 0.00060350 which gives you a percent change of -2.1375310687655236
+ICNBTC New Price is 0.00029047 Old price was: 0.00028842 which gives you a percent change of 0.7107690174051621
+MCOBTC New Price is 0.00138000 Old price was: 0.00135700 which gives you a percent change of 1.6949152542372896
+ICXBTC New Price is 0.00073200 Old price was: 0.00073300 which gives you a percent change of -0.13642564802183144
+HSRBTC New Price is 0.00152600 Old price was: 0.00154800 which gives you a percent change of -1.4211886304909487
+MDABTC New Price is 0.00031813 Old price was: 0.00031992 which gives you a percent change of -0.5595148787196783
+NEOBTC New Price is 0.00990500 Old price was: 0.00969300 which gives you a percent change of 2.187145362632832
+Coin with the highest percent change is WINGSBTC which is 2.2173297688315587
