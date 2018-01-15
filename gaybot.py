@@ -234,7 +234,13 @@ def updateCrypto(interval, starttime, endtime):
         percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
         percentChange = percentChange.json()
 
-        print(percentChange.text)
+        #calculate the percent change over the whole hour
+        openPrice = percentChange[0][1]
+        closePrice = percentChange[58][4]
+        print(str(value) + ' open  ' + str(openPrice) + ' close ' + str(closePrice))
+
+        #calculate the percentage change between the minute intervals
+        #use the calculations to get a score based on how frequently the crypto was increasing
 
 
 def priceGetter():
@@ -284,7 +290,7 @@ def main():
     #pickCrypto()
     binStepSize()
     endTime = int(time.time() * 1000)
-    startTime = endTime - 3500000
+    startTime = endTime - 3600000
     updateCrypto('1m', startTime, endTime)
 
 
