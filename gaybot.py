@@ -46,6 +46,12 @@ minimumPercentIncrease = 5.0
 
 zeroCounter = 0
 
+MAX_TIME_CYCLE = 3600
+
+MAX_CYCLES = 24
+
+restart = 0
+
 today = datetime.date.today()
 
 
@@ -215,6 +221,22 @@ def pickCrypto():
     realTime = startTime - endTime
     print(str(realTime))
 
+
+    #interval based on this from binance API
+    #     m -> minutes;     h -> hours;     d -> days;     w -> weeks;    M -> months
+    #  1m  3m   5m  15m  30m  1h 2h 4h 6h 8h  12h  1d   3d  1w   1M
+    # method used to update price lists on past hour of trends
+
+def updateCrypto(interval, starttime, endtime):
+
+    for key,value in priceSymbols.items():
+        parameter = {'symbol': value, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
+        percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
+        percentChange = percentChange.json()
+
+        print(percentChange.text)
+
+
 def priceGetter():
     #creates a list of prices based on the list of 15 cryptos we are looking at
     for key, value in currencyToTrade.items():
@@ -249,21 +271,42 @@ def priceChecker():
     return currencyToBuy #potential runtime error if all negative todo
 
 
+#just calculates the percent change between two values
+def calcPercentChange(startVal, endVal):
+    return (((endVal - startVal)/startVal ) * 100)
+
+
 def main():
     file.write("\n")
     print('------------------------------------------------------------------------------------')
     file.write('------------------------------------------------------------------------------------' + "\n")
 
-    pickCrypto()
+    #pickCrypto()
     binStepSize()
+    endTime = int(time.time() * 1000)
+    startTime = endTime - 3500000
+    updateCrypto('1m', startTime, endTime)
 
+
+    """
     x=0
+    t=0
+
     currentCurrency = ''
 
-    while(x<24):
+    while(x < MAX_CYCLES):
         priceGetter()
-        time.sleep(3600)
-        pickCrypto()
+
+        #while statement is more flexible way to wait for a period of time or a restart
+        # restart could be caused by a met failure condition or a met sustained one
+        while(t < MAX_TIME_CYCLE and restart == 0):
+            time.sleep(1)
+            t+=1
+        
+        
+        endTime = int(time.time() * 1000)
+        startTime = endTime - 3500000
+        updateCrypto('1m', startTime, endTime)
         oldCurrency = currentCurrency
         currentCurrency = priceChecker()
         if(oldCurrency != currentCurrency and oldCurrency != ''):
@@ -274,7 +317,7 @@ def main():
         x+=1
 
     sellBin(currentCurrency)
-
+    """
 
     print('---------------------------||||||||||||||||----------------------------------------')
     file.write('---------------------------||||||||||||||||----------------------------------------' + "\n")
