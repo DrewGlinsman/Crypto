@@ -75,6 +75,9 @@ MAX_TIME_CYCLE = 3600
 #number of cycles run with each run of this bot
 MAX_CYCLES = 24
 
+#max percent change before the bot sells and exits
+MAX_PERCENT_CHANGE = 50
+
 #0 is false, 1 is true
 RESTART = 0
 EXIT = 0
@@ -418,6 +421,17 @@ def checkTooNegative(symbol):
 
     return 0
 
+def checkExitCondition(currency):
+    currentBalance = getBalance(currency)
+
+    global initialBalance
+    percentChange = calcPercentChange(initialBalance, currentBalance)
+
+    if(percentChange >= MAX_PERCENT_CHANGE):
+        return 1
+
+    return 0
+
 def main():
     file.write("\n")
     file.write('------------------------------------------------------------------------------------' + "\n")
@@ -435,12 +449,11 @@ def main():
 
     currentCurrency = ''
 
+    global initialBalance
     initialBalance = getBalance('BTC')
 
-    '''
     binStepSize()
-    while(x < MAX_CYCLES):
-        
+    while(x < MAX_CYCLES and EXIT == 0):
         
         endTime = int(time.time() * 1000)
         startTime = endTime - 3600000
@@ -462,7 +475,7 @@ def main():
             t+=1
         t=0
         
-
+        checkExitCondition(currentCurrency)
         x+=1
 
     sellBin(currentCurrency)
@@ -470,6 +483,6 @@ def main():
 
     file.write('---------------------------||||||||||||||||----------------------------------------' + "\n")
     file.write("\n" + "\n" + "\n")
-    '''
+
 if __name__ == "__main__":
     main()
