@@ -59,6 +59,10 @@ oldCurrency = ''
 
 currentCurrency = ''
 
+initialBalance = 0.0
+
+currentBalance = 0.0
+
 minimumPercentIncrease = 5.0
 
 zeroCounter = 0
@@ -73,6 +77,7 @@ MAX_CYCLES = 24
 
 #0 is false, 1 is true
 RESTART = 0
+EXIT = 0
 
 #calculated cumulative percentChange with the current cycle
 cumulativePercentChange = 0.0
@@ -80,20 +85,30 @@ cumulativePercentChange = 0.0
 today = datetime.date.today()
 
 
-def buyBin(symbol):
-    #current time in ms
+def getBalance(symbol):
     timestamp = int(time.time() * 1000)
-
-    #building the request query url plus other parameters(signed)
+    # building the request query url plus other parameters(signed)
     headers = {'X-MBX-APIKEY': api_key}
     infoParameter = {'timestamp': timestamp}
     query = urlencode(sorted(infoParameter.items()))
     signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
     query += "&signature=" + signature
 
-    #requesting account info to get the balance
+    # requesting account info to get the balance
     accountInfo = requests.get("https://api.binance.com/api/v3/account?" + query, headers=headers)
-    balance = accountInfo.json()["balances"][0]["free"]
+    accountInfo = accountInfo.json()["balances"]
+
+    balance = 0
+
+    for val in accountInfo:
+        if(val["asset"] == symbol):
+            balance = val["free"]
+
+    return balance
+
+def buyBin(symbol):
+    timestamp = int(time.time() * 1000)
+    balance = getBalance('BTC')
 
     #multiply balance by constant ratio of how much we want to spend
     # and then convert quantity from BTC price to amount of coin
@@ -225,9 +240,13 @@ def binStepSize():
 
 def getbinanceprice(currency):
     #getting the aggregate trade data and finding one price to return
-    parameter = {'symbol': currency, 'interval': '1m'}
-    binData = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
-    binPrice = binData.json()[0][4]
+    binData = requests.get("https://api.binance.com/api/v1/ticker/allPrices")
+    binData = binData.json()
+    for value in binData:
+        if(value["symbol"] == currency):
+            binPrice = value["price"]
+            break;
+    print("Price: " + str(binPrice))
     return binPrice
 
 def pickCrypto():
@@ -352,8 +371,8 @@ def calcPercentChange(startVal, endVal):
 #if yes it forces a new check to see if there is a better crypto
 def checkFailureCondition(currency):
 
-    price = getbinanceprice(currency)
-    change = calcPercentChange(currentCrypto[currency]['buyPrice'], price)
+    #price = getbinanceprice(currency)
+    #change = calcPercentChange(currentCrypto[currency]['buyPrice'], price)
 
     startTime = int(time.time()*1000) - 300000
     endTime = int(time.time())*1000
@@ -367,7 +386,8 @@ def checkFailureCondition(currency):
         startPrice = i[1]
         endPrice = i[4]
         print("Current Crypto: " + currency + " Start Price: " + str(startPrice) + " End Price: " + str(endPrice) + "Times Increasing over the interval: " + str(timeIncreasingCounter))
-        percentChange = calcPercentChange(startPrice,endPrice)
+        file.write("Current Crypto: " + currency + " Start Price: " + str(startPrice) + " End Price: " + str(endPrice) + "Times Increasing over the interval: " + str(timeIncreasingCounter) + "\n")
+        percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
             timeIncreasingCounter += 1
 
@@ -415,7 +435,8 @@ def main():
 
     currentCurrency = ''
 
-    getbinanceprice("ETHBTC")
+    initialBalance = getBalance('BTC')
+
     '''
     binStepSize()
     while(x < MAX_CYCLES):
