@@ -224,15 +224,10 @@ def binStepSize():
 
 
 def getbinanceprice(currency):
-    #setting a start time ~1 hr before the current time for our aggregate price range
-    startTime = int(time.time()*1000) - 3500000
-    endTime = int(time.time()*1000)
-    print("Symbol: " + currency + " Start Time: " + str(startTime) + " End Time: " + str(endTime))
     #getting the aggregate trade data and finding one price to return
-    parameter = {'symbol': currency, 'startTime': startTime, 'endTime': endTime}
-    binData = requests.get("https://api.binance.com/api/v1/aggTrades", params=parameter)
-    print("This is the price data: " + binData.text)
-    binPrice = binData.json()[1]['p']
+    parameter = {'symbol': currency, 'interval': '1m'}
+    binData = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
+    binPrice = binData.json()[0][4]
     return binPrice
 
 def pickCrypto():
@@ -420,8 +415,8 @@ def main():
 
     currentCurrency = ''
 
-    
-
+    getbinanceprice("ETHBTC")
+    '''
     binStepSize()
     while(x < MAX_CYCLES):
         
@@ -454,6 +449,6 @@ def main():
 
     file.write('---------------------------||||||||||||||||----------------------------------------' + "\n")
     file.write("\n" + "\n" + "\n")
-
+    '''
 if __name__ == "__main__":
     main()
