@@ -146,6 +146,7 @@ def buyBin(symbol):
     file.write('Quantity to buy: ' + str(quantity) + 'of' + symbol + "\n")
 
     #building the query string for buying(signed)
+    headers = {'X-MBX-APIKEY': api_key}
     buyParameters = {'symbol': symbol, 'side': 'buy', 'type': 'market', 'timestamp': timestamp, 'quantity': quantity}
     query = urlencode(sorted(buyParameters.items()))
     signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
@@ -454,7 +455,7 @@ def main():
 
     binStepSize()
     while(x < MAX_CYCLES and EXIT == 0):
-        
+
         endTime = int(time.time() * 1000)
         startTime = endTime - 3600000
         updateCrypto('1m', startTime, endTime)

@@ -1338,3 +1338,302 @@ Current Crypto: ZRXBTC Start Price: 0.00015542 End Price: 0.00015623Times Increa
 ------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+The score of XMRBTC is 6.123577177266597
+The score of ADXBTC is 7.040382005721079
+The score of ARNBTC is 7.430590540503902
+The score of BATBTC is 7.721844114966345
+The score of BCPTBTC is 8.240770734075562
+The score of BNBBTC is 8.780413159694612
+The score of BRDBTC is 10.6039816091954
+The score of DGDBTC is 10.900997835936964
+The score of DNTBTC is 30.390866355866365
+The score of ZRXBTC is 31.35393082714166
+Coin with the highest score is ZRXBTC which is 31.35393082714166
+Stepsize of ZRXBTC is 1.00000000
+Balance: 0.16574139
+Quantity to buy: 942ofZRXBTC
+
+------------------------------------------------------------------------------------
+The score of XMRBTC is 6.1114820459287955
+The score of ADXBTC is 6.774609213250519
+The score of ARNBTC is 6.93957440340479
+The score of BCDBTC is 7.051587301587297
+The score of BNBBTC is 7.610668701036905
+The score of BRDBTC is 10.225760270858773
+The score of CTRBTC is 10.90174072666152
+The score of DNTBTC is 23.75856746046835
+The score of POEBTC is 24.111432042181804
+The score of POWRBTC is 24.718911429700366
+The score of SNGLSBTC is 26.706297912270287
+The score of TNBBTC is 27.706561822761113
+The score of VIBBTC is 29.012088944163317
+The score of WABIBTC is 29.114736867593653
+The score of WAVESBTC is 29.79056310811047
+The score of WTCBTC is 30.290879030806803
+The score of ZRXBTC is 32.676663961573574
+Coin with the highest score is ZRXBTC which is 32.676663961573574
+Stepsize of ZRXBTC is 1.00000000
+Balance: 0.16574139
+Quantity to buy: 939ofZRXBTC
+{"symbol":"ZRXBTC","orderId":6551128,"clientOrderId":"RQGBJURwyNy33V64DONAdE","transactTime":1516404989978,"price":"0.00000000","origQty":"939.00000000","executedQty":"939.00000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"BUY"}
+Current Crypto: ZRXBTC Start Price: 0.00015850 End Price: 0.00015850Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015811 End Price: 0.00015810Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015850 End Price: 0.00015816Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015894 End Price: 0.00015820Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015882 End Price: 0.00015882Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015820 End Price: 0.00015825Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015825 End Price: 0.00015869Times Increasing over the interval: 1
+Current Crypto: ZRXBTC Start Price: 0.00015869 End Price: 0.00015821Times Increasing over the interval: 2
+Current Crypto: ZRXBTC Start Price: 0.00015882 End Price: 0.00015882Times Increasing over the interval: 2
+Current Crypto: ZRXBTC Start Price: 0.00015882 End Price: 0.00015882Times Increasing over the interval: 2
+Current Crypto: ZRXBTC Start Price: 0.00015872 End Price: 0.00015823Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015823 End Price: 0.00015881Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015822 End Price: 0.00015850Times Increasing over the interval: 1
+Current Crypto: ZRXBTC Start Price: 0.00015872 End Price: 0.00015881Times Increasing over the interval: 2
+Current Crypto: ZRXBTC Start Price: 0.00015881 End Price: 0.00015860Times Increasing over the interval: 3
+Current Crypto: ZRXBTC Start Price: 0.00015909 End Price: 0.00015909Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015832 End Price: 0.00015959Times Increasing over the interval: 0
+Current Crypto: ZRXBTC Start Price: 0.00015785 End Price: 0.00015812Times Increasing over the interval: 1
+Current Crypto: ZRXBTC Start Price: 0.00015940 End Price: 0.00015854Times Increasing over the interval: 2
+Current Crypto: ZRXBTC Start Price: 0.00016012 End Price: 0.00015898Times Increasing over the interval: 2
+
+------------------------------------------------------------------------------------
+The score of APPCBTC is 8.950406311511827
+The score of ARNBTC is 15.155129436654995
+The score of ICNBTC is 15.422388734710667
+The score of IOTABTC is 18.132487540191683
+The score of LRCBTC is 22.91305725822719
+The score of NULSBTC is 23.259335570102245
+The score of OAXBTC is 23.89182451213038
+The score of OSTBTC is 23.95020199980077
+The score of REQBTC is 24.27059781517457
+The score of SALTBTC is 24.45634162134161
+The score of STORJBTC is 24.467410062877473
+The score of STRATBTC is 24.75777442313261
+The score of TRXBTC is 26.715240032719453
+The score of VENBTC is 35.305642907459344
+Coin with the highest score is VENBTC which is 35.305642907459344
+Stepsize of VENBTC is 1.00000000
+Balance: 0.16174620
+Quantity to buy: 243ofVENBTC
+{"symbol":"VENBTC","orderId":6961467,"clientOrderId":"3JBVglMJ5mpnaZrU6J2bSX","transactTime":1516440218532,"price":"0.00000000","origQty":"243.00000000","executedQty":"243.00000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"BUY"}
+Current Crypto: VENBTC Start Price: 0.00058860 End Price: 0.00059261Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00059261 End Price: 0.00058341Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058750 End Price: 0.00058222Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058222 End Price: 0.00057720Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00057720 End Price: 0.00057500Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00060100 End Price: 0.00059700Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00059899 End Price: 0.00059300Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00059298 End Price: 0.00058950Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00058704 End Price: 0.00058300Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00058283 End Price: 0.00059000Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00058788 End Price: 0.00058789Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00058789 End Price: 0.00058750Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058601 End Price: 0.00058502Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058687 End Price: 0.00058397Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058158 End Price: 0.00057800Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00057868 End Price: 0.00057531Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00057531 End Price: 0.00057300Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00057250 End Price: 0.00057687Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00057687 End Price: 0.00058010Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00057999 End Price: 0.00058200Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00058186 End Price: 0.00058500Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00058361 End Price: 0.00058799Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058799 End Price: 0.00058600Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00058537 End Price: 0.00058018Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00058017 End Price: 0.00058198Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00057000 End Price: 0.00056501Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00056500 End Price: 0.00056557Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00056500 End Price: 0.00056404Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056699 End Price: 0.00056400Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056310 End Price: 0.00056409Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00057200 End Price: 0.00057340Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00057212 End Price: 0.00056839Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056990 End Price: 0.00056549Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056779 End Price: 0.00056689Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056689 End Price: 0.00056548Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056555 End Price: 0.00056581Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00056690 End Price: 0.00056701Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056701 End Price: 0.00056821Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00056821 End Price: 0.00057180Times Increasing over the interval: 3
+Current Crypto: VENBTC Start Price: 0.00057210 End Price: 0.00057750Times Increasing over the interval: 4
+Current Crypto: VENBTC Start Price: 0.00057173 End Price: 0.00057134Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00057295 End Price: 0.00057424Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00057206 End Price: 0.00057111Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00057111 End Price: 0.00056822Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056822 End Price: 0.00056823Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00056811 End Price: 0.00057700Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00057600 End Price: 0.00058660Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058660 End Price: 0.00057708Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00057707 End Price: 0.00057410Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00057410 End Price: 0.00057687Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00058300 End Price: 0.00058041Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00058041 End Price: 0.00058273Times Increasing over the interval: 0
+Current Crypto: VENBTC Start Price: 0.00058215 End Price: 0.00058529Times Increasing over the interval: 1
+Current Crypto: VENBTC Start Price: 0.00058529 End Price: 0.00058690Times Increasing over the interval: 2
+Current Crypto: VENBTC Start Price: 0.00058700 End Price: 0.00058700Times Increasing over the interval: 3
+The score of APPCBTC is 28.533104672085933
+The score of ARKBTC is 32.69494765281999
+The score of CTRBTC is 32.91335536376098
+The score of DNTBTC is 33.42647275090637
+The score of ELFBTC is 36.55173939414034
+The score of KMDBTC is 38.02164399092971
+Coin with the highest score is KMDBTC which is 38.02164399092971
+{'makerCommission': 10, 'takerCommission': 10, 'buyerCommission': 0, 'sellerCommission': 0, 'canTrade': True, 'canWithdraw': True, 'canDeposit': True, 'updateTime': 1513029452333, 'balances': [{'asset': 'BTC', 'free': '0.01643516', 'locked': '0.00000000'}, {'asset': 'LTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETH', 'free': '0.00024679', 'locked': '0.00000000'}, {'asset': 'BNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNB', 'free': '0.00024719', 'locked': '0.00000000'}, {'asset': '123', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '456', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QTUM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EOS', 'free': '0.88000000', 'locked': '0.00000000'}, {'asset': 'SNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GAS', 'free': '0.00009000', 'locked': '0.00000000'}, {'asset': 'BCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'USDT', 'free': '0.00374029', 'locked': '0.00000000'}, {'asset': 'HCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'HSR', 'free': '0.00315000', 'locked': '0.00000000'}, {'asset': 'OAX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DNT', 'free': '0.65200000', 'locked': '0.00000000'}, {'asset': 'MCO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PAY', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZRX', 'free': '0.07700000', 'locked': '0.00000000'}, {'asset': 'OMG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WTC', 'free': '0.00112000', 'locked': '0.00000000'}, {'asset': 'LRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'YOYO', 'free': '0.06200000', 'locked': '0.00000000'}, {'asset': 'LRC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TRX', 'free': '0.82100000', 'locked': '0.00000000'}, {'asset': 'FID', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNGLS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STRAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BQX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CDT', 'free': '0.98500000', 'locked': '0.00000000'}, {'asset': 'XVG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'IOTA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LINK', 'free': '0.15800000', 'locked': '0.00000000'}, {'asset': 'CVC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'REP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CTR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MDA', 'free': '0.21500000', 'locked': '0.00000000'}, {'asset': 'MTL', 'free': '0.00998000', 'locked': '0.00000000'}, {'asset': 'SALT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NULS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SUB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MTH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PIX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETC', 'free': '0.00683000', 'locked': '0.00000000'}, {'asset': 'ENG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZEC', 'free': '0.00041931', 'locked': '0.00000000'}, {'asset': 'AST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '1ST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DGD', 'free': '0.00041400', 'locked': '0.00000000'}, {'asset': 'BAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'POWR', 'free': '0.80700000', 'locked': '0.00000000'}, {'asset': 'BTG', 'free': '0.00455000', 'locked': '0.00000000'}, {'asset': 'REQ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XMR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EVX', 'free': '0.41500000', 'locked': '0.00000000'}, {'asset': 'VIB', 'free': '0.89900000', 'locked': '0.00000000'}, {'asset': 'ENJ', 'free': '0.94100000', 'locked': '0.00000000'}, {'asset': 'VEN', 'free': '242.75700000', 'locked': '0.00000000'}, {'asset': 'CAG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XRP', 'free': '4377.61800000', 'locked': '0.00000000'}, {'asset': 'MOD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AVT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STORJ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KMD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RCN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SAN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DATA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GUP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MCAP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MANA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PPT', 'free': '0.00990000', 'locked': '0.00000000'}, {'asset': 'OTN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CFD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RDN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GXS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AMB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCPT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CND', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GVT', 'free': '0.00483000', 'locked': '0.00000000'}, {'asset': 'POE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ALIS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUEL', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XZC', 'free': '0.00771000', 'locked': '0.00000000'}, {'asset': 'QSP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LSK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCD', 'free': '0.00039400', 'locked': '0.00000000'}, {'asset': 'TNB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STAR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LEND', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'IFT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KICK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'UKG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'VOISE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XLM', 'free': '20400.90100000', 'locked': '0.00000000'}, {'asset': 'CMT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WAVES', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WABI', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SBTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GTO', 'free': '0.58200000', 'locked': '0.00000000'}, {'asset': 'ETF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'OST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AION', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WINGS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BRD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEBL', 'free': '0.00869000', 'locked': '0.00000000'}, {'asset': 'NAV', 'free': '0.00955000', 'locked': '0.00000000'}, {'asset': 'VIBE', 'free': '0.15567200', 'locked': '0.00000000'}, {'asset': 'LUN', 'free': '0.00401000', 'locked': '0.00000000'}, {'asset': 'TRIG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'APPC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CHAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RLC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'INS', 'free': '0.00000000', 'locked': '0.00000000'}]}
+Stepsize of VENBTC is 1.00000000
+Balance: 242.75700000
+Quantity to sell: 242 of VENBTC with stepsize 1.00000000
+{"symbol":"VENBTC","orderId":6992424,"clientOrderId":"qajVNjDlR9gxLcbXvMq2YU","transactTime":1516446923202,"price":"0.00000000","origQty":"242.00000000","executedQty":"242.00000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"SELL"}
+Stepsize of KMDBTC is 0.01000000
+Balance: 0.16031753
+Quantity to buy: 215.93ofKMDBTC
+{"symbol":"KMDBTC","orderId":4211155,"clientOrderId":"dRLxhqfjL9tyVA95TyTG3O","transactTime":1516446925610,"price":"0.00000000","origQty":"215.93000000","executedQty":"215.93000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"BUY"}
+Current Crypto: KMDBTC Start Price: 0.00066590 End Price: 0.00067000Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066990 End Price: 0.00066900Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00066700 End Price: 0.00067000Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067000 End Price: 0.00067180Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00067190 End Price: 0.00067180Times Increasing over the interval: 3
+Current Crypto: KMDBTC Start Price: 0.00066720 End Price: 0.00067010Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00067010 End Price: 0.00067140Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067130 End Price: 0.00066740Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00066760 End Price: 0.00066760Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00066770 End Price: 0.00066720Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00067260 End Price: 0.00067270Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00067260 End Price: 0.00067800Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067790 End Price: 0.00067910Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00067910 End Price: 0.00067320Times Increasing over the interval: 3
+Current Crypto: KMDBTC Start Price: 0.00067790 End Price: 0.00067500Times Increasing over the interval: 3
+Current Crypto: KMDBTC Start Price: 0.00065380 End Price: 0.00064670Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00064900 End Price: 0.00065190Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00065180 End Price: 0.00065180Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00064760 End Price: 0.00065160Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00064890 End Price: 0.00064830Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00064700 End Price: 0.00064970Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00064960 End Price: 0.00064900Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00064900 End Price: 0.00064500Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00064400 End Price: 0.00064380Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00064380 End Price: 0.00064370Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00066030 End Price: 0.00066000Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00065540 End Price: 0.00065720Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00065630 End Price: 0.00065590Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00065610 End Price: 0.00065560Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00065550 End Price: 0.00065560Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00065050 End Price: 0.00064600Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00064930 End Price: 0.00064950Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00064700 End Price: 0.00064890Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00064700 End Price: 0.00064700Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00064700 End Price: 0.00064700Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00065940 End Price: 0.00065940Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066080 End Price: 0.00065630Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066290 End Price: 0.00065670Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066170 End Price: 0.00066310Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066290 End Price: 0.00065990Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00066300 End Price: 0.00066120Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066190 End Price: 0.00066190Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066130 End Price: 0.00066190Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00066060 End Price: 0.00066050Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00066050 End Price: 0.00066200Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067230 End Price: 0.00067230Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00067470 End Price: 0.00067790Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00067790 End Price: 0.00067770Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067770 End Price: 0.00068000Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00068000 End Price: 0.00068190Times Increasing over the interval: 2
+Current Crypto: KMDBTC Start Price: 0.00067990 End Price: 0.00068100Times Increasing over the interval: 0
+Current Crypto: KMDBTC Start Price: 0.00068100 End Price: 0.00068100Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067940 End Price: 0.00067600Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067540 End Price: 0.00067280Times Increasing over the interval: 1
+Current Crypto: KMDBTC Start Price: 0.00067280 End Price: 0.00067000Times Increasing over the interval: 1
+The score of APPCBTC is 30.839763147268048
+The score of ARKBTC is 31.409641568093523
+The score of CMTBTC is 32.635041342069044
+The score of ENGBTC is 34.25221257933072
+The score of MODBTC is 34.306582435880834
+The score of TNBBTC is 38.33790559319682
+Coin with the highest score is TNBBTC which is 38.33790559319682
+{'makerCommission': 10, 'takerCommission': 10, 'buyerCommission': 0, 'sellerCommission': 0, 'canTrade': True, 'canWithdraw': True, 'canDeposit': True, 'updateTime': 1516446925610, 'balances': [{'asset': 'BTC', 'free': '0.01586882', 'locked': '0.00000000'}, {'asset': 'LTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETH', 'free': '0.00024679', 'locked': '0.00000000'}, {'asset': 'BNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNB', 'free': '0.00024719', 'locked': '0.00000000'}, {'asset': '123', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '456', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QTUM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EOS', 'free': '0.88000000', 'locked': '0.00000000'}, {'asset': 'SNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GAS', 'free': '0.00009000', 'locked': '0.00000000'}, {'asset': 'BCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'USDT', 'free': '0.00374029', 'locked': '0.00000000'}, {'asset': 'HCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'HSR', 'free': '0.00315000', 'locked': '0.00000000'}, {'asset': 'OAX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DNT', 'free': '0.65200000', 'locked': '0.00000000'}, {'asset': 'MCO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PAY', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZRX', 'free': '0.07700000', 'locked': '0.00000000'}, {'asset': 'OMG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WTC', 'free': '0.00112000', 'locked': '0.00000000'}, {'asset': 'LRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'YOYO', 'free': '0.06200000', 'locked': '0.00000000'}, {'asset': 'LRC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TRX', 'free': '0.82100000', 'locked': '0.00000000'}, {'asset': 'FID', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNGLS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STRAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BQX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CDT', 'free': '0.98500000', 'locked': '0.00000000'}, {'asset': 'XVG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'IOTA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LINK', 'free': '0.15800000', 'locked': '0.00000000'}, {'asset': 'CVC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'REP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CTR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MDA', 'free': '0.21500000', 'locked': '0.00000000'}, {'asset': 'MTL', 'free': '0.00998000', 'locked': '0.00000000'}, {'asset': 'SALT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NULS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SUB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MTH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PIX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETC', 'free': '0.00683000', 'locked': '0.00000000'}, {'asset': 'ENG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZEC', 'free': '0.00041931', 'locked': '0.00000000'}, {'asset': 'AST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '1ST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DGD', 'free': '0.00041400', 'locked': '0.00000000'}, {'asset': 'BAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'POWR', 'free': '0.80700000', 'locked': '0.00000000'}, {'asset': 'BTG', 'free': '0.00455000', 'locked': '0.00000000'}, {'asset': 'REQ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XMR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EVX', 'free': '0.41500000', 'locked': '0.00000000'}, {'asset': 'VIB', 'free': '0.89900000', 'locked': '0.00000000'}, {'asset': 'ENJ', 'free': '0.94100000', 'locked': '0.00000000'}, {'asset': 'VEN', 'free': '0.75700000', 'locked': '0.00000000'}, {'asset': 'CAG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XRP', 'free': '4377.61800000', 'locked': '0.00000000'}, {'asset': 'MOD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AVT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STORJ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KMD', 'free': '215.71407000', 'locked': '0.00000000'}, {'asset': 'RCN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SAN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DATA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GUP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MCAP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MANA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PPT', 'free': '0.00990000', 'locked': '0.00000000'}, {'asset': 'OTN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CFD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RDN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GXS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AMB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCPT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CND', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GVT', 'free': '0.00483000', 'locked': '0.00000000'}, {'asset': 'POE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ALIS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUEL', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XZC', 'free': '0.00771000', 'locked': '0.00000000'}, {'asset': 'QSP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LSK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCD', 'free': '0.00039400', 'locked': '0.00000000'}, {'asset': 'TNB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STAR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LEND', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'IFT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KICK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'UKG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'VOISE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XLM', 'free': '20400.90100000', 'locked': '0.00000000'}, {'asset': 'CMT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WAVES', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WABI', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SBTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GTO', 'free': '0.58200000', 'locked': '0.00000000'}, {'asset': 'ETF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'OST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AION', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WINGS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BRD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEBL', 'free': '0.00869000', 'locked': '0.00000000'}, {'asset': 'NAV', 'free': '0.00955000', 'locked': '0.00000000'}, {'asset': 'VIBE', 'free': '0.15567200', 'locked': '0.00000000'}, {'asset': 'LUN', 'free': '0.00401000', 'locked': '0.00000000'}, {'asset': 'TRIG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'APPC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CHAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RLC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'INS', 'free': '0.00000000', 'locked': '0.00000000'}]}
+Stepsize of KMDBTC is 0.01000000
+Balance: 215.71407000
+Quantity to sell: 215.71 of KMDBTC with stepsize 0.01000000
+{"symbol":"KMDBTC","orderId":4217132,"clientOrderId":"ESKgb07DdsGwRAQAxkWHZ3","transactTime":1516453697652,"price":"0.00000000","origQty":"215.71000000","executedQty":"215.71000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"SELL"}
+Stepsize of TNBBTC is 1.00000000
+Balance: 0.16028715
+Quantity to buy: 13596ofTNBBTC
+{"symbol":"TNBBTC","orderId":2753550,"clientOrderId":"ScRZdIN9KYvxyX2gMPCpMT","transactTime":1516453700062,"price":"0.00000000","origQty":"13596.00000000","executedQty":"13596.00000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"BUY"}
+Current Crypto: TNBBTC Start Price: 0.00001056 End Price: 0.00001056Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001056 End Price: 0.00001058Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001058 End Price: 0.00001052Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001057 End Price: 0.00001058Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001058 End Price: 0.00001052Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001063 End Price: 0.00001066Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001066 End Price: 0.00001065Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001065 End Price: 0.00001070Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001070 End Price: 0.00001069Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001069 End Price: 0.00001073Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001070 End Price: 0.00001068Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001068 End Price: 0.00001071Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001070 End Price: 0.00001068Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001069 End Price: 0.00001075Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001075 End Price: 0.00001071Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001065 End Price: 0.00001065Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001062 End Price: 0.00001056Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001056 End Price: 0.00001060Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001060 End Price: 0.00001053Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001053 End Price: 0.00001051Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001033 End Price: 0.00001038Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001039 End Price: 0.00001044Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001044 End Price: 0.00001044Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001044 End Price: 0.00001047Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001047 End Price: 0.00001047Times Increasing over the interval: 3
+Current Crypto: TNBBTC Start Price: 0.00001049 End Price: 0.00001049Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001049 End Price: 0.00001050Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001046 End Price: 0.00001046Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001045 End Price: 0.00001041Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001042 End Price: 0.00001044Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001042 End Price: 0.00001045Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001044 End Price: 0.00001043Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001043 End Price: 0.00001048Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001048 End Price: 0.00001040Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001040 End Price: 0.00001039Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001048 End Price: 0.00001040Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001047 End Price: 0.00001047Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001041 End Price: 0.00001048Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001044 End Price: 0.00001044Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001044 End Price: 0.00001044Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001044 End Price: 0.00001040Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001040 End Price: 0.00001039Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001040 End Price: 0.00001036Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001035 End Price: 0.00001040Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001040 End Price: 0.00001040Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001067 End Price: 0.00001057Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001053 End Price: 0.00001051Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001051 End Price: 0.00001053Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001053 End Price: 0.00001054Times Increasing over the interval: 1
+Current Crypto: TNBBTC Start Price: 0.00001055 End Price: 0.00001057Times Increasing over the interval: 2
+Current Crypto: TNBBTC Start Price: 0.00001043 End Price: 0.00001042Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001043 End Price: 0.00001042Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001042 End Price: 0.00001038Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001041 End Price: 0.00001041Times Increasing over the interval: 0
+Current Crypto: TNBBTC Start Price: 0.00001041 End Price: 0.00001042Times Increasing over the interval: 0
+The score of APPCBTC is 29.443994211719744
+The score of ARKBTC is 32.60453314934194
+The score of BTSBTC is 33.76486114539173
+The score of ICXBTC is 36.250101813572996
+The score of LRCBTC is 38.18217702689666
+The score of SNGLSBTC is 44.52977925269563
+Coin with the highest score is SNGLSBTC which is 44.52977925269563
+{'makerCommission': 10, 'takerCommission': 10, 'buyerCommission': 0, 'sellerCommission': 0, 'canTrade': True, 'canWithdraw': True, 'canDeposit': True, 'updateTime': 1516453700062, 'balances': [{'asset': 'BTC', 'free': '0.01542475', 'locked': '0.00000000'}, {'asset': 'LTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETH', 'free': '0.00024679', 'locked': '0.00000000'}, {'asset': 'BNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNB', 'free': '0.00024719', 'locked': '0.00000000'}, {'asset': '123', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '456', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QTUM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EOS', 'free': '0.88000000', 'locked': '0.00000000'}, {'asset': 'SNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GAS', 'free': '0.00009000', 'locked': '0.00000000'}, {'asset': 'BCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'USDT', 'free': '0.00374029', 'locked': '0.00000000'}, {'asset': 'HCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'HSR', 'free': '0.00315000', 'locked': '0.00000000'}, {'asset': 'OAX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DNT', 'free': '0.65200000', 'locked': '0.00000000'}, {'asset': 'MCO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PAY', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZRX', 'free': '0.07700000', 'locked': '0.00000000'}, {'asset': 'OMG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WTC', 'free': '0.00112000', 'locked': '0.00000000'}, {'asset': 'LRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'YOYO', 'free': '0.06200000', 'locked': '0.00000000'}, {'asset': 'LRC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TRX', 'free': '0.82100000', 'locked': '0.00000000'}, {'asset': 'FID', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNGLS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STRAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BQX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CDT', 'free': '0.98500000', 'locked': '0.00000000'}, {'asset': 'XVG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'IOTA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LINK', 'free': '0.15800000', 'locked': '0.00000000'}, {'asset': 'CVC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'REP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CTR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MDA', 'free': '0.21500000', 'locked': '0.00000000'}, {'asset': 'MTL', 'free': '0.00998000', 'locked': '0.00000000'}, {'asset': 'SALT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NULS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SUB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MTH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PIX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETC', 'free': '0.00683000', 'locked': '0.00000000'}, {'asset': 'ENG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZEC', 'free': '0.00041931', 'locked': '0.00000000'}, {'asset': 'AST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '1ST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DGD', 'free': '0.00041400', 'locked': '0.00000000'}, {'asset': 'BAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'POWR', 'free': '0.80700000', 'locked': '0.00000000'}, {'asset': 'BTG', 'free': '0.00455000', 'locked': '0.00000000'}, {'asset': 'REQ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XMR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EVX', 'free': '0.41500000', 'locked': '0.00000000'}, {'asset': 'VIB', 'free': '0.89900000', 'locked': '0.00000000'}, {'asset': 'ENJ', 'free': '0.94100000', 'locked': '0.00000000'}, {'asset': 'VEN', 'free': '0.75700000', 'locked': '0.00000000'}, {'asset': 'CAG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XRP', 'free': '4377.61800000', 'locked': '0.00000000'}, {'asset': 'MOD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AVT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STORJ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KMD', 'free': '0.00407000', 'locked': '0.00000000'}, {'asset': 'RCN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SAN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DATA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GUP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MCAP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MANA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PPT', 'free': '0.00990000', 'locked': '0.00000000'}, {'asset': 'OTN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CFD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RDN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GXS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AMB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCPT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CND', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GVT', 'free': '0.00483000', 'locked': '0.00000000'}, {'asset': 'POE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ALIS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUEL', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XZC', 'free': '0.00771000', 'locked': '0.00000000'}, {'asset': 'QSP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LSK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCD', 'free': '0.00039400', 'locked': '0.00000000'}, {'asset': 'TNB', 'free': '13582.40400000', 'locked': '0.00000000'}, {'asset': 'GRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STAR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LEND', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'IFT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KICK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'UKG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'VOISE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XLM', 'free': '20400.90100000', 'locked': '0.00000000'}, {'asset': 'CMT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WAVES', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WABI', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SBTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GTO', 'free': '0.58200000', 'locked': '0.00000000'}, {'asset': 'ETF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'OST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AION', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WINGS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BRD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEBL', 'free': '0.00869000', 'locked': '0.00000000'}, {'asset': 'NAV', 'free': '0.00955000', 'locked': '0.00000000'}, {'asset': 'VIBE', 'free': '0.15567200', 'locked': '0.00000000'}, {'asset': 'LUN', 'free': '0.00401000', 'locked': '0.00000000'}, {'asset': 'TRIG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'APPC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CHAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RLC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'INS', 'free': '0.00000000', 'locked': '0.00000000'}]}
+Stepsize of TNBBTC is 1.00000000
+Balance: 13582.40400000
+Quantity to sell: 13582 of TNBBTC with stepsize 1.00000000
+{"symbol":"TNBBTC","orderId":2759525,"clientOrderId":"e2nnYUdUkaBeXLm5BkSZln","transactTime":1516460585162,"price":"0.00000000","origQty":"13582.00000000","executedQty":"13582.00000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"SELL"}
+Stepsize of SNGLSBTC is 1.00000000
+Balance: 0.15580477
+Quantity to buy: 5445ofSNGLSBTC
+{"symbol":"SNGLSBTC","orderId":5322801,"clientOrderId":"EsZxxKDXjoPxH4Tqjsfrhl","transactTime":1516460587594,"price":"0.00000000","origQty":"5445.00000000","executedQty":"5445.00000000","status":"FILLED","timeInForce":"GTC","type":"MARKET","side":"BUY"}
+Current Crypto: SNGLSBTC Start Price: 0.00002565 End Price: 0.00002520Times Increasing over the interval: 0
+Current Crypto: SNGLSBTC Start Price: 0.00002522 End Price: 0.00002517Times Increasing over the interval: 0
+Current Crypto: SNGLSBTC Start Price: 0.00002527 End Price: 0.00002528Times Increasing over the interval: 0
+Current Crypto: SNGLSBTC Start Price: 0.00002532 End Price: 0.00002562Times Increasing over the interval: 1
+Current Crypto: SNGLSBTC Start Price: 0.00002570 End Price: 0.00002589Times Increasing over the interval: 2
