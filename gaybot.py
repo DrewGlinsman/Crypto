@@ -80,6 +80,7 @@ MAX_PERCENT_CHANGE = 50
 
 #0 is false, 1 is true
 RESTART = 0
+RESTART_TN = 0
 EXIT = 0
 
 #calculated cumulative percentChange with the current cycle
@@ -293,13 +294,13 @@ def updateCrypto(interval, starttime, endtime):
         percentChanges[value] = []
         for i in percentChange:
             percentChanges[value].append(calcPercentChange(i[1], i[4]))
-        #print(str(value) + ' % percent changes ' + str(percentChanges[value]))
+        print(str(value) + ' % percent changes ' + str(percentChanges[value]))
 
         #calculate and store the % time increasing
         differentName[value]['timeIncreasing'] = getTimeIncreasing(0)
         differentName[value]['weightedtimeIncreasing'] = getTimeIncreasing(1)
-        #print (str(value) + ' % time increasing ' + str(differentName[value]['timeIncreasing']))
-        #print(str(value) + ' % time increasing weighted ' + str(differentName[value]['weightedtimeIncreasing']))
+        print (str(value) + ' % time increasing ' + str(differentName[value]['timeIncreasing']))
+        print(str(value) + ' % time increasing weighted ' + str(differentName[value]['weightedtimeIncreasing']))
 
         #use the calculations to get a score
         calc_score = getScore(value)
@@ -326,10 +327,10 @@ def getTimeIncreasing(isWeighted):
             #that casues positive increases early in the hour to matter less
             #than increases later in the hour
             if float(i) > 0.0 and isWeighted == 0:
-              slots_increasing+=1
+              slots_increasing+=1*i
 
             if float(i) > 0.0 and isWeighted == 1:
-              slots_increasing+=(1*(slots/30.0))
+              slots_increasing+=(1*(slots/50.0)*i)
 
     return (slots_increasing/slots)
 
@@ -339,10 +340,11 @@ def getTimeIncreasing(isWeighted):
 def getScore(symbol):
     new_score = 0
 
-    new_score+= differentName[symbol]['percentbyhour']
-    #print(' percent change ' + str(new_score))
+    new_score += differentName[symbol]['percentbyhour']
+    print(' percent change ' + str(new_score))
     m = new_score * differentName[symbol]['weightedtimeIncreasing']
     w = new_score + differentName[symbol]['weightedtimeIncreasing']
+
     #print(' multiply by weight ' + str(m))
     #print(' add the weight ' + str(w))
 
@@ -466,13 +468,14 @@ def main():
         if(oldCurrency != currentCurrency):
             buyBin(currentCurrency)
         global RESTART
+        global RESTART_TN
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
-        while(t < MAX_TIME_CYCLE and RESTART == 0):
+        while(t < MAX_TIME_CYCLE and RESTART == 0 and RESTART_TN == 0):
             time.sleep(1)
             if(t % 300 == 0 and t != 0):
                 RESTART = checkFailureCondition(currentCurrency)
-            RESTART = checkTooNegative(currentCurrency)
+            RESTART_TN = checkTooNegative(currentCurrency)
             t+=1
         t=0
         
