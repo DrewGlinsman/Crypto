@@ -84,7 +84,11 @@ RESTART_TN = 0
 EXIT = 0
 
 #calculated cumulative percentChange with the current cycle
+
 cumulativePercentChange = 0.0
+
+
+priceBought = 0.0
 
 today = datetime.date.today()
 
@@ -154,9 +158,9 @@ def buyBin(symbol):
     query += "&signature=" + signature
 
     #actually buying
-    testBuy = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
-    print(testBuy.text)
-    file.write(testBuy.text + "\n")
+   # testBuy = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
+   # print(testBuy.text)
+   # file.write(testBuy.text + "\n")
 
 
 def sellBin(symbol):
@@ -222,9 +226,9 @@ def sellBin(symbol):
     query += "&signature=" + signature
 
     #actually selling
-    testSell = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
-    print(testSell.text)
-    file.write(testSell.text + "\n")
+   # testSell = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
+   # print(testSell.text)
+   # file.write(testSell.text + "\n")
 
 
 def binStepSize():
@@ -250,8 +254,11 @@ def getbinanceprice(currency):
     for value in binData:
         if(value["symbol"] == currency):
             binPrice = value["price"]
+
             break;
     print("Price: " + str(binPrice))
+    priceBought = binPrice
+
     return binPrice
 
 def pickCrypto():
@@ -287,6 +294,11 @@ def updateCrypto(interval, starttime, endtime):
         openPrice = percentChange[0][1]
         closePrice = percentChange[58][4]
         differentName[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
+
+
+
+
+
         #print(str(value) + ' open  ' + str(openPrice) + ' close ' + str(closePrice) + ' % change ' + str(differentName[value]['percentbyhour']))
 
         #calculate the percentage change between the minute intervals and store
@@ -299,8 +311,8 @@ def updateCrypto(interval, starttime, endtime):
         #calculate and store the % time increasing
         differentName[value]['timeIncreasing'] = getTimeIncreasing(0)
         differentName[value]['weightedtimeIncreasing'] = getTimeIncreasing(1)
-        print (str(value) + ' % time increasing ' + str(differentName[value]['timeIncreasing']))
-        print(str(value) + ' % time increasing weighted ' + str(differentName[value]['weightedtimeIncreasing']))
+        #print (str(value) + ' % time increasing ' + str(differentName[value]['timeIncreasing']))
+       # print(str(value) + ' % time increasing weighted ' + str(differentName[value]['weightedtimeIncreasing']))
 
         #use the calculations to get a score
         calc_score = getScore(value)
@@ -312,6 +324,10 @@ def updateCrypto(interval, starttime, endtime):
             entry = {key: value}
             currencyToTrade.update(entry)
 
+    print ("OUR LIST OF CRYPTO")
+    print(currencyToTrade)
+    file.write("OUR LIST OF CRYPTO")
+    file.write(str(currencyToTrade))
 
 #caclulates and returns the time spent increasing
 #weighted = 0 is false, weighted = 1 is true
@@ -326,10 +342,10 @@ def getTimeIncreasing(isWeighted):
             #caclcualtes slots_increasing using a weight
             #that casues positive increases early in the hour to matter less
             #than increases later in the hour
-            if float(i) > 0.0 and isWeighted == 0:
+            if float(i)  != 0.0 and isWeighted == 0:
               slots_increasing+=1*i
 
-            if float(i) > 0.0 and isWeighted == 1:
+            if float(i) != 0.0 and isWeighted == 1:
               slots_increasing+=(1*(slots/50.0)*i)
 
     return (slots_increasing/slots)
@@ -338,12 +354,14 @@ def getTimeIncreasing(isWeighted):
 # score is a combination of weighted time increasing and %change over hour.
 #calculation should have more factors added
 def getScore(symbol):
-    new_score = 0
+    new_score = 1
 
-    new_score += differentName[symbol]['percentbyhour']
-    print(' percent change ' + str(new_score))
+    new_score *= differentName[symbol]['percentbyhour'] * 10
+    print(str(symbol) + ' percent change ' + str(new_score))
     m = new_score * differentName[symbol]['weightedtimeIncreasing']
     w = new_score + differentName[symbol]['weightedtimeIncreasing']
+    c = new_score * differentName[symbol]['timeIncreasing']
+    e = new_score + differentName[symbol]['timeIncreasing']
 
     #print(' multiply by weight ' + str(m))
     #print(' add the weight ' + str(w))
@@ -357,10 +375,12 @@ def priceChecker():
     # the coin with the highest score
     maxScore = 0 #moved out of for loop
     for key, value in currencyToTrade.items():
+        print("The score of " + key + " is " + str(scores[key]))
+        file.write("The score of " + key + " is " + str(scores[key]) + "\n")
         if(maxScore < scores[key]):
             maxScore = scores[key]
-            print("The score of " + key + " is " + str(scores[key]))
-            file.write("The score of " + key + " is " + str(scores[key]) + "\n")
+            print("CURRENT HIGH SCORE: The score of " + key + " is " + str(scores[key]))
+            file.write("CURRENT HIGH SCORE: The score of " + key + " is " + str(scores[key]) + "\n")
             currencyToBuy = key
 
     print("Coin with the highest score is " + currencyToBuy + " which is " + str(maxScore))
@@ -376,7 +396,8 @@ def calcPercentChange(startVal, endVal):
 #checks if the current crypto has been decreasing the past five minutes
 #if yes it forces a new check to see if there is a better crypto
 def checkFailureCondition(currency):
-
+    print("New Interval");
+    file.write("New Interval");
     #price = getbinanceprice(currency)
     #change = calcPercentChange(currentCrypto[currency]['buyPrice'], price)
 
@@ -391,13 +412,21 @@ def checkFailureCondition(currency):
     for i in percentChange:
         startPrice = i[1]
         endPrice = i[4]
-        print("Current Crypto: " + currency + " Start Price: " + str(startPrice) + " End Price: " + str(endPrice) + "Times Increasing over the interval: " + str(timeIncreasingCounter))
-        file.write("Current Crypto: " + currency + " Start Price: " + str(startPrice) + " End Price: " + str(endPrice) + "Times Increasing over the interval: " + str(timeIncreasingCounter) + "\n")
+        print("Current Crypto: " + currency + " Start Price: " + str(startPrice) + " End Price: " + str(endPrice))
+        file.write("Current Crypto: " + currency + " Start Price: " + str(startPrice) + " End Price: " + str(endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
             timeIncreasingCounter += 1
 
+    cumulativePercentChange = calcPercentChange(priceBought, endPrice)
+    print("Cumulative percent change over THIS INTERVAL " + str(cumulativePercentChange))
+    file.write("Cumulative percent change over THIS INTERVAL " + str(cumulativePercentChange))
+
+    print ("Times Increasing over the interval: " + str(timeIncreasingCounter))
+    file.write("Times Increasing over the interval: " + str(timeIncreasingCounter) + "\n")
     if(timeIncreasingCounter==0):
+        print("DECREASED ALL INTERVALS. RESTART")
+        file.write("DECREASED ALL INTERVALS. RESTART")
         return 1
 
     return 0
@@ -420,6 +449,8 @@ def checkTooNegative(symbol):
     percentChange = calcPercentChange(startPrice, endPrice)
 
     if(percentChange < -15):
+        print("TOO NEGATIVE. RESTART")
+        file.write("TOO NEGATIVE. RESTART")
         return 1
 
     return 0
@@ -452,6 +483,7 @@ def main():
 
     currentCurrency = ''
 
+    priceSold = 0.0
     global initialBalance
     initialBalance = getBalance('BTC')
 
@@ -478,7 +510,12 @@ def main():
             RESTART_TN = checkTooNegative(currentCurrency)
             t+=1
         t=0
-        
+        priceSold = getbinanceprice(currentCurrency)
+        cumulativePercentChange = calcPercentChange(priceBought, priceSold)
+
+        print("FINAL percent change over the life of owning this crypto " + str(cumulativePercentChange))
+        file.write("FINAL percent change over the life of owning this crypto " + str(cumulativePercentChange))
+
         checkExitCondition(currentCurrency)
         x+=1
 
