@@ -94,7 +94,7 @@ today = datetime.date.today()
 
 
 def getBalance(symbol):
-    timestamp = int(time.time() * 1000)
+    timestamp = int(time.time() * 1000) - 1000
     # building the request query url plus other parameters(signed)
     headers = {'X-MBX-APIKEY': api_key}
     infoParameter = {'timestamp': timestamp}
@@ -104,6 +104,7 @@ def getBalance(symbol):
 
     # requesting account info to get the balance
     accountInfo = requests.get("https://api.binance.com/api/v3/account?" + query, headers=headers)
+    print(str(accountInfo.text))
     accountInfo = accountInfo.json()["balances"]
 
     balance = 0
@@ -345,8 +346,11 @@ def getTimeIncreasing(isWeighted):
             if float(i)  != 0.0 and isWeighted == 0:
               slots_increasing+=1*i
 
-            if float(i) != 0.0 and isWeighted == 1:
+            if float(i) > 0.0 and isWeighted == 1:
               slots_increasing+=(1*(slots/50.0)*i)
+
+            if float(i) < 0.0 and isWeighted == 1:
+              slots_increasing+=(1*(slots/50.0)*i*1.3)
 
     return (slots_increasing/slots)
 
@@ -356,7 +360,7 @@ def getTimeIncreasing(isWeighted):
 def getScore(symbol):
     new_score = 1
 
-    new_score *= differentName[symbol]['percentbyhour'] * 10
+    new_score *= differentName[symbol]['percentbyhour']
     print(str(symbol) + ' percent change ' + str(new_score))
     m = new_score * differentName[symbol]['weightedtimeIncreasing']
     w = new_score + differentName[symbol]['weightedtimeIncreasing']
@@ -390,14 +394,16 @@ def priceChecker():
 
 #just calculates the percent change between two values
 def calcPercentChange(startVal, endVal):
+    if(endVal == 0):
+        return startVal * 100
     return (((float(endVal) - float(startVal))/float(startVal) ) * 100)
 
 
 #checks if the current crypto has been decreasing the past five minutes
 #if yes it forces a new check to see if there is a better crypto
 def checkFailureCondition(currency):
-    print("New Interval");
-    file.write("New Interval");
+    print("New Interval")
+    file.write("New Interval")
     #price = getbinanceprice(currency)
     #change = calcPercentChange(currentCrypto[currency]['buyPrice'], price)
 
@@ -510,6 +516,7 @@ def main():
             RESTART_TN = checkTooNegative(currentCurrency)
             t+=1
         t=0
+
         priceSold = getbinanceprice(currentCurrency)
         cumulativePercentChange = calcPercentChange(priceBought, priceSold)
 

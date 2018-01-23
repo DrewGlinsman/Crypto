@@ -3362,3 +3362,74 @@ New IntervalCurrent Crypto: DLTBTC Start Price: 0.00007187 End Price: 0.00007180
 New IntervalCurrent Crypto: DLTBTC Start Price: 0.00006565 End Price: 0.00006557Current Crypto: DLTBTC Start Price: 0.00006557 End Price: 0.00006567Current Crypto: DLTBTC Start Price: 0.00006567 End Price: 0.00006574Current Crypto: DLTBTC Start Price: 0.00006574 End Price: 0.00006574Current Crypto: DLTBTC Start Price: 0.00006595 End Price: 0.00006599Times Increasing over the interval: 3
 New IntervalCurrent Crypto: DLTBTC Start Price: 0.00006649 End Price: 0.00006583Current Crypto: DLTBTC Start Price: 0.00006603 End Price: 0.00006601Current Crypto: DLTBTC Start Price: 0.00006601 End Price: 0.00006601Current Crypto: DLTBTC Start Price: 0.00006601 End Price: 0.00006601Current Crypto: DLTBTC Start Price: 0.00006601 End Price: 0.00006601Times Increasing over the interval: 0
 DECREASED ALL INTERVALS. RESTART
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+OUR LIST OF CRYPTO{'BTCUSDT': 27.47276308354109, 'XMRBTC': 10.471226698152144, 'QTUMBTC': 7.565343143884261, 'AMBBTC': 33.31021306844094, 'APPCBTC': 14.688766637331065, 'BCDBTC': 29.069341253227144, 'BTSBTC': 11.276257256582273, 'CDTBTC': 13.719400113655981, 'CNDBTC': 9.256910998435622, 'DGDBTC': 6.054025822305368, 'FUELBTC': 41.03795243320438, 'GASBTC': 12.770508318800626, 'GVTBTC': 18.69072705187798, 'GXSBTC': 12.867133998396772, 'HSRBTC': 6.721689913456268, 'ICXBTC': 8.227398083903193, 'IOTABTC': 10.875039378415515, 'KMDBTC': 13.013981858623934, 'KNCBTC': 34.875631086733144, 'LENDBTC': 43.952369865789024, 'LINKBTC': 10.340732117517035, 'LRCBTC': 10.026806622964074, 'LSKBTC': 8.623541983026408, 'MTHBTC': 25.78085848607743, 'MTLBTC': 25.43450503565233, 'NEBLBTC': 6.5673175707778055, 'NEOBTC': 26.645142153202638, 'NULSBTC': 10.119752815770385, 'OAXBTC': 13.679027302407038, 'OMGBTC': 23.591688894259082, 'OSTBTC': 19.82550602858312, 'QSPBTC': 21.722803375518144, 'RDNBTC': 12.876157096598932, 'SNTBTC': 6.667977730721994, 'SUBBTC': 47.96864322517777, 'TRXBTC': 7.911356420699768, 'VIBEBTC': 18.914931730939706, 'WTCBTC': 57.24761676690538, 'XZCBTC': 10.00539370479455}The score of BTCUSDT is 27.47276308354109
+CURRENT HIGH SCORE: The score of BTCUSDT is 27.47276308354109
+The score of XMRBTC is 10.471226698152144
+The score of QTUMBTC is 7.565343143884261
+The score of AMBBTC is 33.31021306844094
+CURRENT HIGH SCORE: The score of AMBBTC is 33.31021306844094
+The score of APPCBTC is 14.688766637331065
+The score of BCDBTC is 29.069341253227144
+The score of BTSBTC is 11.276257256582273
+The score of CDTBTC is 13.719400113655981
+The score of CNDBTC is 9.256910998435622
+The score of DGDBTC is 6.054025822305368
+The score of FUELBTC is 41.03795243320438
+CURRENT HIGH SCORE: The score of FUELBTC is 41.03795243320438
+The score of GASBTC is 12.770508318800626
+The score of GVTBTC is 18.69072705187798
+The score of GXSBTC is 12.867133998396772
+The score of HSRBTC is 6.721689913456268
+The score of ICXBTC is 8.227398083903193
+The score of IOTABTC is 10.875039378415515
+The score of KMDBTC is 13.013981858623934
+The score of KNCBTC is 34.875631086733144
+The score of LENDBTC is 43.952369865789024
+CURRENT HIGH SCORE: The score of LENDBTC is 43.952369865789024
+The score of LINKBTC is 10.340732117517035
+The score of LRCBTC is 10.026806622964074
+The score of LSKBTC is 8.623541983026408
+The score of MTHBTC is 25.78085848607743
+The score of MTLBTC is 25.43450503565233
+The score of NEBLBTC is 6.5673175707778055
+The score of NEOBTC is 26.645142153202638
+The score of NULSBTC is 10.119752815770385
+The score of OAXBTC is 13.679027302407038
+The score of OMGBTC is 23.591688894259082
+The score of OSTBTC is 19.82550602858312
+The score of QSPBTC is 21.722803375518144
+The score of RDNBTC is 12.876157096598932
+The score of SNTBTC is 6.667977730721994
+The score of SUBBTC is 47.96864322517777
+CURRENT HIGH SCORE: The score of SUBBTC is 47.96864322517777
+The score of TRXBTC is 7.911356420699768
+The score of VIBEBTC is 18.914931730939706
+The score of WTCBTC is 57.24761676690538
+CURRENT HIGH SCORE: The score of WTCBTC is 57.24761676690538
+The score of XZCBTC is 10.00539370479455
+Coin with the highest score is WTCBTC which is 57.24761676690538
+Stepsize of WTCBTC is 0.01000000
+Balance: 0.09371870
+Quantity to buy: 31.01ofWTCBTC
+New IntervalCurrent Crypto: WTCBTC Start Price: 0.00272650 End Price: 0.00272640Current Crypto: WTCBTC Start Price: 0.00272000 End Price: 0.00272720Current Crypto: WTCBTC Start Price: 0.00272950 End Price: 0.00272950Current Crypto: WTCBTC Start Price: 0.00273000 End Price: 0.00274000Current Crypto: WTCBTC Start Price: 0.00274030 End Price: 0.00274400
+------------------------------------------------------------------------------------
+OUR LIST OF CRYPTO{}
