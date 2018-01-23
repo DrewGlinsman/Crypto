@@ -43,6 +43,15 @@ volumePercentChanges = {'BTCUSDT': [], 'XRPBTC': [],
                 'XMRBTC': [], 'QTUMBTC': [], 'ETCBTC': [],
                 'ZECBTC': [], 'ADABTC': [], 'ADXBTC': [], 'AIONBTC' : [], 'AMBBTC': [], 'APPCBTC': [], 'ARKBTC': [], 'ARNBTC': [], 'ASTBTC': [], 'BATBTC': [], 'BCDBTC': [], 'BCPTBTC': [], 'BNBBTC': [], 'BNTBTC': [], 'BQXBTC': [], 'BRDBTC': [], 'BTSBTC': [], 'CDTBTC': [], 'CMTBTC': [], 'CNDBTC': [], 'CTRBTC': [], 'DGDBTC': [], 'DLTBTC': [], 'DNTBTC': [], 'EDOBTC': [], 'ELFBTC': [], 'ENGBTC': [], 'ENJBTC': [], 'EOSBTC': [], 'EVXBTC': [], 'FUELBTC': [], 'FUNBTC': [], 'GASBTC': [], 'GTOBTC': [], 'GVTBTC': [], 'GXSBTC': [], 'HSRBTC': [], 'ICNBTC': [], 'ICXBTC': [], 'IOTABTC': [], 'KMDBTC': [], 'KNCBTC': [], 'LENDBTC': [], 'LINKBTC': [], 'LRCBTC': [], 'LSKBTC': [], 'LUNBTC': [], 'MANABTC': [], 'MCOBTC': [], 'MDABTC': [], 'MODBTC': [], 'MTHBTC': [], 'MTLBTC': [], 'NAVBTC': [], 'NEBLBTC': [], 'NEOBTC': [], 'NULSBTC': [], 'OAXBTC': [], 'OMGBTC': [], 'OSTBTC': [], 'POEBTC': [], 'POWRBTC': [], 'PPTBTC': [], 'QSPBTC': [], 'RCNBTC': [], 'RDNBTC': [], 'REQBTC': [], 'SALTBTC': [], 'SNGLSBTC': [], 'SNMBTC': [], 'SNTBTC': [], 'STORJBTC': [], 'STRATBTC': [], 'SUBBTC': [], 'TNBBTC': [], 'TNTBTC': [], 'TRIGBTC': [], 'TRXBTC': [], 'VENBTC': [], 'VIBBTC': [], 'VIBEBTC': [], 'WABIBTC': [], 'WAVESBTC': [], 'WINGSBTC': [], 'WTCBTC': [], 'XVGBTC': [], 'XZCBTC': [], 'YOYOBTC': [], 'ZRXBTC': []}
 
+
+#holds lists of volumes over an interval for each crypto calculated
+volumeAmounts = {'BTCUSDT': [], 'XRPBTC': [],
+                'ETHBTC': [], 'BCCBTC': [],
+                'LTCBTC': [], 'DASHBTC': [],
+                'XMRBTC': [], 'QTUMBTC': [], 'ETCBTC': [],
+                'ZECBTC': [], 'ADABTC': [], 'ADXBTC': [], 'AIONBTC' : [], 'AMBBTC': [], 'APPCBTC': [], 'ARKBTC': [], 'ARNBTC': [], 'ASTBTC': [], 'BATBTC': [], 'BCDBTC': [], 'BCPTBTC': [], 'BNBBTC': [], 'BNTBTC': [], 'BQXBTC': [], 'BRDBTC': [], 'BTSBTC': [], 'CDTBTC': [], 'CMTBTC': [], 'CNDBTC': [], 'CTRBTC': [], 'DGDBTC': [], 'DLTBTC': [], 'DNTBTC': [], 'EDOBTC': [], 'ELFBTC': [], 'ENGBTC': [], 'ENJBTC': [], 'EOSBTC': [], 'EVXBTC': [], 'FUELBTC': [], 'FUNBTC': [], 'GASBTC': [], 'GTOBTC': [], 'GVTBTC': [], 'GXSBTC': [], 'HSRBTC': [], 'ICNBTC': [], 'ICXBTC': [], 'IOTABTC': [], 'KMDBTC': [], 'KNCBTC': [], 'LENDBTC': [], 'LINKBTC': [], 'LRCBTC': [], 'LSKBTC': [], 'LUNBTC': [], 'MANABTC': [], 'MCOBTC': [], 'MDABTC': [], 'MODBTC': [], 'MTHBTC': [], 'MTLBTC': [], 'NAVBTC': [], 'NEBLBTC': [], 'NEOBTC': [], 'NULSBTC': [], 'OAXBTC': [], 'OMGBTC': [], 'OSTBTC': [], 'POEBTC': [], 'POWRBTC': [], 'PPTBTC': [], 'QSPBTC': [], 'RCNBTC': [], 'RDNBTC': [], 'REQBTC': [], 'SALTBTC': [], 'SNGLSBTC': [], 'SNMBTC': [], 'SNTBTC': [], 'STORJBTC': [], 'STRATBTC': [], 'SUBBTC': [], 'TNBBTC': [], 'TNTBTC': [], 'TRIGBTC': [], 'TRXBTC': [], 'VENBTC': [], 'VIBBTC': [], 'VIBEBTC': [], 'WABIBTC': [], 'WAVESBTC': [], 'WINGSBTC': [], 'WTCBTC': [], 'XVGBTC': [], 'XZCBTC': [], 'YOYOBTC': [], 'ZRXBTC': []}
+
+
 #special dictionary, houses the % change by hour, the % time spent increasing, and the % of time increasing (weighted)
 pricePercentData = {'BTCUSDT': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'XRPBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0},
                 'ETHBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BCCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0},
@@ -55,6 +64,14 @@ volumePercentData = {'BTCUSDT': {'percentbyhour': 0, 'timeIncreasing': 0, 'weigh
                 'LTCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'DASHBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0},
                 'XMRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'QTUMBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ETCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0},
                 'ZECBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ADABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ADXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'AIONBTC' : {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'AMBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'APPCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ARKBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ARNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ASTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BATBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BCDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BCPTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BNBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BQXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BRDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BTSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CDTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CMTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CNDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CTRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'DGDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'DLTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'DNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'EDOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ELFBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ENGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ENJBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'EOSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'EVXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'FUELBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'FUNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GASBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GTOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GVTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GXSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'HSRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ICNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ICXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'IOTABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'KMDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'KNCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LENDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LINKBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LRCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LSKBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LUNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MANABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MCOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MDABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MODBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MTHBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MTLBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NAVBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NEBLBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NEOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NULSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'OAXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'OMGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'OSTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'POEBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'POWRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'PPTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'QSPBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'RCNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'RDNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'REQBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SALTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SNGLSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SNMBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'STORJBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'STRATBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SUBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TNBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TRIGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TRXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'VENBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'VIBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'VIBEBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WABIBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WAVESBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WINGSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WTCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'XVGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'XZCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'YOYOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ZRXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}}
+
+#dictionary holds the modified cumulative volume over a period (i.e percent changes change the sign of the volume)
+
+modifiedVolume = {'BTCUSDT': [], 'XRPBTC': [],
+                'ETHBTC': [], 'BCCBTC': [],
+                'LTCBTC': [], 'DASHBTC': [],
+                'XMRBTC': [], 'QTUMBTC': [], 'ETCBTC': [],
+                'ZECBTC': [], 'ADABTC': [], 'ADXBTC': [], 'AIONBTC' : [], 'AMBBTC': [], 'APPCBTC': [], 'ARKBTC': [], 'ARNBTC': [], 'ASTBTC': [], 'BATBTC': [], 'BCDBTC': [], 'BCPTBTC': [], 'BNBBTC': [], 'BNTBTC': [], 'BQXBTC': [], 'BRDBTC': [], 'BTSBTC': [], 'CDTBTC': [], 'CMTBTC': [], 'CNDBTC': [], 'CTRBTC': [], 'DGDBTC': [], 'DLTBTC': [], 'DNTBTC': [], 'EDOBTC': [], 'ELFBTC': [], 'ENGBTC': [], 'ENJBTC': [], 'EOSBTC': [], 'EVXBTC': [], 'FUELBTC': [], 'FUNBTC': [], 'GASBTC': [], 'GTOBTC': [], 'GVTBTC': [], 'GXSBTC': [], 'HSRBTC': [], 'ICNBTC': [], 'ICXBTC': [], 'IOTABTC': [], 'KMDBTC': [], 'KNCBTC': [], 'LENDBTC': [], 'LINKBTC': [], 'LRCBTC': [], 'LSKBTC': [], 'LUNBTC': [], 'MANABTC': [], 'MCOBTC': [], 'MDABTC': [], 'MODBTC': [], 'MTHBTC': [], 'MTLBTC': [], 'NAVBTC': [], 'NEBLBTC': [], 'NEOBTC': [], 'NULSBTC': [], 'OAXBTC': [], 'OMGBTC': [], 'OSTBTC': [], 'POEBTC': [], 'POWRBTC': [], 'PPTBTC': [], 'QSPBTC': [], 'RCNBTC': [], 'RDNBTC': [], 'REQBTC': [], 'SALTBTC': [], 'SNGLSBTC': [], 'SNMBTC': [], 'SNTBTC': [], 'STORJBTC': [], 'STRATBTC': [], 'SUBBTC': [], 'TNBBTC': [], 'TNTBTC': [], 'TRIGBTC': [], 'TRXBTC': [], 'VENBTC': [], 'VIBBTC': [], 'VIBEBTC': [], 'WABIBTC': [], 'WAVESBTC': [], 'WINGSBTC': [], 'WTCBTC': [], 'XVGBTC': [], 'XZCBTC': [], 'YOYOBTC': [], 'ZRXBTC': []}
 
 
 #dictionary to hold the intervals, their symbols, and their time in milliseconds
@@ -106,6 +123,7 @@ NEGATIVE_WEIGHT = 1.3
 #0 is false, 1 is true
 RESTART = 0
 RESTART_TN = 0
+RESTART_LOW = 0
 EXIT = 0
 
 #calculated cumulative percentChange with the current cycle
@@ -123,13 +141,22 @@ SLOT_WEIGHT = .1
 #weights applied to change value of the calculated values
 TIME_INCREASING_MODIFIER = 10
 
-VOLUME_TIME_INCREASING_MODIFIER = .01
+VOLUME_INCREASING_MODIFIER = .01
 
 PERCENT_BY_HOUR_MODIFIER = 1
 
 VOLUME_PERCENT_BY_HOUR_MODIFIER = 0.1
 
-today = datetime.date.today()
+MODIFIED_VOLUME_MODIFIER = .0001
+
+#modifier for the lowest the price can be before it is sold
+
+FLOOR_PRICE_MODIFIER = 1.05
+
+#time waiting fields
+WAIT_FOR_CHECK_FAILURE = 300
+
+WAIT_FOR_CHECK_TOO_LOW = 600
 
 
 def getBalance(symbol):
@@ -143,7 +170,7 @@ def getBalance(symbol):
 
     # requesting account info to get the balance
     accountInfo = requests.get("https://api.binance.com/api/v3/account?" + query, headers=headers)
-    print(str(accountInfo.text))
+    #print(str(accountInfo.text))
     accountInfo = accountInfo.json()["balances"]
 
     balance = 0
@@ -298,9 +325,28 @@ def getVolume(interval, starttime, endtime, currency):
         slots += 1
         fuckthis = float(value[5])
         fuckthis = int(fuckthis)
-        volume += (fuckthis)
+        volume += fuckthis
     volume *= float(getbinanceprice(currency))
     return volume
+
+
+#grabs the list of volumes over the interval and percent changes over the interal
+#then interates through and calculates a cumulative volume where the volume is considered negative
+#when the percent change was negative and positive when the percent change was positive
+def getModifiedVolume(currency):
+    oldVolume = 0
+    percentChangesList = percentChanges[currency]
+    volumeAmountList = volumeAmounts[currency]
+    currentSlot = 0
+
+    for i in volumeAmountList:
+        if(percentChangesList[currentSlot] < 0):
+            oldVolume += float(i)* -1
+        if(percentChangesList[currentSlot] > 0):
+            oldVolume += float(i)
+        currentSlot += 1
+
+    return oldVolume
 
 
 def getbinanceprice(currency):
@@ -365,19 +411,30 @@ def updateCrypto(interval, starttime, endtime):
             percentChanges[value].append(calcPercentChange(i[1], i[4]))
         #print(str(value) + ' % percent changes ' + str(percentChanges[value]))
 
+
+        #grabs and stores the volume from the first two intervals that are skipped in the for loop below
+        volumeAmounts[value].append(percentChange[0][5])
+        volumeAmounts[value].append(percentChange[1][5])
+
+
         #volumePercentChanges[value] = []
         for i in range(2, len(percentChange)):
            # print("Old Volume: " + percentChange[i-1][5] + " New Volume: " + percentChange[i][5])
            #print("CURRENT PERCENT CHANGE: " + str(calcPercentChange(percentChange[i-1][5],percentChange[i][5])) + "START VOLUME: " + str(percentChange[i-1][5]) + " END VOLUME: " + str(percentChange[i][5]))
            volumePercentChanges[value].append(calcPercentChange(percentChange[i-1][5], percentChange[i][5]))
+           volumeAmounts[value].append(percentChange[i][5])
 
-        #calculate and store the % time increasing
+        #calculate and store the % time increasing for volume and percent
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
         pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
 
         volumePercentData[value]['timeIncreasing'] = getVolumeTimeIncreasing(0, value)
         volumePercentData[value]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, value)
 
+
+        #get the modified volume changes
+        modifiedVolume[value] = getModifiedVolume(value)
+        print(value + " modified volume" + str(modifiedVolume[value]))
 
         #print(str(value))
         #print("Volume Time Increasing: " + str(volumePercentData[value]["timeIncreasing"]))
@@ -390,6 +447,8 @@ def updateCrypto(interval, starttime, endtime):
         calc_score = getScore(value)
         new_score = {value: calc_score}
         scores.update(new_score)
+
+    print("HERE ARE THE MODIFIED VOLUMES" + str(modifiedVolume))
 
     for key, value in scores.items():
         if(value > minimumScore):
@@ -485,11 +544,14 @@ def getScore(symbol):
     w = new_score + pricePercentData[symbol]['weightedtimeIncreasing']
     c = new_score * pricePercentData[symbol]['timeIncreasing']
     e = new_score + pricePercentData[symbol]['timeIncreasing']
-    print(symbol + ": (BEFORE VOLUME) " + str(w) + " Absolute increasing weight: " + str(e))
+    #print(symbol + ": (BEFORE VOLUME) " + str(w) + " Absolute increasing weight: " + str(e))
 
     w += volumePercentData[symbol]['weightedtimeIncreasing']
     e += volumePercentData[symbol]['timeIncreasing']
-    print(symbol + ": " + str(w) + " Absolute increasing weight: " + str(e))
+    #print(symbol + ": " + str(w) + " Absolute increasing weight: " + str(e))
+
+    w += modifiedVolume[symbol] * MODIFIED_VOLUME_MODIFIER
+
     return w
 
 
@@ -595,8 +657,19 @@ def checkExitCondition(currency):
         return 1
 
     return 0
+#checks to see if the current currency is too near to its starting point
+def checkTooLow(currency):
+    currentPrice = getbinanceprice(curreny)
+    floorPrice = FLOOR_PRICE_MODIFIER * priceBought
+    starttime = int(time.time() * 1000)
+    emdtime = starttime - intervalTypes['10m']['inMS']
 
+    direction = increasingOrDecreasing(currency, intervalTypes['10m']['symbol'], starttime, endtime)
 
+    if(currentPrice < floorPrice & direction == 0):
+        return 1
+
+    return 0
 
 def getLastSlot(interval, starttime, endtime):
     difference = endtime - starttime
@@ -606,7 +679,41 @@ def getLastSlot(interval, starttime, endtime):
 
     return numIntervals - 1
 
+#returns whether the specified currency is increasing or decreasing over the interval
+# 0 means increasing or constant, 1 means decreasing
+def increasingOrDecreasing(currency, interval, starttime, endtime):
+
+    lastSlot = getLastSlot(interval, starttime, endtime)
+
+    parameter = {'symbol': currency, 'interval': interval, 'startTime': startTime, 'endTime': endTime}
+    percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
+    percentChange = percentChange.json()
+
+    startPrice = percentChange[0][1]
+    endPrice = percentChange[lastSlot][4]
+
+    calcPChange = calcPercentChange(startPrice, endPrice)
+
+    if(calcPChange >= 0.0):
+        return 1
+
+    return 0
+
+
 def main():
+
+    global initialBalance
+    global RESTART
+    global RESTART_TN
+    global RESTART_LOW
+    currentCurrency = ''
+    priceSold = 0.0
+    x = 0
+    t = 0
+
+
+
+
     file.write("\n")
     file.write('------------------------------------------------------------------------------------' + "\n")
 
@@ -622,21 +729,18 @@ def main():
     updateCrypto('5m', startTime, endTime)
     priceChecker()
 """
-    x=0
-    t=0
 
-    currentCurrency = ''
-
-    priceSold = 0.0
-    global initialBalance
     initialBalance = getBalance('BTC')
 
     binStepSize()
     while(x < MAX_CYCLES and EXIT == 0):
 
-        endTime = int(time.time() * 1000)
-        startTime = endTime - 3600000
+        endTime = int(time.time() * 1000) - 3600000
+        startTime = endTime - 3600000 * 2
         updateCrypto(intervalTypes['5m']['symbol'], startTime, endTime)
+
+
+
         oldCurrency = currentCurrency
         currentCurrency = priceChecker()
         if(oldCurrency != currentCurrency and oldCurrency != ''):
@@ -648,14 +752,16 @@ def main():
             print("THIS RUN BOUGHT AT: " + str(datetime.datetime.time(datetime.datetime.now())))
             file.write("THIS RUN BOUGHT AT: " + str(datetime.datetime.time(datetime.datetime.now())))
 
-        global RESTART
-        global RESTART_TN
+
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
-        while(t < MAX_TIME_CYCLE and RESTART == 0 and RESTART_TN == 0):
+        while(t < MAX_TIME_CYCLE and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0):
             time.sleep(1)
-            if(t % 300 == 0 and t != 0):
+            if(t % WAIT_FOR_CHECK_FAILURE == 0 and t != 0):
                 RESTART = checkFailureCondition(currentCurrency)
+            if(t > WAIT_FOR_CHECK_TOO_LOW):
+                RESTART_LOW = checkTooLow(currentCurrency)
+
             RESTART_TN = checkTooNegative(currentCurrency)
             t+=1
         t=0
