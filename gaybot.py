@@ -67,7 +67,7 @@ minimumPercentIncrease = 5.0
 
 zeroCounter = 0
 
-minimumScore = 6
+minimumScore = 2.7
 
 #number in seconds that determines the maximum time a crypto will be held without checkin for a potential switch
 MAX_TIME_CYCLE = 3600
@@ -76,8 +76,10 @@ MAX_TIME_CYCLE = 3600
 MAX_CYCLES = 24
 
 #max percent change before the bot sells and exits
-MAX_PERCENT_CHANGE = 50
+MAX_PERCENT_CHANGE = 20
 
+#weight to make negative numbers worse than positive.
+NEGATIVE_WEIGHT = 1.6
 #0 is false, 1 is true
 RESTART = 0
 RESTART_TN = 0
@@ -248,6 +250,22 @@ def binStepSize():
             file.write(str(symbol) + " stepsize: " + stepsize + "\n")
 
 
+def getVolume(interval, starttime, endtime, currency):
+    parameters = {"symbol": currency, "interval": interval, 'startTime': starttime, 'endTime': endtime}
+    data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
+    data = data.json()
+    slots = 0
+    volume = 0
+    print(data)
+    for value in data:
+        slots += 1
+        fuckthis = float(value[5])
+        fuckthis = int(fuckthis)
+        volume += (fuckthis * (slots/45))
+    volume *= float(getbinanceprice(currency))
+    print(currency + " Volume/Price: " + str(volume))
+    return volume
+
 def getbinanceprice(currency):
     #getting the aggregate trade data and finding one price to return
     binData = requests.get("https://api.binance.com/api/v1/ticker/allPrices")
@@ -293,13 +311,8 @@ def updateCrypto(interval, starttime, endtime):
 
         #calculate the percent change over the whole hour and store
         openPrice = percentChange[0][1]
-        closePrice = percentChange[58][4]
+        closePrice = percentChange[19][4]
         differentName[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
-
-
-
-
-
         #print(str(value) + ' open  ' + str(openPrice) + ' close ' + str(closePrice) + ' % change ' + str(differentName[value]['percentbyhour']))
 
         #calculate the percentage change between the minute intervals and store
@@ -307,11 +320,11 @@ def updateCrypto(interval, starttime, endtime):
         percentChanges[value] = []
         for i in percentChange:
             percentChanges[value].append(calcPercentChange(i[1], i[4]))
-        print(str(value) + ' % percent changes ' + str(percentChanges[value]))
+        #print(str(value) + ' % percent changes ' + str(percentChanges[value]))
 
         #calculate and store the % time increasing
-        differentName[value]['timeIncreasing'] = getTimeIncreasing(0)
-        differentName[value]['weightedtimeIncreasing'] = getTimeIncreasing(1)
+        differentName[value]['timeIncreasing'] = getTimeIncreasing(0, value)
+        differentName[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
         #print (str(value) + ' % time increasing ' + str(differentName[value]['timeIncreasing']))
        # print(str(value) + ' % time increasing weighted ' + str(differentName[value]['weightedtimeIncreasing']))
 
@@ -332,25 +345,42 @@ def updateCrypto(interval, starttime, endtime):
 
 #caclulates and returns the time spent increasing
 #weighted = 0 is false, weighted = 1 is true
-def getTimeIncreasing(isWeighted):
+def getTimeIncreasing(isWeighted, currency):
+
+    list = percentChanges[currency]
     slots = 0.0
     slots_increasing = 0.0
-    for key, value in percentChanges.items():
-        for  i in value:
+    positiveCounter = 0
+    negativeCounter = 0
+    for  i in list:
             slots+=1
 
             #the two if statements only differ in that the second one
             #caclcualtes slots_increasing using a weight
             #that casues positive increases early in the hour to matter less
             #than increases later in the hour
-            if float(i)  != 0.0 and isWeighted == 0:
-              slots_increasing+=1*i
+            if(currency == "VENBTC"):
+                print("Current Percent Increase/Decrease: " + str(i))
+                print("Previous Weight: " + str(slots_increasing))
 
+            if float(i)  > 0.0 and isWeighted == 0:
+              slots_increasing+=1*i
+              positiveCounter+=1
+
+            if float(i) < 0.0 and isWeighted == 0:
+              slots_increasing += 1 * i * NEGATIVE_WEIGHT
+              negativeCounter+=1
             if float(i) > 0.0 and isWeighted == 1:
               slots_increasing+=(1*(slots/50.0)*i)
+              positiveCounter+=1
 
             if float(i) < 0.0 and isWeighted == 1:
-              slots_increasing+=(1*(slots/50.0)*i*1.3)
+              slots_increasing += (1*(slots/50.0)*i * NEGATIVE_WEIGHT)
+              negativeCounter+=1
+
+            if(currency=="VENBTC"):
+              print("Current Weight: " + str(slots_increasing))
+              print("Positive increases: " + str(positiveCounter) + "Negative increases: " + str(negativeCounter))
 
     return (slots_increasing/slots)
 
@@ -361,16 +391,16 @@ def getScore(symbol):
     new_score = 1
 
     new_score *= differentName[symbol]['percentbyhour']
-    print(str(symbol) + ' percent change ' + str(new_score))
     m = new_score * differentName[symbol]['weightedtimeIncreasing']
     w = new_score + differentName[symbol]['weightedtimeIncreasing']
     c = new_score * differentName[symbol]['timeIncreasing']
     e = new_score + differentName[symbol]['timeIncreasing']
-
+    print(symbol + ": " + str(w) + " Absolute increasing weight: " + str(e))
     #print(' multiply by weight ' + str(m))
     #print(' add the weight ' + str(w))
 
     return w
+
 
 
 def priceChecker():
@@ -428,7 +458,7 @@ def checkFailureCondition(currency):
     print("Cumulative percent change over THIS INTERVAL " + str(cumulativePercentChange))
     file.write("Cumulative percent change over THIS INTERVAL " + str(cumulativePercentChange))
 
-    print ("Times Increasing over the interval: " + str(timeIncreasingCounter))
+    print("Times Increasing over the interval: " + str(timeIncreasingCounter))
     file.write("Times Increasing over the interval: " + str(timeIncreasingCounter) + "\n")
     if(timeIncreasingCounter==0):
         print("DECREASED ALL INTERVALS. RESTART")
@@ -470,20 +500,23 @@ def checkExitCondition(currency):
     if(percentChange >= MAX_PERCENT_CHANGE):
         return 1
 
+    if(percentChanges <= -1 * MAX_PERCENT_CHANGE):
+        return 1
+
     return 0
 
 def main():
     file.write("\n")
     file.write('------------------------------------------------------------------------------------' + "\n")
 
-    '''
+
     #pickCrypto()
     binStepSize()
     endTime = int(time.time() * 1000)
     startTime = endTime - 3600000
-    updateCrypto('1m', startTime, endTime)
-    priceChecker()
-    '''
+    #updateCrypto('1m', startTime, endTime)
+    #priceChecker()
+
     x=0
     t=0
 
@@ -492,13 +525,15 @@ def main():
     priceSold = 0.0
     global initialBalance
     initialBalance = getBalance('BTC')
-
+    for key, value in priceSymbols.items():
+        getVolume('3m', startTime, endTime, value)
+    '''
     binStepSize()
     while(x < MAX_CYCLES and EXIT == 0):
 
-        endTime = int(time.time() * 1000)
-        startTime = endTime - 3600000
-        updateCrypto('1m', startTime, endTime)
+        endTime = int(time.time() * 1000) - 3600000
+        startTime = endTime - 3600000*2
+        updateCrypto('3m', startTime, endTime)
         oldCurrency = currentCurrency
         currentCurrency = priceChecker()
         if(oldCurrency != currentCurrency and oldCurrency != ''):
@@ -531,6 +566,7 @@ def main():
 
     file.write('---------------------------||||||||||||||||----------------------------------------' + "\n")
     file.write("\n" + "\n" + "\n")
+    '''
 
 if __name__ == "__main__":
     main()
