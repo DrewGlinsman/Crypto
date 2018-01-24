@@ -657,16 +657,17 @@ def checkExitCondition(currency):
         return 1
 
     return 0
+
 #checks to see if the current currency is too near to its starting point
 def checkTooLow(currency):
-    currentPrice = getbinanceprice(curreny)
-    floorPrice = FLOOR_PRICE_MODIFIER * priceBought
-    starttime = int(time.time() * 1000)
-    emdtime = starttime - intervalTypes['10m']['inMS']
+    currentPrice = getbinanceprice(currency)
+    floorPrice = FLOOR_PRICE_MODIFIER * 10
+    endtime = int(time.time() * 1000)
+    starttime = endtime - intervalTypes['15m']['inMS']
 
-    direction = increasingOrDecreasing(currency, intervalTypes['10m']['symbol'], starttime, endtime)
+    direction = increasingOrDecreasing(currency, intervalTypes['15m']['symbol'], starttime, endtime)
 
-    if(currentPrice < floorPrice & direction == 0):
+    if(float(currentPrice) < float(floorPrice) and direction == 0):
         return 1
 
     return 0
@@ -680,17 +681,19 @@ def getLastSlot(interval, starttime, endtime):
     return numIntervals - 1
 
 #returns whether the specified currency is increasing or decreasing over the interval
-# 0 means increasing or constant, 1 means decreasing
+# 0 means decreasing, 1 means stable or increasing
 def increasingOrDecreasing(currency, interval, starttime, endtime):
 
     lastSlot = getLastSlot(interval, starttime, endtime)
 
-    parameter = {'symbol': currency, 'interval': interval, 'startTime': startTime, 'endTime': endTime}
+    parameter = {'symbol': currency, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
     percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
+    print(percentChange.text)
     percentChange = percentChange.json()
 
+
     startPrice = percentChange[0][1]
-    endPrice = percentChange[lastSlot][4]
+    endPrice = percentChange[int(lastSlot)][4]
 
     calcPChange = calcPercentChange(startPrice, endPrice)
 
@@ -710,9 +713,6 @@ def main():
     priceSold = 0.0
     x = 0
     t = 0
-
-
-
 
     file.write("\n")
     file.write('------------------------------------------------------------------------------------' + "\n")
