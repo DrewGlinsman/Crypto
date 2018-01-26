@@ -105,7 +105,7 @@ minimumScore = 2.7
 
 #the maximum percentage decrease over 1 minute period allowed
 
-MAX_DECREASE = -15
+MAX_DECREASE = -10
 
 #number in seconds that determines the maximum time a crypto will be held without checkin for a potential switch
 MAX_TIME_CYCLE = 3600
@@ -117,7 +117,7 @@ MAX_CYCLES = 24
 MAX_PERCENT_CHANGE = 15
 
 #weight to make negative numbers worse than positive.
-NEGATIVE_WEIGHT = 1.3
+NEGATIVE_WEIGHT = 1.5
 
 
 #0 is false, 1 is true
@@ -145,13 +145,14 @@ VOLUME_INCREASING_MODIFIER = .01
 
 PERCENT_BY_HOUR_MODIFIER = 1
 
-VOLUME_PERCENT_BY_HOUR_MODIFIER = 0.1
+VOLUME_PERCENT_BY_HOUR_MODIFIER = 0.1 #best run had this at .1
 
-MODIFIED_VOLUME_MODIFIER = .0001
+
+MODIFIED_VOLUME_MODIFIER = .01 #best run had this at 0
 
 #modifier for the lowest the price can be before it is sold
 
-FLOOR_PRICE_MODIFIER = 1.05
+FLOOR_PRICE_MODIFIER = 1.005
 
 #time waiting fields
 WAIT_FOR_CHECK_FAILURE = 300
@@ -182,6 +183,8 @@ def getBalance(symbol):
     return balance
 
 def buyBin(symbol):
+    global priceBought
+
     timestamp = int(time.time() * 1000)
     balance = getBalance('BTC')
 
@@ -189,6 +192,10 @@ def buyBin(symbol):
     # and then convert quantity from BTC price to amount of coin
     balancetospend = float(balance) * percent_to_spend
     ratio = getbinanceprice(symbol)
+
+    priceBought = ratio
+
+
     #mark item as the current crypto being traded and save the buy price at for failure condition
     entry = {symbol:{'buyPrice': ratio, 'timestamp': timestamp}}
     currentCrypto.clear()
@@ -338,15 +345,24 @@ def getModifiedVolume(currency):
     percentChangesList = percentChanges[currency]
     volumeAmountList = volumeAmounts[currency]
     currentSlot = 0
+    volumeModifier = getbinanceprice(currency)
 
     for i in volumeAmountList:
+        percentChangeScale = (percentChangesList[currentSlot] / 100)
+
+        #NOTE: can change back to normal if this doesnt work
         if(percentChangesList[currentSlot] < 0):
-            oldVolume += float(i)* -1
+            oldVolume += float(i) * -1 * (1 + percentChangeScale)
+            oldVolume += float(i) * (-1 * percentChangeScale)
         if(percentChangesList[currentSlot] > 0):
-            oldVolume += float(i)
+            oldVolume += float(i) * (1 - percentChangeScale)
+            oldVolume += float(i) * -1 *(percentChangeScale)
         currentSlot += 1
 
-    return oldVolume
+    print("For crypto "  + str(currency))
+    print ("Volume before modification " + str(oldVolume))
+    print ("Volume after modification " + str(float(oldVolume) * float(volumeModifier)))
+    return float(oldVolume) * float(volumeModifier)
 
 
 def getbinanceprice(currency):
@@ -359,7 +375,7 @@ def getbinanceprice(currency):
 
             break;
     print("Price: " + str(binPrice))
-    priceBought = binPrice
+
 
     return binPrice
 
@@ -394,6 +410,16 @@ def updateCrypto(interval, starttime, endtime):
 
         lastSlot = getLastSlot(interval, starttime, endtime)
 
+        if percentChange == []:
+            lastSlot = 0
+        counter = 0
+
+        for i in percentChange:
+            counter+=1
+        if counter != (int(lastSlot) + 1):
+            print("Last Slot is: " + str(lastSlot))
+            print("Counter " + str(counter))
+
         #calculate the percent change over the whole hour and store
         openPrice = percentChange[0][1]
         closePrice = percentChange[int(lastSlot)][4]
@@ -412,9 +438,12 @@ def updateCrypto(interval, starttime, endtime):
         #print(str(value) + ' % percent changes ' + str(percentChanges[value]))
 
 
+        volumeAmounts[value] = []
+        volumePercentChanges[value] = []
         #grabs and stores the volume from the first two intervals that are skipped in the for loop below
         volumeAmounts[value].append(percentChange[0][5])
         volumeAmounts[value].append(percentChange[1][5])
+
 
 
         #volumePercentChanges[value] = []
@@ -424,6 +453,8 @@ def updateCrypto(interval, starttime, endtime):
            volumePercentChanges[value].append(calcPercentChange(percentChange[i-1][5], percentChange[i][5]))
            volumeAmounts[value].append(percentChange[i][5])
 
+        #print(" LENGTH OF PERCENT CHANGES " + str(len(percentChanges)) + ' LENGTH OF VOLUME AMOUNTS ' + str(len(volumeAmounts)))
+
         #calculate and store the % time increasing for volume and percent
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
         pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
@@ -431,10 +462,10 @@ def updateCrypto(interval, starttime, endtime):
         volumePercentData[value]['timeIncreasing'] = getVolumeTimeIncreasing(0, value)
         volumePercentData[value]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, value)
 
-
+        modifiedVolume[value] = []
         #get the modified volume changes
         modifiedVolume[value] = getModifiedVolume(value)
-        print(value + " modified volume" + str(modifiedVolume[value]))
+       # print(value + " modified volume" + str(modifiedVolume[value]))
 
         #print(str(value))
         #print("Volume Time Increasing: " + str(volumePercentData[value]["timeIncreasing"]))
@@ -448,7 +479,7 @@ def updateCrypto(interval, starttime, endtime):
         new_score = {value: calc_score}
         scores.update(new_score)
 
-    print("HERE ARE THE MODIFIED VOLUMES" + str(modifiedVolume))
+   # print("HERE ARE THE MODIFIED VOLUMES" + str(modifiedVolume))
 
     for key, value in scores.items():
         if(value > minimumScore):
@@ -577,25 +608,31 @@ def priceChecker():
 
 #just calculates the percent change between two values
 def calcPercentChange(startVal, endVal):
-    if(float(startVal) == 0.00000000):
+    if(float(startVal) == 0.0):
+        print('ITS ZERO' + str(startVal))
         return float(endVal) * 100.0
     return (((float(endVal) - float(startVal))/float(startVal) ) * 100)
 
 
 #checks if the current crypto has been decreasing the past five minutes
 #if yes it forces a new check to see if there is a better crypto
-def checkFailureCondition(currency):
+def checkFailureCondition(currency, timesIncreasing):
+    startPriceInterval = 0
+
+
     print("New Interval")
     file.write("New Interval")
     #price = getbinanceprice(currency)
     #change = calcPercentChange(currentCrypto[currency]['buyPrice'], price)
 
-    startTime = int(time.time()*1000) - 300000
+    startTime = int(time.time()*1000) - (int(intervalTypes['5m']['inMS']) * 2)
     endTime = int(time.time())*1000
 
-    parameter = {'symbol': currency, 'interval': '1m', 'startTime': startTime, 'endTime': endTime}
+    parameter = {'symbol': currency, 'interval': intervalTypes['1m']['symbol'], 'startTime': startTime, 'endTime': endTime}
     percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
     percentChange = percentChange.json()
+
+    startPriceInterval = percentChange[0][1]
     timeIncreasingCounter = 0
 
     for i in percentChange:
@@ -607,13 +644,13 @@ def checkFailureCondition(currency):
         if(percentChange > 0):
             timeIncreasingCounter += 1
 
-    cumulativePercentChange = calcPercentChange(priceBought, endPrice)
+    cumulativePercentChange = calcPercentChange(startPriceInterval, endPrice)
     print("Cumulative percent change over THIS INTERVAL " + str(cumulativePercentChange))
     file.write("Cumulative percent change over THIS INTERVAL " + str(cumulativePercentChange))
 
     print("Times Increasing over the interval: " + str(timeIncreasingCounter))
     file.write("Times Increasing over the interval: " + str(timeIncreasingCounter) + "\n")
-    if(timeIncreasingCounter==0):
+    if(timeIncreasingCounter <= timesIncreasing):
         print("DECREASED ALL INTERVALS. RESTART")
         file.write("DECREASED ALL INTERVALS. RESTART")
         return 1
@@ -645,29 +682,34 @@ def checkTooNegative(symbol):
     return 0
 
 def checkExitCondition(currency):
-    currentBalance = getBalance(currency)
+    global priceBought
+    currentPrice= getbinanceprice(currency)
 
-    global initialBalance
-    percentChange = calcPercentChange(initialBalance, currentBalance)
+
+    percentChange = calcPercentChange(priceBought, currentPrice)
 
     if(percentChange >= MAX_PERCENT_CHANGE):
+        print("HIT MAX PERCENT CHANGE")
         return 1
 
     if(percentChange <= -1 * MAX_PERCENT_CHANGE):
+        print("HIT MINIMUM PERCENT CHANGE")
         return 1
 
     return 0
 
 #checks to see if the current currency is too near to its starting point
-def checkTooLow(currency):
+def checkTooLow(currency, timesIncreasing):
     currentPrice = getbinanceprice(currency)
     floorPrice = FLOOR_PRICE_MODIFIER * 10
     endtime = int(time.time() * 1000)
     starttime = endtime - intervalTypes['15m']['inMS']
 
     direction = increasingOrDecreasing(currency, intervalTypes['15m']['symbol'], starttime, endtime)
+    allIntervalsDecreasing = checkFailureCondition(currency, 1)
 
-    if(float(currentPrice) < float(floorPrice) and direction == 0):
+    if(float(currentPrice) < float(floorPrice) and direction == 0 & allIntervalsDecreasing == 1):
+        print("WAS TOO LOW")
         return 1
 
     return 0
@@ -709,10 +751,11 @@ def main():
     global RESTART
     global RESTART_TN
     global RESTART_LOW
+    global EXIT
     currentCurrency = ''
     priceSold = 0.0
     x = 0
-    t = 0
+
 
     file.write("\n")
     file.write('------------------------------------------------------------------------------------' + "\n")
@@ -734,45 +777,53 @@ def main():
 
     binStepSize()
     while(x < MAX_CYCLES and EXIT == 0):
+        t = 0
+        RESTART = 0
+        RESTART_LOW = 0
+        RESTART_TN = 0
+        endTime = int(time.time() * 1000)
+        startTime = endTime - 3600000
 
-        endTime = int(time.time() * 1000) - 3600000
-        startTime = endTime - 3600000 * 2
         updateCrypto(intervalTypes['5m']['symbol'], startTime, endTime)
-
 
 
         oldCurrency = currentCurrency
         currentCurrency = priceChecker()
+
+
         if(oldCurrency != currentCurrency and oldCurrency != ''):
             sellBin(oldCurrency)
             print("THIS RUN SOLD AT: " + str(datetime.datetime.time(datetime.datetime.now())))
             file.write("THIS RUN SOLD AT: " + str(datetime.datetime.time(datetime.datetime.now())))
+        print('2. PRICE BOUGHT ' + str(priceBought))
         if(oldCurrency != currentCurrency):
             buyBin(currentCurrency)
             print("THIS RUN BOUGHT AT: " + str(datetime.datetime.time(datetime.datetime.now())))
             file.write("THIS RUN BOUGHT AT: " + str(datetime.datetime.time(datetime.datetime.now())))
 
-
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
         while(t < MAX_TIME_CYCLE and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0):
             time.sleep(1)
+            print("We are here")
             if(t % WAIT_FOR_CHECK_FAILURE == 0 and t != 0):
-                RESTART = checkFailureCondition(currentCurrency)
-            if(t > WAIT_FOR_CHECK_TOO_LOW):
+                RESTART = checkFailureCondition(currentCurrency, 0)
+
+            if(t > WAIT_FOR_CHECK_TOO_LOW and t % WAIT_FOR_CHECK_FAILURE):
                 RESTART_LOW = checkTooLow(currentCurrency)
 
             RESTART_TN = checkTooNegative(currentCurrency)
             t+=1
-        t=0
 
+        print("We left")
         priceSold = getbinanceprice(currentCurrency)
+        print('Price bought ' + str(priceBought) + ' Price sold ' + str(priceSold))
         cumulativePercentChange = calcPercentChange(priceBought, priceSold)
 
         print("FINAL percent change over the life of owning this crypto " + str(cumulativePercentChange))
         file.write("FINAL percent change over the life of owning this crypto " + str(cumulativePercentChange))
 
-        checkExitCondition(currentCurrency)
+        EXIT = checkExitCondition(currentCurrency)
         x+=1
 
     sellBin(currentCurrency)
