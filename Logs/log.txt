@@ -1,0 +1,139 @@
+HEYYYYYYYYYYYYYYYYY
+
+
+
+------------------------------------------------------------------------------------
+Date and Time of Run 2018-01-29 20:56:41.587694OUR LIST OF CRYPTO{'BTCUSDT': 1.8355241211099007, 'QTUMBTC': 3.7234867573031614, 'ZECBTC': 3.636995914523378, 'ADABTC': 1.9929853251509444, 'AIONBTC': 15.891022475617634, 'ARNBTC': 25.302321673052948, 'BCDBTC': 146.92572833971954, 'BQXBTC': 1.0594883358332368, 'BRDBTC': 42.82976550661407, 'CDTBTC': 2.4949232994842285, 'CMTBTC': 15.227556809786046, 'CTRBTC': 18.035304433589886, 'DLTBTC': 6.971833748927896, 'DNTBTC': 11985.12485277841, 'EDOBTC': 178.71648044846083, 'ENJBTC': 94.98589171265347, 'EVXBTC': 1.2159682909372556, 'FUELBTC': 55.49049723607525, 'FUNBTC': 8.147421975302755, 'GTOBTC': 13.60896531189199, 'GVTBTC': 2.5452159846910796, 'GXSBTC': 228.695651711775, 'HSRBTC': 19.651935961137653, 'ICNBTC': 3.009508349890118, 'KNCBTC': 152.6936070805475, 'LENDBTC': 75.33387506458864, 'LRCBTC': 15.66289623535196, 'NAVBTC': 5.909105038557719, 'OAXBTC': 112.47736854617489, 'POEBTC': 27.990801650722037, 'PPTBTC': 573.8210488135031, 'QSPBTC': 16.082403486702614, 'RCNBTC': 19.81952284903596, 'RDNBTC': 6.62219352823907, 'REQBTC': 10.415876842218362, 'SALTBTC': 20.674787298942686, 'SNGLSBTC': 11.990287819117384, 'SNMBTC': 3.374735467630491, 'SNTBTC': 57.765505818787354, 'STORJBTC': 20.116348850083046, 'SUBBTC': 2.693375358264421, 'TRIGBTC': 14.758365615031424, 'TRXBTC': 1.3754881739506817, 'VIBEBTC': 102.19984301473609, 'WAVESBTC': 11.02349323340538, 'WINGSBTC': 4.644264378993299, 'XZCBTC': 3.7629515250288206}The score of BTCUSDT is 1.8355241211099007
+CURRENT HIGH SCORE: The score of BTCUSDT is 1.8355241211099007
+The score of QTUMBTC is 3.7234867573031614
+The score of ZECBTC is 3.636995914523378
+CURRENT HIGH SCORE: The score of ZECBTC is 3.636995914523378
+The score of ADABTC is 1.9929853251509444
+The score of AIONBTC is 15.891022475617634
+The score of ARNBTC is 25.302321673052948
+The score of BCDBTC is 146.92572833971954
+CURRENT HIGH SCORE: The score of BCDBTC is 146.92572833971954
+The score of BQXBTC is 1.0594883358332368
+The score of BRDBTC is 42.82976550661407
+The score of CDTBTC is 2.4949232994842285
+The score of CMTBTC is 15.227556809786046
+The score of CTRBTC is 18.035304433589886
+The score of DLTBTC is 6.971833748927896
+The score of DNTBTC is 11985.12485277841
+The score of EDOBTC is 178.71648044846083
+CURRENT HIGH SCORE: The score of EDOBTC is 178.71648044846083
+The score of ENJBTC is 94.98589171265347
+The score of EVXBTC is 1.2159682909372556
+The score of FUELBTC is 55.49049723607525
+The score of FUNBTC is 8.147421975302755
+The score of GTOBTC is 13.60896531189199
+The score of GVTBTC is 2.5452159846910796
+The score of GXSBTC is 228.695651711775
+The score of HSRBTC is 19.651935961137653
+The score of ICNBTC is 3.009508349890118
+The score of KNCBTC is 152.6936070805475
+The score of LENDBTC is 75.33387506458864
+The score of LRCBTC is 15.66289623535196
+The score of NAVBTC is 5.909105038557719
+The score of OAXBTC is 112.47736854617489
+The score of POEBTC is 27.990801650722037
+The score of PPTBTC is 573.8210488135031
+CURRENT HIGH SCORE: The score of PPTBTC is 573.8210488135031
+The score of QSPBTC is 16.082403486702614
+The score of RCNBTC is 19.81952284903596
+The score of RDNBTC is 6.62219352823907
+The score of REQBTC is 10.415876842218362
+The score of SALTBTC is 20.674787298942686
+The score of SNGLSBTC is 11.990287819117384
+The score of SNMBTC is 3.374735467630491
+The score of SNTBTC is 57.765505818787354
+The score of STORJBTC is 20.116348850083046
+The score of SUBBTC is 2.693375358264421
+The score of TRIGBTC is 14.758365615031424
+The score of TRXBTC is 1.3754881739506817
+The score of VIBEBTC is 102.19984301473609
+The score of WAVESBTC is 11.02349323340538
+The score of WINGSBTC is 4.644264378993299
+The score of XZCBTC is 3.7629515250288206
+Coin with the highest score is PPTBTC which is 573.8210488135031
+Stepsize of PPTBTC is 0.01000000
+Balance: 0.08270971
+Quantity to buy: 12.14ofPPTBTC
+THIS RUN BOUGHT AT: 21:00:45.695217New IntervalCurrent Crypto: PPTBTC Start Price: 0.00612910 End Price: 0.00612910Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00612910Current Crypto: PPTBTC Start Price: 0.00612910 End Price: 0.00612910Current Crypto: PPTBTC Start Price: 0.00612910 End Price: 0.00612910Current Crypto: PPTBTC Start Price: 0.00611510 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Cumulative percent change over THIS INTERVAL -0.2300500889200763Times Increasing over the interval: 1
+New IntervalCurrent Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00611500Current Crypto: PPTBTC Start Price: 0.00611500 End Price: 0.00610780Current Crypto: PPTBTC Start Price: 0.00610780 End Price: 0.00610780Current Crypto: PPTBTC Start Price: 0.00612610 End Price: 0.00612610Current Crypto: PPTBTC Start Price: 0.00612490 End Price: 0.00610770Current Crypto: PPTBTC Start Price: 0.00612500 End Price: 0.00612500Current Crypto: PPTBTC Start Price: 0.00610790 End Price: 0.00610790Cumulative percent change over THIS INTERVAL -0.1161079313164263Times Increasing over the interval: 0
+DECREASED ALL INTERVALS. RESTARTFINAL percent change over the life of owning this crypto -0.3458909138372659Cumualtive percent change over the life of all cryptos owneed so far -0.3458909138372659OUR LIST OF CRYPTO{'BTCUSDT': 1.8355241211099007, 'QTUMBTC': 31.007037145647416, 'ZECBTC': 3.636995914523378, 'ADABTC': 1.9929853251509444, 'AIONBTC': 15.891022475617634, 'ARNBTC': 25.302321673052948, 'BCDBTC': 35.29173696720628, 'BQXBTC': 89.31903951638199, 'BRDBTC': 7.9789931699950705, 'CDTBTC': 16.04294574927408, 'CMTBTC': 5.384980009577285, 'CTRBTC': 18.035304433589886, 'DLTBTC': 6.971833748927896, 'DNTBTC': 5.712723829307386, 'EDOBTC': 91.17412745435597, 'ENJBTC': 94.98589171265347, 'EVXBTC': 2.085616494792541, 'FUELBTC': 288.2182746808835, 'FUNBTC': 8.147421975302755, 'GTOBTC': 13.60896531189199, 'GVTBTC': 213.40980808345608, 'GXSBTC': 132.75139683465545, 'HSRBTC': 6.3497908899043685, 'ICNBTC': 29.238997828855485, 'KNCBTC': 152.6936070805475, 'LENDBTC': 75.33387506458864, 'LRCBTC': 15.66289623535196, 'NAVBTC': 8.951765664650061, 'OAXBTC': 112.47736854617489, 'POEBTC': 27.990801650722037, 'PPTBTC': 3.1346352296399775, 'QSPBTC': 16.082403486702614, 'RCNBTC': 19.81952284903596, 'RDNBTC': 6.62219352823907, 'REQBTC': 5.036236505195693, 'SALTBTC': 59.35439102619502, 'SNGLSBTC': 108.91514896729447, 'SNMBTC': 15.044642545281361, 'SNTBTC': 2.049556889905148, 'STORJBTC': 20.116348850083046, 'SUBBTC': 123.51740741597501, 'TRIGBTC': 39.176582765847776, 'TRXBTC': 5.96950119249812, 'VIBEBTC': 102.19984301473609, 'WAVESBTC': 21.016181740150675, 'WINGSBTC': 4.644264378993299, 'XZCBTC': 155.69899045185196, 'ETHBTC': 11.994499580608853, 'BCCBTC': 47.875098353732426, 'LTCBTC': 1.145356721855297, 'DASHBTC': 38.2014431963011, 'XMRBTC': 57.055523757085396, 'APPCBTC': 72.51126098146247, 'ARKBTC': 23.07626890460118, 'BATBTC': 63.93335450357816, 'BNTBTC': 193.63146482474966, 'BTSBTC': 8.768186961338051, 'DGDBTC': 22.751720881306216, 'EOSBTC': 15.349998484343415, 'LUNBTC': 15.42042929923133, 'MANABTC': 5.269051015739574, 'MDABTC': 49.503712244277814, 'MODBTC': 83.43105913810939, 'MTHBTC': 25.532885661571566, 'MTLBTC': 1958.4497230290294, 'NEBLBTC': 2.6278911473679236, 'POWRBTC': 22.590754051568503, 'STRATBTC': 5.08002714783276, 'TNTBTC': 25.844935846301286, 'WTCBTC': 8.031513217310177, 'ZRXBTC': 24.43402770618537}The score of BTCUSDT is -1.5003553107069576
+The score of QTUMBTC is 31.007037145647416
+The score of ZECBTC is -7.53931502933909
+The score of ADABTC is -8.321789716663645
+The score of AIONBTC is -5.7895116523909405
+The score of ARNBTC is -4.7092325477314905
+The score of BCDBTC is 35.29173696720628
+CURRENT HIGH SCORE: The score of BCDBTC is 35.29173696720628
+The score of BQXBTC is 89.31903951638199
+The score of BRDBTC is 7.9789931699950705
+The score of CDTBTC is 16.04294574927408
+The score of CMTBTC is 5.384980009577285
+The score of CTRBTC is -12.673531661654922
+The score of DLTBTC is -8.786603274758823
+The score of DNTBTC is 5.712723829307386
+The score of EDOBTC is 91.17412745435597
+CURRENT HIGH SCORE: The score of EDOBTC is 91.17412745435597
+The score of ENJBTC is 0.407434885953854
+The score of EVXBTC is 2.085616494792541
+The score of FUELBTC is 288.2182746808835
+The score of FUNBTC is -0.031723964330184165
+The score of GTOBTC is -4.0542263598370845
+The score of GVTBTC is 213.40980808345608
+The score of GXSBTC is 132.75139683465545
+The score of HSRBTC is 6.3497908899043685
+The score of ICNBTC is 29.238997828855485
+The score of KNCBTC is -6.743825686854147
+The score of LENDBTC is -9.558977176863712
+The score of LRCBTC is -9.593402446209303
+The score of NAVBTC is 8.951765664650061
+The score of OAXBTC is -3.252377561764683
+The score of POEBTC is -2.5070719923887403
+The score of PPTBTC is 3.1346352296399775
+The score of QSPBTC is -6.691873817380173
+The score of RCNBTC is -11.450864250266447
+The score of RDNBTC is -5.826458270029121
+The score of REQBTC is 5.036236505195693
+The score of SALTBTC is 59.35439102619502
+The score of SNGLSBTC is 108.91514896729447
+The score of SNMBTC is 15.044642545281361
+The score of SNTBTC is 2.049556889905148
+The score of STORJBTC is -0.3204376648519909
+The score of SUBBTC is 123.51740741597501
+The score of TRIGBTC is 39.176582765847776
+The score of TRXBTC is 5.96950119249812
+The score of VIBEBTC is -0.9047723839108428
+The score of WAVESBTC is 21.016181740150675
+The score of WINGSBTC is -3.4971445076324006
+The score of XZCBTC is 155.69899045185196
+CURRENT HIGH SCORE: The score of XZCBTC is 155.69899045185196
+The score of ETHBTC is 11.994499580608853
+The score of BCCBTC is 47.875098353732426
+The score of LTCBTC is 1.145356721855297
+The score of DASHBTC is 38.2014431963011
+The score of XMRBTC is 57.055523757085396
+The score of APPCBTC is 72.51126098146247
+The score of ARKBTC is 23.07626890460118
+The score of BATBTC is 63.93335450357816
+The score of BNTBTC is 193.63146482474966
+The score of BTSBTC is 8.768186961338051
+The score of DGDBTC is 22.751720881306216
+The score of EOSBTC is 15.349998484343415
+The score of LUNBTC is 15.42042929923133
+The score of MANABTC is 5.269051015739574
+The score of MDABTC is 49.503712244277814
+The score of MODBTC is 83.43105913810939
+The score of MTHBTC is 25.532885661571566
+The score of MTLBTC is 1958.4497230290294
+The score of NEBLBTC is 2.6278911473679236
+The score of POWRBTC is 22.590754051568503
+The score of STRATBTC is 5.08002714783276
+The score of TNTBTC is 25.844935846301286
+The score of WTCBTC is 8.031513217310177
+The score of ZRXBTC is 24.43402770618537
+Coin with the highest score is XZCBTC which is 155.69899045185196
+{'makerCommission': 10, 'takerCommission': 10, 'buyerCommission': 0, 'sellerCommission': 0, 'canTrade': True, 'canWithdraw': True, 'canDeposit': True, 'updateTime': 1517008009267, 'balances': [{'asset': 'BTC', 'free': '0.08270971', 'locked': '0.00000000'}, {'asset': 'LTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETH', 'free': '0.00024679', 'locked': '0.00000000'}, {'asset': 'BNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNB', 'free': '0.00016077', 'locked': '0.00000000'}, {'asset': '123', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '456', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QTUM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EOS', 'free': '0.88000000', 'locked': '0.00000000'}, {'asset': 'SNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GAS', 'free': '0.00009000', 'locked': '0.00000000'}, {'asset': 'BCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'USDT', 'free': '0.00374029', 'locked': '0.00000000'}, {'asset': 'HCC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'HSR', 'free': '0.00315000', 'locked': '0.00000000'}, {'asset': 'OAX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DNT', 'free': '0.65200000', 'locked': '0.00000000'}, {'asset': 'MCO', 'free': '0.00854000', 'locked': '0.00000000'}, {'asset': 'ICN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PAY', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZRX', 'free': '0.07700000', 'locked': '0.00000000'}, {'asset': 'OMG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WTC', 'free': '0.00608000', 'locked': '0.00000000'}, {'asset': 'LRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'YOYO', 'free': '0.06200000', 'locked': '0.00000000'}, {'asset': 'LRC', 'free': '0.59500000', 'locked': '0.00000000'}, {'asset': 'LLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TRX', 'free': '0.04600000', 'locked': '0.00000000'}, {'asset': 'FID', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNGLS', 'free': '0.55500000', 'locked': '0.00000000'}, {'asset': 'STRAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BQX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CDT', 'free': '0.20700000', 'locked': '0.00000000'}, {'asset': 'XVG', 'free': '0.62200000', 'locked': '0.00000000'}, {'asset': 'IOTA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SNM', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LINK', 'free': '0.15800000', 'locked': '0.00000000'}, {'asset': 'CVC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'TNT', 'free': '0.07600000', 'locked': '0.00000000'}, {'asset': 'REP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CTR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MDA', 'free': '0.68000000', 'locked': '0.00000000'}, {'asset': 'MTL', 'free': '0.00682000', 'locked': '0.00000000'}, {'asset': 'SALT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NULS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SUB', 'free': '0.74600000', 'locked': '0.00000000'}, {'asset': 'STX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MTH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PIX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ETC', 'free': '0.00683000', 'locked': '0.00000000'}, {'asset': 'ENG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ZEC', 'free': '0.00041931', 'locked': '0.00000000'}, {'asset': 'AST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': '1ST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GNT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DGD', 'free': '0.00041400', 'locked': '0.00000000'}, {'asset': 'BAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'POWR', 'free': '0.80700000', 'locked': '0.00000000'}, {'asset': 'BTG', 'free': '0.00455000', 'locked': '0.00000000'}, {'asset': 'REQ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XMR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EVX', 'free': '0.41500000', 'locked': '0.00000000'}, {'asset': 'VIB', 'free': '0.89900000', 'locked': '0.00000000'}, {'asset': 'ENJ', 'free': '0.94100000', 'locked': '0.00000000'}, {'asset': 'VEN', 'free': '0.75700000', 'locked': '0.00000000'}, {'asset': 'CAG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XRP', 'free': '0.03800000', 'locked': '0.00000000'}, {'asset': 'MOD', 'free': '0.00816000', 'locked': '0.00000000'}, {'asset': 'AVT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STORJ', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KMD', 'free': '0.00407000', 'locked': '0.00000000'}, {'asset': 'RCN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'EDO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'QASH', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'SAN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DATA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'DLT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GUP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MCAP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'MANA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PPT', 'free': '0.00990000', 'locked': '0.00000000'}, {'asset': 'OTN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CFD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RDN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GXS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AMB', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ARN', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCPT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CND', 'free': '0.73500000', 'locked': '0.00000000'}, {'asset': 'GVT', 'free': '0.00483000', 'locked': '0.00000000'}, {'asset': 'POE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ALIS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BTS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'FUEL', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XZC', 'free': '0.00771000', 'locked': '0.00000000'}, {'asset': 'QSP', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LSK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCD', 'free': '0.00041400', 'locked': '0.00000000'}, {'asset': 'TNB', 'free': '0.40400000', 'locked': '0.00000000'}, {'asset': 'GRX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'STAR', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ADA', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'LEND', 'free': '0.95000000', 'locked': '0.00000000'}, {'asset': 'IFT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'KICK', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'UKG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'VOISE', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'XLM', 'free': '33527.75700000', 'locked': '0.00000000'}, {'asset': 'CMT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WAVES', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'WABI', 'free': '0.51700000', 'locked': '0.00000000'}, {'asset': 'SBTC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BCX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'GTO', 'free': '0.58200000', 'locked': '0.00000000'}, {'asset': 'ETF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'OST', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ELF', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'AION', 'free': '0.00714000', 'locked': '0.00000000'}, {'asset': 'WINGS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'BRD', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEBL', 'free': '0.00869000', 'locked': '0.00000000'}, {'asset': 'NAV', 'free': '0.00955000', 'locked': '0.00000000'}, {'asset': 'VIBE', 'free': '0.38067200', 'locked': '0.00000000'}, {'asset': 'LUN', 'free': '0.00401000', 'locked': '0.00000000'}, {'asset': 'TRIG', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'APPC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'CHAT', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'RLC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'INS', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'PIVX', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'IOST', 'free': '0.00000000', 'locked': '0.00000000'}]}
