@@ -37,10 +37,11 @@ api_key = '7WzDy6Hw7HBozQiR1UEpWMgdpzAKQ3ZUSBX6QMra723KO4ot6iAQykbqtqM4hL7Y'
 
 secret_key = 'cHFo1FUc4zRgydNpTDip51S2s12yd7SKe65LS96AgrUxfm8B5Q7HgQcJghitSlNo'
 
+solume_key = 'c4ee107f-c981-447c-ba9b-070f9fdaef12'
+
+
 percent_to_spend = 1  # CHANGE TO 0.5
 
-minTransactionAmount = {'BTC': 0.003, 'ETH': 0.01, 'Dash': 0.01, 'LTC': 0.01, 'ETC': 0.01, 'XRP': 21, 'BCH': 0.005,
-                        'XMR': 0.1, 'ZEC': 0.01, 'QTUM': 0.1}
 
 #dictionary with lists that will hold the % changes for each crypto calculated from the klines data
 percentChanges = {'BTCUSDT': [], 'XRPBTC': [],
@@ -810,6 +811,7 @@ def increasingOrDecreasing(currency, interval, starttime, endtime):
     return 0
 
 
+
 def main():
     global cumulativePercentChangeStore
     global initialBalance
@@ -899,6 +901,7 @@ def main():
 
     file.write('---------------------------||||||||||||||||----------------------------------------' + "\n")
     file.write("\n" + "\n" + "\n")
+    file.close()
 
 
 if __name__ == "__main__":
