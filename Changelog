@@ -1,0 +1,6 @@
+2/1/18 Andrew Katson
+Created CryptoData.py to independently initialize all the necessary text files with data
+Created Changelog to track changes made over time more succinctly
+Created AutoTrader. Actual bot that will run when we trade
+
+Updated CryptoEvaluator and AutoTrader to use the new Parameter Dictionary

@@ -1,3 +1,10 @@
+# Copyright (c) 2018 A&D
+# Auto trading tester that runs multiple versions of the trader with different parameters
+
+#todo add a function to randomize the parameters when requested
+#todo update the best parameters text file
+
+
 import sys
 import subprocess
 import random
@@ -9,7 +16,10 @@ import math
 import datetime
 import os
 
+from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
+
+
 
 # EXPLANATION OF THE PARAMETERS
 
@@ -46,12 +56,17 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
                 'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 
+<<<<<<< HEAD
 #<<<<<<< HEAD
 #will hold the specific parameter given to each list
 PARAM_CHOSEN = {}
 #=======
 
 #>>>>>>> ca933efa55324cb11972e2a90dfda2f80984b4ad
+=======
+#will hold the specific parameter given to each list
+PARAM_CHOSEN = {}
+>>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
 
 #list of each variation of the parameter list, one is passed to each instance of the bot
 PARAMETER_VARIATIONS=[]
@@ -63,75 +78,56 @@ def main():
     global NUM_ITERATIONS
     global PARAM_CHOSEN
     global PARAMETER_VARIATIONS
+    global file
 
     for i in range(NUM_ITERATIONS):
         PARAMETER_VARIATIONS.append(PARAMETERS)
 
+<<<<<<< HEAD
 #<<<<<<< HEAD
     #CODE TO RUN MULTIPLE INSTANCES OF BOT
     '''
 =======
+=======
+>>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
 
-<<<<<<< HEAD
+    returns = [NUM_ITERATIONS]
+    PARAM_CHOSEN = PARAMETER_VARIATIONS[0]
+    print('{}'.format(PARAM_CHOSEN['PERCENT_TO_SPEND']))
     #CODE TO RUN MULTIPLE INSTANCES OF BOT
-=======
->>>>>>> 6f79ff1032f7272af5c6920979290e99b30a3b01
-    for key, value in priceSymbols.items():
-        cryptoPath = os.path.join(cryptoPaths, value + ".txt")
-        file = open(cryptoPath, "a+")
-        timeBackwards = 86400000
-        j = 0
-        while(timeBackwards <= 1209600000):
-            endTime = int(time.time()*1000) - timeBackwards * j
-            startTime = endTime - timeBackwards
-            parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
-            data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
-            data = data.json()
-            for i in data:
-                file.write("{} \n".format(i[1]))
-                file.write("{} \n".format(i[4]))
-                file.write("{} \n".format(i[5]))
-            j += 1
-            timeBackwards += 86400000
-<<<<<<< HEAD
-    '''
-    for key, value in priceSymbols.items():
-        cryptoPath = os.path.join(cryptoPaths, value + ".txt")
-        print("{}".format(cryptoPath))
-        file = open(cryptoPath, "r")
-        data = file.readlines()
-        for line in data:
-            words = line.split("\n")
-            print("{}".format(words))
-        print("{}".format(data))
-
-    '''
-=======
-
-
-
->>>>>>> ca933efa55324cb11972e2a90dfda2f80984b4ad
->>>>>>> 6f79ff1032f7272af5c6920979290e99b30a3b01
     procs = []
+<<<<<<< HEAD
     for i in range(NUM_ITERATIONS):
         PARAM_CHOSEN = PARAMETER_VARIATIONS[i]
         PARAM_CHOSEN['PERCENT_TO_SPEND'] = i * 10
         proc = subprocess.Popen([sys.executable, 'tester.py', '{}in.csv'.format(i), '{}out.csv'.format(i)])
         procs.append(proc)
+=======
+    current_Max = 0.0
+    for i in range(NUM_ITERATIONS):
+        apot = 1
 
+        PARAM_CHOSEN = PARAMETER_VARIATIONS[i]
+        PARAM_CHOSEN['PERCENT_TO_SPEND'] = i * 10
 
+        proc = Popen([sys.executable, 'tester.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stderr=PIPE,bufsize=1, universal_newlines=True)
+        for line in proc.stdout:
+            val = line
+            substring = val.split("CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
+            cumulativePerentChangeStore = substring.split(',', 1)[0]
 
-    for proc in procs:
-        proc.wait()
+            cumulativePerentChangeStore = float(cumulativePerentChangeStore)
+>>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
 
-    for key, value in priceSymbols.items():
-        endTime = int(time.time()*1000)
-        startTime = endTime - 1210000000
-        parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '4h'}
-        data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
-        data = data.json()
-        print(str(data))
-    '''
+            if cumulativePerentChangeStore >= current_Max:
+                current_Max = cumulativePerentChangeStore
+                stored_output = line
+
+        print('{}'.format(stored_output))
+        print('{}'.format(current_Max))
+
+    proc.wait()
+
 
 if __name__ == "__main__":
     main()
