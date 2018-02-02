@@ -46,15 +46,36 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
                 'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 
+<<<<<<< HEAD
+#will hold the specific parameter given to each list
+PARAM_CHOSEN = {}
+=======
 cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
+>>>>>>> ca933efa55324cb11972e2a90dfda2f80984b4ad
 
 #list of each variation of the parameter list, one is passed to each instance of the bot
 PARAMETER_VARIATIONS=[]
 
-def main():
+#number of iterations of bot
+NUM_ITERATIONS = 5
 
+def main():
+    global NUM_ITERATIONS
+    global PARAM_CHOSEN
+    global PARAMETER_VARIATIONS
+
+    for i in range(NUM_ITERATIONS):
+        PARAMETER_VARIATIONS.append(PARAMETERS)
+
+<<<<<<< HEAD
     #CODE TO RUN MULTIPLE INSTANCES OF BOT
     '''
+=======
+
+<<<<<<< HEAD
+    #CODE TO RUN MULTIPLE INSTANCES OF BOT
+=======
+>>>>>>> 6f79ff1032f7272af5c6920979290e99b30a3b01
     for key, value in priceSymbols.items():
         cryptoPath = os.path.join(cryptoPaths, value + ".txt")
         file = open(cryptoPath, "a+")
@@ -72,6 +93,7 @@ def main():
                 file.write("{} \n".format(i[5]))
             j += 1
             timeBackwards += 86400000
+<<<<<<< HEAD
     '''
     for key, value in priceSymbols.items():
         cryptoPath = os.path.join(cryptoPaths, value + ".txt")
@@ -84,10 +106,16 @@ def main():
         print("{}".format(data))
 
     '''
+=======
+
+
+
+>>>>>>> ca933efa55324cb11972e2a90dfda2f80984b4ad
+>>>>>>> 6f79ff1032f7272af5c6920979290e99b30a3b01
     procs = []
-    for i in range(5):
-        proc = subprocess.Popen([sys.executable, 'gaybot.py', '{}in.csv'.format(i), '{}out.csv'.format(i)])
         procs.append(proc)
+
+
 
     for proc in procs:
         proc.wait()
