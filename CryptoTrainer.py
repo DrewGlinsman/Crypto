@@ -6,7 +6,6 @@
 
 
 import sys
-import subprocess
 import random
 import requests
 import hmac
@@ -14,7 +13,7 @@ import hashlib
 import time
 import math
 import datetime
-import os
+import re
 
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
