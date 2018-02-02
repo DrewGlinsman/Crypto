@@ -1,2 +1,1 @@
-# Crypto
-Cryptocurrency bot
+# Crypto-master
