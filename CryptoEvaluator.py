@@ -21,7 +21,7 @@ except ImportError:
 
 
 #todo find a way to get the parameters specific to this run from CrytpoTrainer
-
+#todo add function to pull data from text files by day into data structures here
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 logPaths = r'C:\Users\katso\Desktop\CryptoBot\Crypto-master\Logs'

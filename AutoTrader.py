@@ -1,6 +1,13 @@
 # Copyright (c) 2018 A&D
 # This is an auto trading bot for cryptocurrency on Binance
 
+#todo add social media data input
+#todo make the slots work as modulos so that we can detect patterns
+#todo initilaize parameters from best parameter text file
+#todo add youtube channel data
+#todo add suspect youtube channels from reddit list
+
+
 import requests
 import hmac
 import hashlib

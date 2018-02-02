@@ -1,3 +1,10 @@
+# Copyright (c) 2018 A&D
+# Auto trading tester that runs multiple versions of the trader with different parameters
+
+#todo add a function to randomize the parameters when requested
+#todo update the best parameters text file
+
+
 import sys
 import random
 import requests
@@ -10,6 +17,8 @@ import re
 
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
+
+
 
 # EXPLANATION OF THE PARAMETERS
 
