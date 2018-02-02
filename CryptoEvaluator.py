@@ -6,8 +6,9 @@ import math
 import datetime
 import os.path
 
-from multiprocessing import Pool
+
 from PrivateData import api_key, secret_key
+from CryptoTrainer import PARAMETERS
 
 try:
     from urlib import urlencode
@@ -16,12 +17,9 @@ except ImportError:
     from urllib.parse import urlencode
 
 
-#todo find a way to get the parameters specific to this run from CrytpoTrainer
-
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#logPaths = r'C:\Users\katso\Desktop\CryptoBot\Crypto-master\Logs'
-logPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
+logPaths = r'C:\Users\katso\Desktop\CryptoBot\Crypto-master\Logs'
 
 #log file name + path
 logCompletePath = os.path.join(logPaths, "log.txt")
@@ -171,7 +169,7 @@ def buyBin(symbol):
 
     #multiply balance by constant ratio of how much we want to spend
     # and then convert quantity from BTC price to amount of coin
-    balancetospend = float(balance) * PERCENT_TO_SPEND
+    balancetospend = float(balance) * PARAMETERS['PERCENT_TO_SPEND']
     ratio = getbinanceprice(symbol)
 
     #store the price the crypto was a bought at for cumulative percent change calculations
@@ -324,7 +322,7 @@ def setWeightedMovingAverage(currency, interval, starttime, endtime):
        cumulativePrice += change
 
     #the scaling of the cumulative price
-    cumulativePrice = (cumulativePrice / slots) * CUMULATIVE_PRICE_MODIFIER
+    cumulativePrice = (cumulativePrice / slots) * PARAMETERS['CUMULATIVE_PRICE_MODIFIER']
 
 
 
@@ -373,11 +371,11 @@ def getModifiedVolume(currency):
 
         #NOTE: can change back to normal if this doesnt work
         if(percentChangesList[currentSlot] < 0):
-            oldVolume += float(i) * (percentChangeScale) * NEGATIVE_WEIGHT
-            oldVolume += float(i) * (-1 * percentChangeScale) *PRIMARY_MODIFIED_VOLUME_SCALER
+            oldVolume += float(i) * (percentChangeScale) * PARAMETERS['NEGATIVE_WEIGHT']
+            oldVolume += float(i) * (-1 * percentChangeScale) * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']
         if(percentChangesList[currentSlot] > 0):
-            oldVolume += float(i) * (percentChangeScale * PRIMARY_MODIFIED_VOLUME_SCALER)
-            oldVolume += float(i) * -1 *(percentChangeScale) * NEGATIVE_WEIGHT
+            oldVolume += float(i) * (percentChangeScale * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER'])
+            oldVolume += float(i) * -1 *(percentChangeScale) * PARAMETERS['NEGATIVE_WEIGHT']
         currentSlot += 1
 
 
@@ -471,7 +469,7 @@ def updateCrypto(interval, starttime, endtime):
 
     #add currencies to a list of cryptos to pick from if it meets the minimum score
     for key, value in scores.items():
-        if(value > MINIMUM_SCORE):
+        if(value > PARAMETERS['MINIMUM_SCORE']):
             entry = {key: value}
             currencyToTrade.update(entry)
 
@@ -482,6 +480,8 @@ def updateCrypto(interval, starttime, endtime):
 
 #caclulates and returns the time spent increasing
 #weighted = 0 is false, weighted = 1 is true
+ # TODO update the modulo so that it is a modulo not a multiplcation so that
+ #patterns are detected
 def getTimeIncreasing(isWeighted, currency):
 
     list = percentChanges[currency]
@@ -502,18 +502,18 @@ def getTimeIncreasing(isWeighted, currency):
               slots_increasing+=1*i
 
             if float(i) < 0.0 and isWeighted == 0:
-              slots_increasing += 1 * i * NEGATIVE_WEIGHT
+              slots_increasing += 1 * i * PARAMETERS['NEGATIVE_WEIGHT']
 
             if float(i) > 0.0 and isWeighted == 1:
-              slots_increasing+=(1*(slots*SLOT_WEIGHT)*i)
-              positiveCounter+=1
+              slots_increasing+=(1*(slots * PARAMETERS['SLOT_WEIGHT'])*i)
+
 
             if float(i) < 0.0 and isWeighted == 1:
-              slots_increasing += (1*(slots*SLOT_WEIGHT)*i * NEGATIVE_WEIGHT)
+              slots_increasing += (1*(slots * PARAMETERS['SLOT_WEIGHT'])*i * PARAMETERS['NEGATIVE_WEIGHT'])
 
 
 
-    return (slots_increasing/slots) * TIME_INCREASING_MODIFIER
+    return (slots_increasing/slots) * PARAMETERS['TIME_INCREASING_MODIFIER']
 
 
 #caclulates and returns the time spent increasing for volume
@@ -534,16 +534,16 @@ def getVolumeTimeIncreasing(isWeighted, currency):
               slots_increasing+=1*i
 
             if float(i) < 0.0 and isWeighted == 0:
-              slots_increasing += 1 * i * NEGATIVE_WEIGHT
+              slots_increasing += 1 * i * PARAMETERS['NEGATIVE_WEIGHT']
 
             if float(i) > 0.0 and isWeighted == 1:
-              slots_increasing+=(1*(slots*SLOT_WEIGHT)*i)
+              slots_increasing+=(1*(slots * PARAMETERS['SLOT_WEIGHT']) * i )
 
             if float(i) < 0.0 and isWeighted == 1:
-              slots_increasing += (1*(slots*SLOT_WEIGHT)*i * NEGATIVE_WEIGHT)
+              slots_increasing += (1*(slots * PARAMETERS['SLOT_WEIGHT']) * i * PARAMETERS['NEGATIVE_WEIGHT'])
 
 
-    return (slots_increasing/slots) * VOLUME_INCREASING_MODIFIER
+    return (slots_increasing/slots) * PARAMETERS['VOLUME_INCREASING_MODIFIER']
 
 # method to calculate the "score" that crypto get when they are updated by hour
 # score is a combination of weighted time increasing and % change over hour.
@@ -551,13 +551,13 @@ def getVolumeTimeIncreasing(isWeighted, currency):
 def getScore(symbol):
     new_score = 0
 
-    new_score += (volumePercentData[symbol]['percentbyhour'] * VOLUME_PERCENT_BY_HOUR_MODIFIER)
-    new_score += pricePercentData[symbol]['percentbyhour'] * PERCENT_BY_HOUR_MODIFIER
+    new_score += (volumePercentData[symbol]['percentbyhour'] * PARAMETERS['VOLUME_PERCENT_BY_HOUR_MODIFIER'])
+    new_score += pricePercentData[symbol]['percentbyhour'] * PARAMETERS['PERCENT_BY_HOUR_MODIFIER']
 
     new_score += pricePercentData[symbol]['weightedtimeIncreasing']
 
     new_score += volumePercentData[symbol]['weightedtimeIncreasing']
-    new_score += modifiedVolume[symbol] * MODIFIED_VOLUME_MODIFIER
+    new_score += modifiedVolume[symbol] * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
 
     return new_score
 
@@ -572,7 +572,7 @@ def priceChecker():
         print("The score of {} is {} ".format(key, scores[key]))
         file.write("The score of {} is {} \n".format(key, scores[key]))
 
-        if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(MINIMUM_MOVING_AVERAGE)):
+        if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(PARAMETERS['MINIMUM_MOVING_AVERAGE'])):
             maxScore = scores[key]
             print("CURRENT HIGH SCORE: The score of {} is {}".format(key, scores[key]))
             file.write("CURRENT HIGH SCORE: The score of {} is {} \n".format(key, scores[key]))
@@ -651,7 +651,7 @@ def checkTooNegative(symbol):
     endPrice = percentChange[0][4]
     percentChange = calcPercentChange(startPrice, endPrice)
 
-    if(percentChange < MAX_DECREASE):
+    if(percentChange < PARAMETERS['MAX_DECREASE']):
         print("TOO NEGATIVE. RESTART")
         file.write("TOO NEGATIVE. RESTART")
         return 1
@@ -668,11 +668,11 @@ def checkExitCondition(currency):
 
     percentChange = calcPercentChange(priceBought, currentPrice)
 
-    if(percentChange >= MAX_PERCENT_CHANGE):
+    if(percentChange >= PARAMETERS['MAX_PERCENT_CHANGE']):
         print("HIT MAX PERCENT CHANGE")
         return 1
 
-    if(percentChange <= -1 * MAX_PERCENT_CHANGE):
+    if(percentChange <= -1 * PARAMETERS['MAX_PERCENT_CHANGE']):
         print("HIT MINIMUM PERCENT CHANGE")
         return 1
 
@@ -683,7 +683,7 @@ def checkTooLow(currency, timesIncreasing):
     global priceBought
 
     currentPrice = getbinanceprice(currency)
-    floorPrice = FLOOR_PRICE_MODIFIER * priceBought
+    floorPrice = PARAMETERS['FLOOR_PRICE_MODIFIER'] * priceBought
     endtime = int(time.time() * 1000)
     starttime = endtime - intervalTypes['15m']['inMS']
 
@@ -759,7 +759,7 @@ def main():
     initialBalance = getBalance('BTC')
 
     binStepSize()
-    while(x < MAX_CYCLES and EXIT == 0):
+    while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
         t = 0
         RESTART = 0
         RESTART_LOW = 0
@@ -786,13 +786,13 @@ def main():
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
-        while(t < MAX_TIME_CYCLE and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0):
+        while(t < PARAMETERS['MAX_TIME_CYCLE'] and PARAMETERS['RESTART'] == 0 and PARAMETERS['RESTART_TN'] == 0 and PARAMETERS['RESTART_LOW'] == 0):
             time.sleep(1)
 
-            if(t % WAIT_FOR_CHECK_FAILURE == 0 and t != 0):
+            if(t % PARAMETERS['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
                 RESTART = checkFailureCondition(currentCurrency, 0)
 
-            if(t > WAIT_FOR_CHECK_TOO_LOW and t % WAIT_FOR_CHECK_FAILURE):
+            if(t > PARAMETERS['WAIT_FOR_CHECK_TOO_LOW'] and t % PARAMETERS['WAIT_FOR_CHECK_FAILURE']):
                 RESTART_LOW = checkTooLow(currentCurrency, 1)
 
             RESTART_TN = checkTooNegative(currentCurrency)
@@ -812,8 +812,8 @@ def main():
         EXIT = checkExitCondition(currentCurrency)
         x+=1
 
-    print("Cumualtive percent change over the life of all cryptos owneed so far {}".format(CUMULATIVE_PERCENT_CHANGE_STORE))
-    file.write("Cumualtive percent change over the life of all cryptos owneed so far {} \n".format(CUMULATIVE_PERCENT_CHANGE_STORE))
+    print("Cumualtive percent change over the life of all cryptos owneed so far {}".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
+    file.write("Cumualtive percent change over the life of all cryptos owneed so far {} \n".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
     sellBin(currentCurrency)
 
 

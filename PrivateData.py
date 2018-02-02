@@ -4,5 +4,3 @@
 api_key = '7WzDy6Hw7HBozQiR1UEpWMgdpzAKQ3ZUSBX6QMra723KO4ot6iAQykbqtqM4hL7Y'
 
 secret_key = 'cHFo1FUc4zRgydNpTDip51S2s12yd7SKe65LS96AgrUxfm8B5Q7HgQcJghitSlNo'
-
-solume_key = 'c4ee107f-c981-447c-ba9b-070f9fdaef12'
