@@ -54,7 +54,7 @@ PARAMETER_VARIATIONS=[]
 def main():
 
     #CODE TO RUN MULTIPLE INSTANCES OF BOT
-
+    '''
     for key, value in priceSymbols.items():
         cryptoPath = os.path.join(cryptoPaths, value + ".txt")
         file = open(cryptoPath, "a+")
@@ -67,14 +67,23 @@ def main():
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
             for i in data:
-                file.write("Open price is {} \n".format(i[1]))
-                file.write("Close price is {} \n".format(i[4]))
-                file.write("Volume sold is {} \n\n".format(i[5]))
+                file.write("{} \n".format(i[1]))
+                file.write("{} \n".format(i[4]))
+                file.write("{} \n".format(i[5]))
             j += 1
             timeBackwards += 86400000
+    '''
+    for key, value in priceSymbols.items():
+        cryptoPath = os.path.join(cryptoPaths, value + ".txt")
+        print("{}".format(cryptoPath))
+        file = open(cryptoPath, "r")
+        data = file.readlines()
+        for line in data:
+            words = line.split("\n")
+            print("{}".format(words))
+        print("{}".format(data))
 
-
-
+    '''
     procs = []
     for i in range(5):
         proc = subprocess.Popen([sys.executable, 'gaybot.py', '{}in.csv'.format(i), '{}out.csv'.format(i)])
@@ -90,5 +99,7 @@ def main():
         data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
         data = data.json()
         print(str(data))
+    '''
+
 if __name__ == "__main__":
     main()
