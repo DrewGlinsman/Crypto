@@ -18,7 +18,7 @@ import os
 from subprocess import Popen, PIPE, run
 from PrivateData import api_key, secret_key
 
-
+#weird errors removed
 
 # EXPLANATION OF THE PARAMETERS
 
@@ -55,17 +55,15 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
                 'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 
-<<<<<<< HEAD
-#<<<<<<< HEAD
-#will hold the specific parameter given to each list
-PARAM_CHOSEN = {}
-#=======
 
-#>>>>>>> ca933efa55324cb11972e2a90dfda2f80984b4ad
-=======
 #will hold the specific parameter given to each list
 PARAM_CHOSEN = {}
->>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
+
+
+
+#will hold the specific parameter given to each list
+PARAM_CHOSEN = {}
+
 
 #list of each variation of the parameter list, one is passed to each instance of the bot
 PARAMETER_VARIATIONS=[]
@@ -128,33 +126,16 @@ def main():
     global NUM_ITERATIONS
     global file
 
-<<<<<<< HEAD
+
     typeOfRandom = 0
     count = 0
-=======
-    for i in range(NUM_ITERATIONS):
-        PARAMETER_VARIATIONS.append(PARAMETERS)
 
-<<<<<<< HEAD
-#<<<<<<< HEAD
-    '''
-=======
-=======
->>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
 
-    returns = [NUM_ITERATIONS]
-    PARAM_CHOSEN = PARAMETER_VARIATIONS[0]
-    print('{}'.format(PARAM_CHOSEN['PERCENT_TO_SPEND']))
->>>>>>> 3ae4120987b6d256cc69ffdece9c4b00feff6052
+
     #CODE TO RUN MULTIPLE INSTANCES OF BOT
     procs = []
-<<<<<<< HEAD
-    for i in range(NUM_ITERATIONS):
-        PARAM_CHOSEN = PARAMETER_VARIATIONS[i]
-        PARAM_CHOSEN['PERCENT_TO_SPEND'] = i * 10
-        proc = subprocess.Popen([sys.executable, 'tester.py', '{}in.csv'.format(i), '{}out.csv'.format(i)])
-        procs.append(proc)
-=======
+
+
     current_Max = 0.0
     for i in range(NUM_ITERATIONS):
 
@@ -188,7 +169,7 @@ def main():
 
             cumulativePerentChangeStore = substring.split(',', 1)[0]
             cumulativePerentChangeStore = float(cumulativePerentChangeStore)
->>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
+
 
             if cumulativePerentChangeStore >= current_Max:
                 current_Max = cumulativePerentChangeStore
