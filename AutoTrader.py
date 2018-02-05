@@ -29,7 +29,7 @@ except ImportError:
 
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-logPaths = r'C:\Users\katso\Desktop\CryptoBot\Crypto-master\Logs'
+logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
 
 #log file name + path
 logCompletePath = os.path.join(logPaths, "log.txt")
