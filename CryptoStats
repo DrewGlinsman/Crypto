@@ -17,9 +17,10 @@ cryptoVolumeData = {}
 
 #path to save the different text files in
 cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
-
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
 #one day in ms
 ONE_DAY = 86400000
+ONE_THIRD_DAY = 28800000
 
 def getData(numDays):
 
@@ -35,17 +36,20 @@ def getData(numDays):
 
         #while loop with a counter to make sure that the start and endtime stay one day apart but go backwards in time, numdays amount of days
         timeBackwards = 0
-        while(timeBackwards <= ONE_DAY*numDays):
-            endTime = int(time.time()*1000) - timeBackwards
-            startTime = endTime - ONE_DAY
+        while(timeBackwards < ONE_DAY*numDays):
+            endTime = requests.get("https://api.binance.com/api/v1/time")
+            endTime = endTime.json()
+            endTime = endTime['serverTime'] - timeBackwards
+            startTime = endTime - ONE_THIRD_DAY
             parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
-            for i in data:
-                oprice.write("{},".format(i[1]))
-                cprice.write("{},".format(i[4]))
-                volume.write("{},".format(i[5]))
-            timeBackwards += ONE_DAY
+            print("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), value, data))
+            for i in reversed(data):
+                oprice.write("{} \n".format(i[1]))
+                cprice.write("{} \n".format(i[4]))
+                volume.write("{} \n".format(i[5]))
+            timeBackwards += ONE_THIRD_DAY
 
   for key, value in priceSymbols.items():
 
@@ -64,30 +68,60 @@ def getData(numDays):
 
       #iterating through each file and adding the correct data to each dictionary
       for line in odata:
-        words = line.split(",")
-        temp = {value: words}
-        cryptoOpenPriceData.update(temp)
+        words = line.split("\n")
+        #if there is not already a dictionary created for the value create one and put the first value in it
+        if(cryptoOpenPriceData == {} or cryptoOpenPriceData[value] == {}):
+            temp = {value: words}
+            cryptoOpenPriceData.update(temp)
+        #otherwise append the price to the list that is already there
+        else:
+            cryptoOpenPriceData[value].append(words)
       for line in cdata:
-          words = line.split(",")
-          temp = {value: words}
-          cryptoClosePriceData.update(temp)
+          words = line.split("\n")
+          if(cryptoClosePriceData == {} or cryptoClosePriceData == {}):
+            temp = {value: words}
+            cryptoClosePriceData.update(temp)
+          else:
+              cryptoClosePriceData[value].append(words)
       for line in vol:
-          words = line.split(",")
-          temp = {value: words}
-          cryptoVolumeData.update(temp)
-          print("Volume: {}".format(words))
+          words = line.split("\n")
+          if(cryptoVolumeData == {} or cryptoVolumeData[value] == {}):
+            temp = {value: words}
+            cryptoVolumeData.update(temp)
+          else:
+              cryptoVolumeData[value].append(words)
+
 
   #closing all the files once we're done
   oprice.close()
   cprice.close()
   volume.close()
 
-  print("Open Price Dict: {}".format(cryptoOpenPriceData))
-  print("Close Price DIct: {}".format(cryptoClosePriceData))
-  print("Volume Dict: {}". format(cryptoVolumeData))
+
+def getOpenPrice():
+    return cryptoOpenPriceData
+
+def getClosePrice():
+    return cryptoClosePriceData
+
+def getVolume():
+    return cryptoVolumeData
+
 
 def main():
-    getData(7)
+    getData(3)
+    file = open(logPath, "w")
+    a = getOpenPrice()
+    b = getClosePrice()
+    c = getVolume()
+
+    file.write("Open Price Data: {} \n".format(a))
+    file.write("----- \n")
+    file.write("Close Price Data: {} \n".format(b))
+    file.write("------ \n")
+    file.write("Volume Data: {} \n".format(c))
+
+    file.close()
 
 if __name__ == "__main__":
     main()
