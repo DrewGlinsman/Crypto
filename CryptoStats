@@ -24,6 +24,7 @@ ONE_THIRD_DAY = 28800000
 
 def getData(numDays):
 
+
   #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
   for key, value in priceSymbols.items():
         #creating the file path lengths and opening them
@@ -46,9 +47,9 @@ def getData(numDays):
             data = data.json()
             print("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), value, data))
             for i in reversed(data):
-                oprice.write("{} \n".format(i[1]))
-                cprice.write("{} \n".format(i[4]))
-                volume.write("{} \n".format(i[5]))
+                oprice.write("{},".format(i[1]))
+                cprice.write("{},".format(i[4]))
+                volume.write("{},".format(i[5]))
             timeBackwards += ONE_THIRD_DAY
 
   for key, value in priceSymbols.items():
@@ -68,24 +69,24 @@ def getData(numDays):
 
       #iterating through each file and adding the correct data to each dictionary
       for line in odata:
-        words = line.split("\n")
+        words = line.split(",")
         #if there is not already a dictionary created for the value create one and put the first value in it
-        if(cryptoOpenPriceData == {} or cryptoOpenPriceData[value] == {}):
+        if(cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
             temp = {value: words}
             cryptoOpenPriceData.update(temp)
         #otherwise append the price to the list that is already there
         else:
             cryptoOpenPriceData[value].append(words)
       for line in cdata:
-          words = line.split("\n")
-          if(cryptoClosePriceData == {} or cryptoClosePriceData == {}):
+          words = line.split(",")
+          if(cryptoClosePriceData == {} or value not in cryptoClosePriceData):
             temp = {value: words}
             cryptoClosePriceData.update(temp)
           else:
               cryptoClosePriceData[value].append(words)
       for line in vol:
-          words = line.split("\n")
-          if(cryptoVolumeData == {} or cryptoVolumeData[value] == {}):
+          words = line.split(",")
+          if(cryptoVolumeData == {} or value not in cryptoVolumeData):
             temp = {value: words}
             cryptoVolumeData.update(temp)
           else:
@@ -109,7 +110,7 @@ def getVolume():
 
 
 def main():
-    getData(3)
+    getData(1)
     file = open(logPath, "w")
     a = getOpenPrice()
     b = getClosePrice()
