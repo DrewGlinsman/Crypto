@@ -73,13 +73,14 @@ NUM_ITERATIONS = 5
 
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+drewparamPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
 #param file name + path
-paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
-
+#paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+drewparamCompletePath = os.path.join(drewparamPaths, "BEST_PARAMETERS.TXT")
 #open a file for appending (a). + creates file if does not exist
-file = open(paramCompletePath, "r")
+file = open(drewparamCompletePath, "r")
 
 
 

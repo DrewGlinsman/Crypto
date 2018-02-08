@@ -8,11 +8,11 @@ import time
 import math
 import datetime
 import os.path
-
+import CryptoStats
 from multiprocessing import Pool
 from PrivateData import api_key, secret_key
 from CryptoTrainer import PARAMETERS
-
+from CryptoStats import getOpenPrice, getClosePrice, getVolume
 try:
     from urlib import urlencode
 
@@ -24,13 +24,14 @@ except ImportError:
 #todo add function to pull data from text files by day into data structures here
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+#logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+drewlogPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
 
 #log file name + path
-logCompletePath = os.path.join(logPaths, "log.txt")
-
+#logCompletePath = os.path.join(logPaths, "log.txt")
+drewlogCompletePath = os.path.join(drewlogPath, "log.txt")
 #open a file for appending (a). + creates file if does not exist
-file = open(logCompletePath, "a+")
+file = open(drewlogCompletePath, "a+")
 
 
 #GLOBAL_VARIABLES
@@ -141,6 +142,7 @@ currentBalance = 0.0
 
 #cumulative percent change of a crypto's price over the course of owning it
 CUMULATIVE_PERCENT_CHANGE = 0.0
+
 
 #get the balance in bitcoins
 def getBalance(symbol):
@@ -388,6 +390,7 @@ def getModifiedVolume(currency):
 
 #get the binance price of the specified currency
 def getbinanceprice(currency):
+    '''
     #getting the aggregate trade data and finding one price to return
     binData = requests.get("https://api.binance.com/api/v1/ticker/allPrices")
     binData = binData.json()
@@ -398,7 +401,9 @@ def getbinanceprice(currency):
             break;
 
     return binPrice
-
+    '''
+    priceDict = CryptoStats.getClosePrice()
+    return priceDict[currency][0]
 
     #interval based on this from binance API
     #     m -> minutes;     h -> hours;     d -> days;     w -> weeks;    M -> months
@@ -753,7 +758,10 @@ def main():
     currentCurrency = ''
     x = 0
 
-
+    for key, value in priceSymbols.items():
+        price = getbinanceprice(value)
+        print("{}: Price: {}".format(value,price))
+    '''
     file.write("\n\n\n\n")
     file.write('------------------------------------------------------------------------------------ \n')
 
@@ -826,6 +834,6 @@ def main():
     file.write("\n" + "\n" + "\n")
 
     file.close()
-
+    '''
 if __name__ == "__main__":
     main()
