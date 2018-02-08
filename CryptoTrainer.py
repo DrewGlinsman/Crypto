@@ -3,7 +3,7 @@
 
 #todo add a function to randomize the parameters when requested
 #todo update the best parameters text file
-
+#todo make the randomize parameters function implement the different types of randomization
 
 import sys
 import random
@@ -14,11 +14,11 @@ import time
 import math
 import datetime
 import re
-
-from subprocess import Popen, PIPE
+import os
+from subprocess import Popen, PIPE, run
 from PrivateData import api_key, secret_key
 
-
+#weird errors removed
 
 # EXPLANATION OF THE PARAMETERS
 
@@ -55,17 +55,15 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
                 'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 
-<<<<<<< HEAD
-#<<<<<<< HEAD
-#will hold the specific parameter given to each list
-PARAM_CHOSEN = {}
-#=======
 
-#>>>>>>> ca933efa55324cb11972e2a90dfda2f80984b4ad
-=======
 #will hold the specific parameter given to each list
 PARAM_CHOSEN = {}
->>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
+
+
+
+#will hold the specific parameter given to each list
+PARAM_CHOSEN = {}
+
 
 #list of each variation of the parameter list, one is passed to each instance of the bot
 PARAMETER_VARIATIONS=[]
@@ -73,57 +71,113 @@ PARAMETER_VARIATIONS=[]
 #number of iterations of bot
 NUM_ITERATIONS = 5
 
+
+#Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+drewparamPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+
+#param file name + path
+#paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+drewparamCompletePath = os.path.join(drewparamPaths, "BEST_PARAMETERS.TXT")
+#open a file for appending (a). + creates file if does not exist
+file = open(drewparamCompletePath, "r")
+
+
+
+
+#randomizes the parameters before sending them to a subprocess
+#typeOfRandom determines what kinds of randomization occurs
+#type 0 means normal, type 1 means larger range of randomization
+#type 3 means none
+def randomizeParams(paramDict, typeOfRandom):
+
+    if(typeOfRandom == 3):
+        return 0
+    if (typeOfRandom == 0):
+        print('')
+        #todo add a normal kind of randomization
+    if(typeOfRandom == 1):
+        print('')
+        #todo add a special kind of randomization
+
+    numTest = paramDict['MINIMUM_PERCENT_INCREASE']
+    numTest *= random.randrange(1, 100)
+
+    paramDict['MINIMUM_PERCENT_INCREASE'] = numTest
+
+#function just resets parameters to the defaults
+def resetParameters(paramDict):
+    valList = []
+    count = 0
+    file.seek(0)
+
+
+    for line in file:
+        val = line.split(': ')[1]
+        trueVal = val.split(',')[0]
+        trueVal = float(trueVal)
+        valList.append(trueVal)
+
+    for key, value in paramDict.items():
+
+        paramDict[key] = valList[count]
+        count+=1
+
 def main():
     global NUM_ITERATIONS
-    global PARAM_CHOSEN
-    global PARAMETER_VARIATIONS
     global file
 
-    for i in range(NUM_ITERATIONS):
-        PARAMETER_VARIATIONS.append(PARAMETERS)
 
-<<<<<<< HEAD
-#<<<<<<< HEAD
-    #CODE TO RUN MULTIPLE INSTANCES OF BOT
-    '''
-=======
-=======
->>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
+    typeOfRandom = 0
+    count = 0
 
-    returns = [NUM_ITERATIONS]
-    PARAM_CHOSEN = PARAMETER_VARIATIONS[0]
-    print('{}'.format(PARAM_CHOSEN['PERCENT_TO_SPEND']))
+
+
     #CODE TO RUN MULTIPLE INSTANCES OF BOT
     procs = []
-<<<<<<< HEAD
-    for i in range(NUM_ITERATIONS):
-        PARAM_CHOSEN = PARAMETER_VARIATIONS[i]
-        PARAM_CHOSEN['PERCENT_TO_SPEND'] = i * 10
-        proc = subprocess.Popen([sys.executable, 'tester.py', '{}in.csv'.format(i), '{}out.csv'.format(i)])
-        procs.append(proc)
-=======
+
+
     current_Max = 0.0
     for i in range(NUM_ITERATIONS):
-        apot = 1
 
-        PARAM_CHOSEN = PARAMETER_VARIATIONS[i]
-        PARAM_CHOSEN['PERCENT_TO_SPEND'] = i * 10
 
-        proc = Popen([sys.executable, 'tester.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stderr=PIPE,bufsize=1, universal_newlines=True)
-        for line in proc.stdout:
+        proc = Popen([sys.executable, 'tester.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stdin = PIPE, stderr=PIPE,bufsize=1, universal_newlines=True)
+        procs.append(proc)
+
+    for proc in procs:
+
+        randomizeParams(PARAMETERS, typeOfRandom)
+
+        print('Changed {}'.format(PARAMETERS['MINIMUM_PERCENT_INCREASE']))
+        if(count % 50 == 0):
+            typeOfRandom == 1
+        else:
+            typeOfRandom == 0
+
+        out = proc.communicate(input = str(PARAMETERS))
+
+        count+=1
+        #walks through the output from the instance of tester and strips it of the parameters used
+        #then stores the parameters if they netted a larger % change than the previous max
+        for line in out:
             val = line
-            substring = val.split("CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
-            cumulativePerentChangeStore = substring.split(',', 1)[0]
 
+            if(val == ''):
+                break
+            substring = val.split("\'CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
+
+
+
+            cumulativePerentChangeStore = substring.split(',', 1)[0]
             cumulativePerentChangeStore = float(cumulativePerentChangeStore)
->>>>>>> d4c32023657e5f489c51b77d938e53188a6bfeda
+
 
             if cumulativePerentChangeStore >= current_Max:
                 current_Max = cumulativePerentChangeStore
                 stored_output = line
-
-        print('{}'.format(stored_output))
-        print('{}'.format(current_Max))
+        resetParameters(PARAMETERS)
+    print('{}'.format(stored_output))
+    print('{}'.format(current_Max))
 
     proc.wait()
 

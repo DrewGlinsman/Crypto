@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+=======
+# Copyright (c) 2018 A&D
+# Sets up text files to hold price and volume data over a specified interval
+# for the different cryptocurrency on Binance
+
+
+
+
+import requests
+import hmac
+import hashlib
+>>>>>>> 1be2caf00c832f2fdfa50402d058f3b05601f7ab
 import time
 import requests
 import os

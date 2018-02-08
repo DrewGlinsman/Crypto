@@ -4,3 +4,18 @@ Created Changelog to track changes made over time more succinctly
 Created AutoTrader. Actual bot that will run when we trade
 
 Updated CryptoEvaluator and AutoTrader to use the new Parameter Dictionary
+
+2/4/18
+
+Updated CryptoTrainer to now pass input to the iterations of the bot
+Can now read and use input inside of the subprocesses
+Added a randomizer to CryptoTrainer to randomize the parameters
+Added a resetParameters method to reset the parameters for each randomization
+
+2/6/2018
+Worked on getting accurate data stored in the CryptoData folder
+useful knowledge learned:
+	requests.get("https://api.binance.com/api/v1/time") gets the current server time
+	binance returns things in reverse chronological order
+	had to iterate through 1/3 of a day to get all the minute interval data since max list size is 500
+
