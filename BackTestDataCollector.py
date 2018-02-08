@@ -1,7 +1,7 @@
 
 import time
 import requests
-
+import os
 
 #dictionary that contains all the symbols for the binance API calls
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -54,7 +54,11 @@ def getData(numDays):
 def main():
     timestamp = requests.get("https://api.binance.com/api/v1/time")
     timestamp = timestamp.json()
+    #todo after successful run change this code so that it grabs from the text file so timestamp is always the same or maybe put this in a function
     timestamp = timestamp['serverTime']
+    timefilepath = os.path.join(cryptoPaths, "timestamp" + ".txt")
+    timefile = open(timefilepath, "a+")
+    timefile.write("Timestamp: {}".format(timestamp))
     while(0<1):
         currentTime = int(time.time()*1000)
         if(timestamp != currentTime):
