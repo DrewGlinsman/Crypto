@@ -1,6 +1,7 @@
 
 import time
 import requests
+import os
 
 
 #dictionary that contains all the symbols for the binance API calls
@@ -52,9 +53,14 @@ def getData(numDays):
   volume.close()
 
 def main():
-    timestamp = requests.get("https://api.binance.com/api/v1/time")
-    timestamp = timestamp.json()
-    timestamp = timestamp['serverTime']
+    #creating the filepath for the file with the timestamp in it and reading it into the timestamp and converting it to int
+    timefilePath = os.path.join(cryptoPaths, "timestamp.txt")
+    timefile = open(timefilePath, "r")
+    timestamp = int(timefile.readline())
+    timefile.close()
+
+    #infinite loop to keep the program running where it will get the data at
+    # the exact same timestamp everytime (the time stamp taken from the text file)
     while(0<1):
         currentTime = int(time.time()*1000)
         if(timestamp != currentTime):
