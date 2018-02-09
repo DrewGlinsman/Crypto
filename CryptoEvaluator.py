@@ -416,6 +416,7 @@ def updateCrypto(interval, starttime, endtime):
 
     for key,value in priceSymbols.items():
 
+        '''
         parameter = {'symbol': value, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
         percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
         percentChange = percentChange.json()
@@ -425,24 +426,52 @@ def updateCrypto(interval, starttime, endtime):
         if percentChange == []:
             lastSlot = 0
 
+
         #calculate the percent change over the whole hour and store
         openPrice = percentChange[0][1]
         closePrice = percentChange[int(lastSlot)][4]
-        pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
 
         #calcualte the percent change in volume over the whole hour and store
-        openVolume = percentChange[0][5]
+        openVolume = volumeData[value][0]
         closeVolume = percentChange[int(lastSlot)][5]
         volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
-
 
         #calculate the percentage change between the minute intervals and store
         #reset the list of stored percentages so a fresh list is stored
         percentChanges[value] = []
         for i in percentChange:
             percentChanges[value].append(calcPercentChange(i[1], i[4]))
+        '''
 
+        closeVolumeIndex = minutesBack - 1
 
+        # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
+        openPriceData = CryptoStats.getOpenPrice()[value]
+        closePriceData = CryptoStats.getClosePrice()[value]
+        volumeData = CryptoStats.getVolume()[value]
+
+        # calculate the percent change over the whole hour and store
+        openPrice = openPriceData[0]
+        closePrice = closePriceData[0]
+        pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
+
+        # calculate the percent change in volume over the whole hour and store
+        openVolume = volumeData[0]
+        closeVolume = volumeData[closeVolumeIndex]
+        volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
+
+        # test.write("Currency: {} Open Price: {} Close Price: {} Open Volume: {} Close Volume: {} \n".format(value, openPrice, closePrice, openVolume, closeVolume))
+
+        # iterate through all the open and close prices for the given interval
+        percentChanges[value] = []
+        i = 0
+        while (i < minutesBack):
+            percentChanges[value].append(calcPercentChange(openPriceData[i], closePriceData[i]))
+            i += 1
+        print("Percent Changes Dictionary: {} Length of Dictionary: {}".format(percentChanges[value],
+                                                                               len(percentChanges[value])))
+
+        '''
         #reset the lists of the volume amounts and volume percent changes
         volumeAmounts[value] = []
         volumePercentChanges[value] = []
@@ -487,7 +516,7 @@ def updateCrypto(interval, starttime, endtime):
     print(currencyToTrade)
     file.write("OUR LIST OF CRYPTO: ")
     file.write(str(currencyToTrade))
-
+    '''
 #caclulates and returns the time spent increasing
 #weighted = 0 is false, weighted = 1 is true
  # TODO update the modulo so that it is a modulo not a multiplcation so that
