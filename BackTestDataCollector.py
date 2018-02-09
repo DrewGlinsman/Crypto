@@ -51,14 +51,16 @@ def getData(numDays):
   cprice.close()
   volume.close()
 
+
 def main():
     timestamp = requests.get("https://api.binance.com/api/v1/time")
     timestamp = timestamp.json()
     #todo after successful run change this code so that it grabs from the text file so timestamp is always the same or maybe put this in a function
     timestamp = timestamp['serverTime']
-    timefilepath = os.path.join(cryptoPaths, "timestamp" + ".txt")
-    timefile = open(timefilepath, "a+")
-    timefile.write("Timestamp: {}".format(timestamp))
+    print("{}".format(timestamp))
+    timestampPath = os.path.join(cryptoPaths, "timestamp.txt")
+    timefile = open(timestampPath, "w")
+    timefile.write(str(timestamp))
     while(0<1):
         currentTime = int(time.time()*1000)
         if(timestamp != currentTime):
