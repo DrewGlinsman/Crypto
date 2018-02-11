@@ -9,16 +9,19 @@ import math
 import datetime
 import os.path
 
+
 import CryptoStats
 
 from multiprocessing import Pool
 from PrivateData import api_key, secret_key
+
 
 import CryptoStats
 from multiprocessing import Pool
 from PrivateData import api_key, secret_key
 from CryptoTrainer import PARAMETERS
 from CryptoStats import getOpenPrice, getClosePrice, getVolume
+
 try:
     from urlib import urlencode
 
@@ -31,9 +34,10 @@ except ImportError:
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-drewlogPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
+#drewlogPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
 
 #log file name + path
+
 
 logCompletePath = os.path.join(logPaths, "log.txt")
 #drewlogCompletePath = os.path.join(drewlogPath, "log.txt")
@@ -57,12 +61,7 @@ paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
 #open a file for appending (a). + creates file if does not exist
 fileParams = open(paramCompletePath, "r")
 
-#logCompletePath = os.path.join(logPaths, "log.txt")
-drewlogCompletePath = os.path.join(drewlogPath, "log.txt")
-testlogPath = os.path.join(drewlogPath, "testlog.txt")
-#open a file for appending (a). + creates file if does not exist
-file = open(drewlogCompletePath, "a+")
-test = open(testlogPath, "w")
+
 
 #GLOBAL_VARIABLES
 
@@ -173,15 +172,20 @@ currentBalance = 0.0
 #cumulative percent change of a crypto's price over the course of owning it
 CUMULATIVE_PERCENT_CHANGE = 0.0
 
+#list to hold the values stored to find the max
+values = {'PERCENT_BY_HOUR': [], 'VOLUME_BY_HOUR': [], 'TIME_INCREASING': [], 'WEIGHTED_TIME_INCREASING': [], 'VOLUME_TIME_INCREASING': [], 'WEIGHTED_VOLUME_TIME_INCREASING': [], 'MODIFIED_VOLUME': [], 'SCORE': []}
+
+
+#hold the max values to be used for scaling
+maxValues = {'PERCENT_BY_HOUR': 0.0, 'VOLUME_BY_HOUR': 0.0, 'TIME_INCREASING': 0.0, 'WEIGHTED_TIME_INCREASING': 0.0, 'VOLUME_TIME_INCREASING': 0.0, 'WEIGHTED_VOLUME_TIME_INCREASING': 0.0, 'MODIFIED_VOLUME': 0.0, 'SCORE': 0.0}
+
 
 PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.5, 'MINIMUM_MOVING_AVERAGE': .01, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 3600.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 300.0, 'WAIT_FOR_CHECK_TOO_LOW': 600.0}
 
-
-
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.5, 'MINIMUM_MOVING_AVERAGE': .01, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 3600.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 300.0, 'WAIT_FOR_CHECK_TOO_LOW': 600.0}
 
 #number of minutes we want to iterate backwards
 minutesBack = 0
+
 
 #get the balance in bitcoins
 
@@ -284,12 +288,15 @@ def getModifiedVolume(currency):
 #get the binance price of the specified currency
 def getbinanceprice(currency):
 
+
     #getting the aggregate trade data and finding one price to return
     parameters = {'symbol': currency}
     binData = requests.get("https://api.binance.com/api/v3/ticker/price", params= parameters)
     binData = binData.json()
     binPrice = binData['price']
     return binPrice
+
+
 
     priceDict = CryptoStats.getClosePrice()
     return priceDict[currency][0]
@@ -301,6 +308,7 @@ def getbinanceprice(currency):
 
 #method to iterate through all the cryptos available on binance and store their price changes, percent price changes,
 #volume changes, percent volume changes, scores, time increasing, and time decreasing
+
 def updateCrypto(interval, starttime, endtime, minutesBack):
     #todo add a parameter for the amount of minutes you want to look back
     for key,value in priceSymbols.items():
@@ -309,11 +317,7 @@ def updateCrypto(interval, starttime, endtime, minutesBack):
         parameter = {'symbol': value, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
         percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
         percentChange = percentChange.json()
-    
-        lastSlot = getLastSlot(interval, starttime, endtime)
 
-        if percentChange == []:
-            lastSlot = 0
         
         
         #calculate the percent change over the whole hour and store
@@ -341,9 +345,11 @@ def updateCrypto(interval, starttime, endtime, minutesBack):
         for i in percentChange:
             percentChanges[value].append(calcPercentChange(i[1], i[4]))
 
+
 def updateCrypto(minutesBack):
 
     for key,value in priceSymbols.items():
+
 
         closeVolumeIndex = minutesBack - 1
 
@@ -369,13 +375,16 @@ def updateCrypto(minutesBack):
         i = 0
         while (i < minutesBack):
             percentChanges[value].append(calcPercentChange(openPriceData[i], closePriceData[i]))
+
             i+=1
         print("Percent Changes Dictionary: {} Length of Dictionary: {}".format(percentChanges[value], len(percentChanges[value])))
 
 
         #reset the lists of the volume amounts and volume percent changes
+
             i += 1
         # reset the lists of the volume amounts and volume percent changes
+
         volumeAmounts[value] = []
         volumePercentChanges[value] = []
 
@@ -395,6 +404,7 @@ def updateCrypto(minutesBack):
         modifiedVolume[value] = []
         # get the modified volume changes
         modifiedVolume[value] = getModifiedVolume(value)
+
         print(str(modifiedVolume[value]))
         values['MODIFIED_VOLUME'].append(modifiedVolume[value])
 
@@ -408,6 +418,7 @@ def updateCrypto(minutesBack):
     # gets the score for each crypto
     # moved to its own loop so all the values can be properly scaled by the largest value
     for key, value in priceSymbols.items():
+
         # use the calculations to get a score
         calc_score = getScore(value)
         new_score = {value: calc_score}
@@ -425,7 +436,9 @@ def updateCrypto(minutesBack):
     print(currencyToTrade)
     file.write("OUR LIST OF CRYPTO: ")
     file.write(str(currencyToTrade))
-    test.write("Volume Amount Dict: {} Volume Percent Dict: {}".format(volumeAmounts, volumePercentChanges))
+
+    file.write("Volume Amount Dict: {} Volume Percent Dict: {}".format(volumeAmounts, volumePercentChanges))
+
 
 
 #caclulates and returns the time spent increasing
@@ -499,6 +512,7 @@ def getVolumeTimeIncreasing(isWeighted, currency):
 # score is a combination of weighted time increasing and % change over hour.
 # for both volume and price
 def getScore(symbol):
+
     new_score = 0.0
 
 
@@ -521,15 +535,7 @@ def getScore(symbol):
 
     new_score += (volumePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_VOLUME_TIME_INCREASING'])
     new_score += (modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']) * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
-    new_score = 0
 
-    new_score += (volumePercentData[symbol]['percentbyhour'] * PARAMETERS['VOLUME_PERCENT_BY_HOUR_MODIFIER'])
-    new_score += pricePercentData[symbol]['percentbyhour'] * PARAMETERS['PERCENT_BY_HOUR_MODIFIER']
-
-    new_score += pricePercentData[symbol]['weightedtimeIncreasing']
-
-    new_score += volumePercentData[symbol]['weightedtimeIncreasing']
-    new_score += modifiedVolume[symbol] * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']
 
     return new_score
 
@@ -575,7 +581,7 @@ def checkFailureCondition(currency, timesIncreasing, minutesBack):
     closePriceData = CryptoStats.getClosePrice()[currency]
 
     #get the starting price of the interval
-    startPriceInterval = percentChange[0][1]
+    startPriceInterval = openPriceData
     timeIncreasingCounter = 0
 
     #iterate through the list of percent changes and add up when the percent change was positive
@@ -666,8 +672,6 @@ def increasingOrDecreasing(currency):
     openPriceData = CryptoStats.getOpenPrice()[currency]
     closePriceData = CryptoStats.getClosePrice()[currency]
 
-    if percentChange == []:
-        return 0
 
     startPrice = openPriceData[0]
     endPrice = closePriceData[0]
@@ -679,6 +683,42 @@ def increasingOrDecreasing(currency):
 
     return 0
 
+
+def resetValues():
+    #reset the list of parameter value that are calculated below
+    for key, value in values.items():
+        values[key] = []
+
+        
+# function just resets parameters to the best stored parameters
+def resetParameters(paramDict):
+    valList = []
+    count = 0
+    file.seek(0)
+
+    for line in file:
+        val = line.split(': ')[1]
+        trueVal = val.split(',')[0]
+        trueVal = float(trueVal)
+        valList.append(trueVal)
+
+    for key, value in paramDict.items():
+        paramDict[key] = valList[count]
+        count += 1
+
+#runs through the values collected and storess the max value
+def setMaxValue():
+
+    for key, value in values.items():
+        currentMaxVal = 0
+
+        for i in values[key]:
+            if i > currentMaxVal:
+                maxValues[key] = i
+                currentMaxVal = i
+
+    print("THE VALUES {}".format(values))
+    print("THE MAX {}".format(maxValues))
 
 def main():
     global CUMULATIVE_PERCENT_CHANGE
@@ -694,7 +734,6 @@ def main():
     x = 0
 
     updateCrypto(1,1,1,60)
-
 
 
     file.write("\n\n\n\n")
@@ -730,8 +769,9 @@ def main():
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
+
         while(t < PARAMETERS['MAX_TIME_CYCLE'] and RESTART == 0 and RESTART_TN == 0 and 'RESTART_LOW' == 0 and currentCurrency != '' and oldCurrency != ''):
-        while(t < PARAMETERS['MAX_TIME_CYCLE'] and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0):
+
             time.sleep(1)
 
             if(t % PARAMETERS['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
