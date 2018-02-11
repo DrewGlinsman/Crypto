@@ -11,7 +11,10 @@ import os.path
 
 from multiprocessing import Pool
 from PrivateData import api_key, secret_key
+<<<<<<< HEAD
 
+=======
+>>>>>>> 80defa7d14703bda69341843dcf3ef91aab8d7bc
 try:
     from urlib import urlencode
 
@@ -156,9 +159,12 @@ currentBalance = 0.0
 #cumulative percent change of a crypto's price over the course of owning it
 CUMULATIVE_PERCENT_CHANGE = 0.0
 
+<<<<<<< HEAD
 PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.5, 'MINIMUM_MOVING_AVERAGE': .01, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 3600.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 300.0, 'WAIT_FOR_CHECK_TOO_LOW': 600.0}
 
 
+=======
+>>>>>>> 80defa7d14703bda69341843dcf3ef91aab8d7bc
 
 #get the balance in bitcoins
 def getBalance(symbol):
@@ -419,6 +425,7 @@ def resetValues():
 
 #get the binance price of the specified currency
 def getbinanceprice(currency):
+    '''
     #getting the aggregate trade data and finding one price to return
     binData = requests.get("https://api.binance.com/api/v1/ticker/allPrices")
     binData = binData.json()
@@ -429,7 +436,9 @@ def getbinanceprice(currency):
             break;
 
     return binPrice
-
+    '''
+    priceDict = CryptoStats.getClosePrice()
+    return priceDict[currency][0]
 
     #interval based on this from binance API
     #     m -> minutes;     h -> hours;     d -> days;     w -> weeks;    M -> months

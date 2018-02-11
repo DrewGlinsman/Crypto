@@ -40,4 +40,7 @@ volume associated with that interval is considered "positive"  or "negative" res
 2/10/18
 Made it so that neither buybin nor sellbin can be called if either the current crypto or the past one are nothing
 
-2/11/18
+<<<<<<< HEAD
+=======
+
+>>>>>>> 80defa7d14703bda69341843dcf3ef91aab8d7bc

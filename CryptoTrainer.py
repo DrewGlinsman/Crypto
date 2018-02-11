@@ -79,14 +79,21 @@ NUM_ITERATIONS = 10
 final_Dict = {}
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 
 #param file name + path
+<<<<<<< HEAD
 #todo change to "BEST_PARAMETERS" when actually running
 paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
+=======
+#paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+drewparamCompletePath = os.path.join(drewparamPaths, "BEST_PARAMETERS.TXT")
+#open a file for appending (a). + creates file if does not exist
+file = open(drewparamCompletePath, "r")
+>>>>>>> 80defa7d14703bda69341843dcf3ef91aab8d7bc
 
 
 
