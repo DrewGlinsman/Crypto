@@ -8,11 +8,10 @@ import time
 import math
 import datetime
 import os.path
-import CryptoStats
+
 from multiprocessing import Pool
 from PrivateData import api_key, secret_key
-from CryptoTrainer import PARAMETERS
-from CryptoStats import getOpenPrice, getClosePrice, getVolume
+
 try:
     from urlib import urlencode
 
@@ -24,16 +23,32 @@ except ImportError:
 #todo add function to pull data from text files by day into data structures here
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-drewlogPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
+logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
 
 #log file name + path
+<<<<<<< HEAD
 #logCompletePath = os.path.join(logPaths, "log.txt")
 drewlogCompletePath = os.path.join(drewlogPath, "log.txt")
 drewTestLogPath = os.path.join(drewlogPath, "testlog.txt")
 #open a file for appending (a). + creates file if does not exist
 file = open(drewlogCompletePath, "a+")
 test = open(drewTestLogPath, "a+")
+=======
+logCompletePath = os.path.join(logPaths, "log.txt")
+
+#open a file for appending (a). + creates file if does not exist
+file = open(logCompletePath, "a+")
+
+
+#Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
+paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+
+#param file name + path
+paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+
+#open a file for appending (a). + creates file if does not exist
+fileParams = open(paramCompletePath, "r")
+>>>>>>> ed1fb50df206a79dbd2ebbd17b7b65abc42a9c30
 
 #GLOBAL_VARIABLES
 
@@ -106,15 +121,21 @@ weightedMovingAverage = {'BTCUSDT': [], 'XRPBTC': [],
                 'ZECBTC': [], 'ADABTC': [], 'ADXBTC': [], 'AIONBTC' : [], 'AMBBTC': [], 'APPCBTC': [], 'ARKBTC': [], 'ARNBTC': [], 'ASTBTC': [], 'BATBTC': [], 'BCDBTC': [], 'BCPTBTC': [], 'BNBBTC': [], 'BNTBTC': [], 'BQXBTC': [], 'BRDBTC': [], 'BTSBTC': [], 'CDTBTC': [], 'CMTBTC': [], 'CNDBTC': [], 'CTRBTC': [], 'DGDBTC': [], 'DLTBTC': [], 'DNTBTC': [], 'EDOBTC': [], 'ELFBTC': [], 'ENGBTC': [], 'ENJBTC': [], 'EOSBTC': [], 'EVXBTC': [], 'FUELBTC': [], 'FUNBTC': [], 'GASBTC': [], 'GTOBTC': [], 'GVTBTC': [], 'GXSBTC': [], 'HSRBTC': [], 'ICNBTC': [], 'ICXBTC': [], 'IOTABTC': [], 'KMDBTC': [], 'KNCBTC': [], 'LENDBTC': [], 'LINKBTC': [], 'LRCBTC': [], 'LSKBTC': [], 'LUNBTC': [], 'MANABTC': [], 'MCOBTC': [], 'MDABTC': [], 'MODBTC': [], 'MTHBTC': [], 'MTLBTC': [], 'NAVBTC': [], 'NEBLBTC': [], 'NEOBTC': [], 'NULSBTC': [], 'OAXBTC': [], 'OMGBTC': [], 'OSTBTC': [], 'POEBTC': [], 'POWRBTC': [], 'PPTBTC': [], 'QSPBTC': [], 'RCNBTC': [], 'RDNBTC': [], 'REQBTC': [], 'SALTBTC': [], 'SNGLSBTC': [], 'SNMBTC': [], 'SNTBTC': [], 'STORJBTC': [], 'STRATBTC': [], 'SUBBTC': [], 'TNBBTC': [], 'TNTBTC': [], 'TRIGBTC': [], 'TRXBTC': [], 'VENBTC': [], 'VIBBTC': [], 'VIBEBTC': [], 'WABIBTC': [], 'WAVESBTC': [], 'WINGSBTC': [], 'WTCBTC': [], 'XVGBTC': [], 'XZCBTC': [], 'YOYOBTC': [], 'ZRXBTC': []}
 
 
-
 #the modified cumulative volume over a period (a negative percent change will result in the volume change being counted as negative towards the
 # cumulative volume stored here
-modifiedVolume = {'BTCUSDT': [], 'XRPBTC': [],
-                'ETHBTC': [], 'BCCBTC': [],
-                'LTCBTC': [], 'DASHBTC': [],
-                'XMRBTC': [], 'QTUMBTC': [], 'ETCBTC': [],
-                'ZECBTC': [], 'ADABTC': [], 'ADXBTC': [], 'AIONBTC' : [], 'AMBBTC': [], 'APPCBTC': [], 'ARKBTC': [], 'ARNBTC': [], 'ASTBTC': [], 'BATBTC': [], 'BCDBTC': [], 'BCPTBTC': [], 'BNBBTC': [], 'BNTBTC': [], 'BQXBTC': [], 'BRDBTC': [], 'BTSBTC': [], 'CDTBTC': [], 'CMTBTC': [], 'CNDBTC': [], 'CTRBTC': [], 'DGDBTC': [], 'DLTBTC': [], 'DNTBTC': [], 'EDOBTC': [], 'ELFBTC': [], 'ENGBTC': [], 'ENJBTC': [], 'EOSBTC': [], 'EVXBTC': [], 'FUELBTC': [], 'FUNBTC': [], 'GASBTC': [], 'GTOBTC': [], 'GVTBTC': [], 'GXSBTC': [], 'HSRBTC': [], 'ICNBTC': [], 'ICXBTC': [], 'IOTABTC': [], 'KMDBTC': [], 'KNCBTC': [], 'LENDBTC': [], 'LINKBTC': [], 'LRCBTC': [], 'LSKBTC': [], 'LUNBTC': [], 'MANABTC': [], 'MCOBTC': [], 'MDABTC': [], 'MODBTC': [], 'MTHBTC': [], 'MTLBTC': [], 'NAVBTC': [], 'NEBLBTC': [], 'NEOBTC': [], 'NULSBTC': [], 'OAXBTC': [], 'OMGBTC': [], 'OSTBTC': [], 'POEBTC': [], 'POWRBTC': [], 'PPTBTC': [], 'QSPBTC': [], 'RCNBTC': [], 'RDNBTC': [], 'REQBTC': [], 'SALTBTC': [], 'SNGLSBTC': [], 'SNMBTC': [], 'SNTBTC': [], 'STORJBTC': [], 'STRATBTC': [], 'SUBBTC': [], 'TNBBTC': [], 'TNTBTC': [], 'TRIGBTC': [], 'TRXBTC': [], 'VENBTC': [], 'VIBBTC': [], 'VIBEBTC': [], 'WABIBTC': [], 'WAVESBTC': [], 'WINGSBTC': [], 'WTCBTC': [], 'XVGBTC': [], 'XZCBTC': [], 'YOYOBTC': [], 'ZRXBTC': []}
+modifiedVolume = {'BTCUSDT': 0.0, 'XRPBTC': 0.0,
+                'ETHBTC': 0.0, 'BCCBTC': 0.0,
+                'LTCBTC': 0.0, 'DASHBTC': 0.0,
+                'XMRBTC': 0.0, 'QTUMBTC': 0.0, 'ETCBTC': 0.0,
+                'ZECBTC': 0.0, 'ADABTC': 0.0, 'ADXBTC': 0.0, 'AIONBTC' : 0.0, 'AMBBTC': 0.0, 'APPCBTC': 0.0, 'ARKBTC': 0.0, 'ARNBTC': 0.0, 'ASTBTC': 0.0, 'BATBTC': 0.0, 'BCDBTC': 0.0, 'BCPTBTC': 0.0, 'BNBBTC': 0.0, 'BNTBTC': 0.0, 'BQXBTC': 0.0, 'BRDBTC': 0.0, 'BTSBTC': 0.0, 'CDTBTC': 0.0, 'CMTBTC': 0.0, 'CNDBTC': 0.0, 'CTRBTC': 0.0, 'DGDBTC': 0.0, 'DLTBTC': 0.0, 'DNTBTC': 0.0, 'EDOBTC': 0.0, 'ELFBTC': 0.0, 'ENGBTC': 0.0, 'ENJBTC': 0.0, 'EOSBTC': 0.0, 'EVXBTC': 0.0, 'FUELBTC': 0.0, 'FUNBTC': 0.0, 'GASBTC': 0.0, 'GTOBTC': 0.0, 'GVTBTC': 0.0, 'GXSBTC': 0.0, 'HSRBTC': 0.0, 'ICNBTC': 0.0, 'ICXBTC': 0.0, 'IOTABTC': 0.0, 'KMDBTC': 0.0, 'KNCBTC': 0.0, 'LENDBTC': 0.0, 'LINKBTC': 0.0, 'LRCBTC': 0.0, 'LSKBTC': 0.0, 'LUNBTC': 0.0, 'MANABTC': 0.0, 'MCOBTC': 0.0, 'MDABTC': 0.0, 'MODBTC': 0.0, 'MTHBTC': 0.0, 'MTLBTC': 0.0, 'NAVBTC': 0.0, 'NEBLBTC': 0.0, 'NEOBTC': 0.0, 'NULSBTC': 0.0, 'OAXBTC': 0.0, 'OMGBTC': 0.0, 'OSTBTC': 0.0, 'POEBTC': 0.0, 'POWRBTC': 0.0, 'PPTBTC': 0.0, 'QSPBTC': 0.0, 'RCNBTC': 0.0, 'RDNBTC': 0.0, 'REQBTC': 0.0, 'SALTBTC': 0.0, 'SNGLSBTC': 0.0, 'SNMBTC': 0.0, 'SNTBTC': 0.0, 'STORJBTC': 0.0, 'STRATBTC': 0.0, 'SUBBTC': 0.0, 'TNBBTC': 0.0, 'TNTBTC': 0.0, 'TRIGBTC': 0.0, 'TRXBTC': 0.0, 'VENBTC': 0.0, 'VIBBTC': 0.0, 'VIBEBTC': 0.0, 'WABIBTC': 0.0, 'WAVESBTC': 0.0, 'WINGSBTC': 0.0, 'WTCBTC': 0.0, 'XVGBTC': 0.0, 'XZCBTC': 0.0, 'YOYOBTC': 0.0, 'ZRXBTC': 0.0}
 
+
+#list to hold the values stored to find the max
+values = {'PERCENT_BY_HOUR': [], 'VOLUME_BY_HOUR': [], 'TIME_INCREASING': [], 'WEIGHTED_TIME_INCREASING': [], 'VOLUME_TIME_INCREASING': [], 'WEIGHTED_VOLUME_TIME_INCREASING': [], 'MODIFIED_VOLUME': [], 'SCORE': []}
+
+
+#hold the max values to be used for scaling
+maxValues = {'PERCENT_BY_HOUR': 0.0, 'VOLUME_BY_HOUR': 0.0, 'TIME_INCREASING': 0.0, 'WEIGHTED_TIME_INCREASING': 0.0, 'VOLUME_TIME_INCREASING': 0.0, 'WEIGHTED_VOLUME_TIME_INCREASING': 0.0, 'MODIFIED_VOLUME': 0.0, 'SCORE': 0.0}
 
 #the binance intervals, their symbols, and their time in milliseconds
 intervalTypes = { '1m': {'symbol': '1m', 'inMS': 60000},  '3m': {'symbol': '3m', 'inMS': 180000}, '5m': {'symbol': '5m', 'inMS': 300000}, '15m': {'symbol': '15m', 'inMS': 900000}, '30m': {'symbol': '30m', 'inMS': 1800000}, '1h': {'symbol': '1h', 'inMS': 3600000}, '2h': {'symbol': '2h', 'inMS': 7200000}, '4h': {'symbol': '4h', 'inMS': 14400000}, '6h': {'symbol': '6h', 'inMS': 21600000}, '8h': {'symbol': '8h', 'inMS': 28800000}, '12h': {'symbol': '12h', 'inMS': 43200000}, '1d': {'symbol': '1d', 'inMS': 86400000}, '3d': {'symbol': '3d', 'inMS': 259200000}, '1w': {'symbol': '1w' , 'inMS': 604800000}, '1M': {'symbol': '1M', 'inMS': 2629746000}}
@@ -144,6 +165,10 @@ currentBalance = 0.0
 #cumulative percent change of a crypto's price over the course of owning it
 CUMULATIVE_PERCENT_CHANGE = 0.0
 
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.5, 'MINIMUM_MOVING_AVERAGE': .01, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 3600.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 300.0, 'WAIT_FOR_CHECK_TOO_LOW': 600.0}
+
+
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.5, 'MINIMUM_MOVING_AVERAGE': .01, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 3600.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 300.0, 'WAIT_FOR_CHECK_TOO_LOW': 600.0}
 
 #get the balance in bitcoins
 def getBalance(symbol):
@@ -377,21 +402,33 @@ def getModifiedVolume(currency):
        #makes each volume % change back into a decimal
         percentChangeScale = (percentChangesList[currentSlot] / 100)
 
+
         #NOTE: can change back to normal if this doesnt work
         if(percentChangesList[currentSlot] < 0):
+
             oldVolume += float(i) * (percentChangeScale) * PARAMETERS['NEGATIVE_WEIGHT']
-            oldVolume += float(i) * (-1 * percentChangeScale) * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']
+
+            oldVolume += float(i) * (-1 * (0.25 * percentChangeScale)) * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']
+
         if(percentChangesList[currentSlot] > 0):
-            oldVolume += float(i) * (percentChangeScale * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER'])
-            oldVolume += float(i) * -1 *(percentChangeScale) * PARAMETERS['NEGATIVE_WEIGHT']
+
+            oldVolume += float(i) * ((percentChangeScale) * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER'])
+
+            oldVolume += float(i) * -1 *((0.25 * percentChangeScale)) * PARAMETERS['NEGATIVE_WEIGHT']
+
         currentSlot += 1
 
 
     return float(oldVolume)
 
+
+def resetValues():
+    #reset the list of parameter value that are calculated below
+    for key, value in values.items():
+        values[key] = []
+
 #get the binance price of the specified currency
 def getbinanceprice(currency):
-    '''
     #getting the aggregate trade data and finding one price to return
     binData = requests.get("https://api.binance.com/api/v1/ticker/allPrices")
     binData = binData.json()
@@ -402,9 +439,7 @@ def getbinanceprice(currency):
             break;
 
     return binPrice
-    '''
-    priceDict = CryptoStats.getClosePrice()
-    return priceDict[currency][0]
+
 
     #interval based on this from binance API
     #     m -> minutes;     h -> hours;     d -> days;     w -> weeks;    M -> months
@@ -431,12 +466,27 @@ def updateCrypto(interval, starttime, endtime, minutesBack):
         #calculate the percent change over the whole hour and store
         openPrice = percentChange[0][1]
         closePrice = percentChange[int(lastSlot)][4]
+<<<<<<< HEAD
         
+=======
+        pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
+
+        #store percent by hour changes to be used later for scaling
+        values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
+
+>>>>>>> ed1fb50df206a79dbd2ebbd17b7b65abc42a9c30
         #calcualte the percent change in volume over the whole hour and store
         openVolume = volumeData[value][0]
         closeVolume = percentChange[int(lastSlot)][5]
         volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
+<<<<<<< HEAD
         
+=======
+
+        #store the volume percent changes by hour for later scaling
+        values['VOLUME_BY_HOUR'].append(volumePercentData[value]['percentbyhour'])
+
+>>>>>>> ed1fb50df206a79dbd2ebbd17b7b65abc42a9c30
         #calculate the percentage change between the minute intervals and store
         #reset the list of stored percentages so a fresh list is stored
         percentChanges[value] = []
@@ -489,30 +539,51 @@ def updateCrypto(interval, starttime, endtime, minutesBack):
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
         pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
 
+        #store the time increasing and weighted time increasing for price data to be used for scaling
+        values['TIME_INCREASING'].append(pricePercentData[value]['timeIncreasing'])
+        values['WEIGHTED_TIME_INCREASING'].append(pricePercentData[value]['weightedtimeIncreasing'])
+
+        #calcualte and store time increasing for volume and price percent changes
         volumePercentData[value]['timeIncreasing'] = getVolumeTimeIncreasing(0, value)
         volumePercentData[value]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, value)
 
-        modifiedVolume[value] = []
-        #get the modified volume changes
+        #store the time increasing and weighted time increasing for volume data to be used for scaling
+        values['VOLUME_TIME_INCREASING'].append(volumePercentData[value]['timeIncreasing'])
+        values['WEIGHTED_VOLUME_TIME_INCREASING'].append(volumePercentData[value]['weightedtimeIncreasing'])
+
+        modifiedVolume[value] = 0.0
+        # get the modified volume changes
         modifiedVolume[value] = getModifiedVolume(value)
+        print(str(modifiedVolume[value]))
+        values['MODIFIED_VOLUME'].append(modifiedVolume[value])
 
-        #use the calculations to get a score
-        calc_score = getScore(value)
-        new_score = {value: calc_score}
-        scores.update(new_score)
-
-        #calcualte a weightedMovingAverage
+        # calcualte a weightedMovingAverage
         endtt = int(time.time() * 1000)
         startt = endtt - intervalTypes['4h']['inMS']
         weightedMovingAverage[value] = setWeightedMovingAverage(value, intervalTypes['1m']['symbol'], startt, endtt)
 
-    #add currencies to a list of cryptos to pick from if it meets the minimum score
+    setMaxValue()
+
+    setMaxValue()
+    resetValues()
+
+    # gets the score for each crypto
+    # moved to its own loop so all the values can be properly scaled by the largest value
+    for key, value in priceSymbols.items():
+        # use the calculations to get a score
+        calc_score = getScore(value)
+        new_score = {value: calc_score}
+        scores.update(new_score)
+
+        values['SCORE'].append(calc_score)
+
+    # add currencies to a list of cryptos to pick from if it meets the minimum score
     for key, value in scores.items():
-        if(value > PARAMETERS['MINIMUM_SCORE']):
+        if (value > PARAMETERS['MINIMUM_SCORE']):
             entry = {key: value}
             currencyToTrade.update(entry)
 
-    print ("OUR LIST OF CRYPTO: ")
+    print("OUR LIST OF CRYPTO: ")
     print(currencyToTrade)
     file.write("OUR LIST OF CRYPTO: ")
     file.write(str(currencyToTrade))
@@ -589,22 +660,49 @@ def getVolumeTimeIncreasing(isWeighted, currency):
 # score is a combination of weighted time increasing and % change over hour.
 # for both volume and price
 def getScore(symbol):
-    new_score = 0
+    new_score = 0.0
 
-    new_score += (volumePercentData[symbol]['percentbyhour'] * PARAMETERS['VOLUME_PERCENT_BY_HOUR_MODIFIER'])
-    new_score += pricePercentData[symbol]['percentbyhour'] * PARAMETERS['PERCENT_BY_HOUR_MODIFIER']
 
-    new_score += pricePercentData[symbol]['weightedtimeIncreasing']
+    # setting up the scaled values for checking
+    values['VOLUME_BY_HOUR'].append(volumePercentData[symbol]['percentbyhour'] / maxValues['VOLUME_BY_HOUR'])
+    values['PERCENT_BY_HOUR'].append(((pricePercentData[symbol]['percentbyhour']) / maxValues['PERCENT_BY_HOUR']))
+    values['TIME_INCREASING'].append(pricePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
+    values['VOLUME_TIME_INCREASING'].append(volumePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
+    values['WEIGHTED_TIME_INCREASING'].append((pricePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_TIME_INCREASING']))
+    values['WEIGHTED_VOLUME_TIME_INCREASING'].append((volumePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_VOLUME_TIME_INCREASING']))
+    values['MODIFIED_VOLUME'].append((modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']))
 
-    new_score += volumePercentData[symbol]['weightedtimeIncreasing']
-    new_score += modifiedVolume[symbol] * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
+
+    #addingup the parameters to the score variable
+    new_score += (volumePercentData[symbol]['percentbyhour'] / maxValues['VOLUME_BY_HOUR']) * PARAMETERS['VOLUME_PERCENT_BY_HOUR_MODIFIER']
+    new_score += ((pricePercentData[symbol]['percentbyhour']) / maxValues['PERCENT_BY_HOUR']) * PARAMETERS['PERCENT_BY_HOUR_MODIFIER']
+
+
+    # setting up the scaled values for checking
+    values['VOLUME_BY_HOUR'].append(volumePercentData[symbol]['percentbyhour'] / maxValues['VOLUME_BY_HOUR'])
+    values['PERCENT_BY_HOUR'].append(((pricePercentData[symbol]['percentbyhour']) / maxValues['PERCENT_BY_HOUR']))
+    values['TIME_INCREASING'].append(pricePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
+    values['VOLUME_TIME_INCREASING'].append(volumePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
+    values['WEIGHTED_TIME_INCREASING'].append((pricePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_TIME_INCREASING']))
+    values['WEIGHTED_VOLUME_TIME_INCREASING'].append((volumePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_VOLUME_TIME_INCREASING']))
+    values['MODIFIED_VOLUME'].append((modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']))
+
+
+    #addingup the parameters to the score variable
+    new_score += (volumePercentData[symbol]['percentbyhour'] / maxValues['VOLUME_BY_HOUR']) * PARAMETERS['VOLUME_PERCENT_BY_HOUR_MODIFIER']
+    new_score += ((pricePercentData[symbol]['percentbyhour']) / maxValues['PERCENT_BY_HOUR']) * PARAMETERS['PERCENT_BY_HOUR_MODIFIER']
+
+    new_score += (pricePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_TIME_INCREASING'])
+
+    new_score += (volumePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_VOLUME_TIME_INCREASING'])
+    new_score += (modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']) * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
 
     return new_score
 
 
 #finds the next currency to buy
 def priceChecker():
-
+    currencyToBuy = ''
     #Compares the two price lists and sets the currencyToBuy to be
     # the coin with the highest score that also is above the minimum moving average
     maxScore = 0
@@ -620,6 +718,15 @@ def priceChecker():
 
     print("Coin with the highest score is {} which is {}".format(currencyToBuy, maxScore))
     file.write("Coin with the highest score is {} which is {} \n".format(currencyToBuy, maxScore))
+
+
+    if currencyToBuy != '':
+        print("Coin with the highest score is {} which is {}".format(currencyToBuy, maxScore))
+        file.write("Coin with the highest score is {} which is {} \n".format(currencyToBuy, maxScore))
+
+    if currencyToBuy == '':
+        print("Did not buy. None qualified")
+        file.write("Did not buy. None qualified")
 
     return currencyToBuy #potential runtime error if all negative todo
 
@@ -776,6 +883,37 @@ def increasingOrDecreasing(currency, interval, starttime, endtime):
     return 0
 
 
+# function just resets parameters to the best stored parameters
+def resetParameters(paramDict):
+    valList = []
+    count = 0
+    file.seek(0)
+
+    for line in file:
+        val = line.split(': ')[1]
+        trueVal = val.split(',')[0]
+        trueVal = float(trueVal)
+        valList.append(trueVal)
+
+    for key, value in paramDict.items():
+        paramDict[key] = valList[count]
+        count += 1
+
+#runs through the values collected and storess the max value
+def setMaxValue():
+
+    for key, value in values.items():
+        currentMaxVal = 0
+        print(str(key))
+        for i in values[key]:
+            if value == 'MODIFIED_VOLUME':
+                print(str(i))
+            if i > currentMaxVal:
+                maxValues[key] = i
+
+    print("THE VALUES {}".format(values))
+    print("THE MAX {}".format(maxValues))
+
 def main():
     global CUMULATIVE_PERCENT_CHANGE
     global initialBalance
@@ -788,8 +926,12 @@ def main():
     currentCurrency = ''
     x = 0
 
+<<<<<<< HEAD
     updateCrypto(1,1,1,60)
     '''
+=======
+
+>>>>>>> ed1fb50df206a79dbd2ebbd17b7b65abc42a9c30
     file.write("\n\n\n\n")
     file.write('------------------------------------------------------------------------------------ \n')
 
@@ -827,7 +969,7 @@ def main():
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
-        while(t < PARAMETERS['MAX_TIME_CYCLE'] and PARAMETERS['RESTART'] == 0 and PARAMETERS['RESTART_TN'] == 0 and PARAMETERS['RESTART_LOW'] == 0):
+        while(t < PARAMETERS['MAX_TIME_CYCLE'] and PARAMETERS['RESTART'] == 0 and PARAMETERS['RESTART_TN'] == 0 and PARAMETERS['RESTART_LOW'] == 0 and currentCurrency != ''):
             time.sleep(1)
 
             if(t % PARAMETERS['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
@@ -839,18 +981,21 @@ def main():
             RESTART_TN = checkTooNegative(currentCurrency)
             t+=1
 
+        # just wait 300 seconds before running through again if no crypto was chosen
+        if currentCurrency == '':
+            time.sleep(300)
 
-        pricesold = getbinanceprice(currentCurrency)
-        print('Price bought: {} Price sold: {} '.format(priceBought, pricesold))
-        file.write('Price bought: {} Price sold: {} \n'.format(priceBought, pricesold))
+        if currentCurrency != '':
+            pricesold = getbinanceprice(currentCurrency)
+            print('Price bought: {} Price sold: {} '.format(priceBought, pricesold))
+            file.write('Price bought: {} Price sold: {} \n'.format(priceBought, pricesold))
 
-        cumulativePercentChange = calcPercentChange(priceBought, pricesold)
-        PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
-        print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
-        file.write("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
+            cumulativePercentChange = calcPercentChange(priceBought, pricesold)
+            PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
+            print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
+            file.write("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
 
-
-        EXIT = checkExitCondition(currentCurrency)
+            EXIT = checkExitCondition(currentCurrency)
         x+=1
 
     print("Cumualtive percent change over the life of all cryptos owneed so far {}".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
@@ -862,6 +1007,6 @@ def main():
     file.write("\n" + "\n" + "\n")
 
     file.close()
-    '''
+
 if __name__ == "__main__":
     main()
