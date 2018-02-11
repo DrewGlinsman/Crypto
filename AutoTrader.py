@@ -33,22 +33,22 @@ TESTING = 1
 
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
 
 #log file name + path
-#logCompletePath = os.path.join(logPaths, "log.txt")
+logCompletePath = os.path.join(logPaths, "log.txt")
 
 #open a file for appending (a). + creates file if does not exist
-#file = open(logCompletePath, "a+")
+file = open(logCompletePath, "a+")
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 
 #param file name + path
-#paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
 
 #open a file for appending (a). + creates file if does not exist
-#fileParams = open(paramCompletePath, "r")
+fileParams = open(paramCompletePath, "r")
 
 #GLOBAL_VARIABLES
 
@@ -508,7 +508,7 @@ def updateCrypto(interval, starttime, endtime):
 
         #calculate the percentage change between the minute intervals and store
         #reset the list of stored percentages so a fresh list is stored
-        percentChanges[value] = []
+        percentChanges[value][:] = []
         for i in percentChange:
             percentChanges[value].append(calcPercentChange(i[1], i[4]))
 
@@ -736,11 +736,11 @@ def checkFailureCondition(currency, timesIncreasing):
     for i in percentChange:
         startPrice = i[1]
         endPrice = i[4]
-<<<<<<< HEAD
-        print("THE FUCKING ENDPRICE" + str(endPrice) + " " + str(i[4]))
-=======
 
->>>>>>> 835f1e647b99323f028aae0d1e86765f56a20cae
+        print("THE FUCKING ENDPRICE" + str(endPrice) + " " + str(i[4]))
+
+
+
         print("Current Crypto: {} Start Price: {} End Price: {}".format(currency, startPrice, endPrice))
         file.write("Current Crypto: {} Start Price: {} End Price: {}\n".format(currency, startPrice, endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
