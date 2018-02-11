@@ -33,22 +33,22 @@ TESTING = 1
 
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+#logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
 
 #log file name + path
-logCompletePath = os.path.join(logPaths, "log.txt")
+#logCompletePath = os.path.join(logPaths, "log.txt")
 
 #open a file for appending (a). + creates file if does not exist
-file = open(logCompletePath, "a+")
+#file = open(logCompletePath, "a+")
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 
 #param file name + path
-paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+#paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
 
 #open a file for appending (a). + creates file if does not exist
-fileParams = open(paramCompletePath, "r")
+#fileParams = open(paramCompletePath, "r")
 
 #GLOBAL_VARIABLES
 
@@ -453,15 +453,10 @@ def getModifiedVolume(currency):
 #get the binance price of the specified currency
 def getbinanceprice(currency):
     #getting the aggregate trade data and finding one price to return
-    binData = requests.get("https://api.binance.com/api/v1/ticker/allPrices")
+    parameters = {'symbol': currency}
+    binData = requests.get("https://api.binance.com/api/v3/ticker/price", params= parameters)
     binData = binData.json()
-
-    for value in binData:
-        if(value["symbol"] == currency):
-            binPrice = value["price"]
-
-            break;
-
+    binPrice = binData['price']
     return binPrice
 
 
@@ -741,8 +736,8 @@ def checkFailureCondition(currency, timesIncreasing):
         startPrice = i[1]
         endPrice = i[4]
         print("THE FUCKING ENDPRICE" + str(endPrice) + " " + str(i[4]))
-        print("Current Crypto: {} Start Price: {} End Price: ".format(currency, startPrice, endPrice))
-        file.write("Current Crypto: {} Start Price: {} End Price: \n".format(currency, startPrice, endPrice))
+        print("Current Crypto: {} Start Price: {} End Price: {}".format(currency, startPrice, endPrice))
+        file.write("Current Crypto: {} Start Price: {} End Price: {}\n".format(currency, startPrice, endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
             timeIncreasingCounter += 1
@@ -913,8 +908,6 @@ def main():
     info = requests.get("https://api.binance.com/api/v1/exchangeInfo")
     print(info.text)
 
-
-
     file.write("\n\n\n\n")
     file.write('------------------------------------------------------------------------------------ \n')
 
@@ -998,7 +991,6 @@ def main():
     file.write("\n" + "\n" + "\n")
 
     file.close()
-
 
 
 
