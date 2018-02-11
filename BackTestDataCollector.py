@@ -62,7 +62,8 @@ def main():
     #infinite loop to keep the program running where it will get the data at
     # the exact same timestamp everytime (the time stamp taken from the text file)
     while(0<1):
-        currentTime = int(time.time()*1000)- ONE_DAY * count
+        currentTime = int(time.time()*1000) - ONE_DAY * count
+        print("One Day: {} Current Time: {}".format(ONE_DAY,currentTime))
         if(timestamp != currentTime):
             print("Current Time: {} Timestamp to get to: {}".format(currentTime, timestamp))
             time.sleep(1)
