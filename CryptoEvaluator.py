@@ -234,7 +234,6 @@ def getVolume(currency, minutesBack):
         data[x] = float(data[x])
         data[x] *= float(getbinanceprice(currency))
         volume.append(data[x])
-    print("volume: {}".format(volume))
     return volume
 
 
