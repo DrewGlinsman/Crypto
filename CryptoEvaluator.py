@@ -290,7 +290,7 @@ def updateCrypto(minutesBack):
         volumeData = getVolume(value, minutesBack)
 
         print("Scaled Volume Data: {}".format(volumeData))
-        test.write("Scaled Volume Data: {}".format(volumeData))
+
         # calculate the percent change over the whole hour and store
         openPrice = openPriceData[0]
         closePrice = closePriceData[0]
@@ -374,10 +374,6 @@ def updateCrypto(minutesBack):
     print(currencyToTrade)
     file.write("OUR LIST OF CRYPTO: ")
     file.write(str(currencyToTrade))
-
-    file.write("Volume Amount Dict: {} Volume Percent Dict: {}".format(volumeAmounts, volumePercentChanges))
-
-
 
 #caclulates and returns the time spent increasing
 #weighted = 0 is false, weighted = 1 is true
