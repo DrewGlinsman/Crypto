@@ -349,10 +349,7 @@ def updateCrypto(interval, starttime, endtime, minutesBack):
 def updateCrypto(minutesBack):
 
     for key,value in priceSymbols.items():
-
-
-        closeVolumeIndex = minutesBack - 1
-
+        
         # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
         openPriceData = CryptoStats.getOpenPrice()[value]
         closePriceData = CryptoStats.getClosePrice()[value]
@@ -366,6 +363,7 @@ def updateCrypto(minutesBack):
         # calculate the percent change in volume over the whole hour and store
         openVolume = volumeData[0]
         closeVolume = volumeData[closeVolumeIndex]
+        closeVolumeIndex = minutesBack - 1
         volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
 
         # test.write("Currency: {} Open Price: {} Close Price: {} Open Volume: {} Close Volume: {} \n".format(value, openPrice, closePrice, openVolume, closeVolume))
