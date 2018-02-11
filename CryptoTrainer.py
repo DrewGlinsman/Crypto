@@ -82,12 +82,17 @@ final_Dict = {}
 paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 
 #param file name + path
+
 #todo change to "BEST_PARAMETERS" when actually running
 paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
+
+#paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.TXT")
 #open a file for appending (a). + creates file if does not exist
+file = open(paramCompletePath, "r")
 
 
 

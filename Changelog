@@ -39,6 +39,17 @@ volume associated with that interval is considered "positive"  or "negative" res
 
 2/10/18
 Made it so that neither buybin nor sellbin can be called if either the current crypto or the past one are nothing
+<<<<<<< HEAD
 
 2/11/18
+<<<<<<< HEAD
 Changed getBinancePrice to use the price api call instead of all prices so it no longer needs to iterate until it finds the coin just gets the specific coins most recent price.
+=======
+=======
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> 80defa7d14703bda69341843dcf3ef91aab8d7bc
+>>>>>>> df300a503c3889a9fcbfad682b8da670c321a100
+>>>>>>> be653246aa77511f8b085b5bad7fb530c19bec88
