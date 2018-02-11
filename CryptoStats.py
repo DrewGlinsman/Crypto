@@ -18,6 +18,8 @@ cryptoVolumeData = {}
 #path to save the different text files in
 cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
 logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
+
+test = open(logPath, "w")
 #one day in ms
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
@@ -46,7 +48,7 @@ def getData(numDays):
             parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
-            print("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), value, data))
+            test.write("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), value, data))
             for i in reversed(data):
                 oprice.write("{},".format(i[1]))
                 cprice.write("{},".format(i[4]))

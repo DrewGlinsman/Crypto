@@ -63,8 +63,8 @@ def main():
     # the exact same timestamp everytime (the time stamp taken from the text file)
     while(0<1):
         currentTime = int(time.time()*1000) - ONE_DAY * count
-        print("One Day: {} Current Time: {}".format(ONE_DAY,currentTime))
-        if(timestamp != currentTime):
+        print("Timestamp: {} Current Time: {}".format(timestamp,currentTime))
+        if(currentTime <= timestamp):
             print("Current Time: {} Timestamp to get to: {}".format(currentTime, timestamp))
             time.sleep(1)
         else:
