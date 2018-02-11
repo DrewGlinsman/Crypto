@@ -30,9 +30,10 @@ drewlogPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
 #log file name + path
 #logCompletePath = os.path.join(logPaths, "log.txt")
 drewlogCompletePath = os.path.join(drewlogPath, "log.txt")
+testlogPath = os.path.join(drewlogPath, "testlog.txt")
 #open a file for appending (a). + creates file if does not exist
 file = open(drewlogCompletePath, "a+")
-
+test = open(testlogPath, "w")
 
 #GLOBAL_VARIABLES
 
@@ -345,10 +346,7 @@ def getVolume(interval, starttime, endtime, currency):
     volume = 0
 
     #building the request
-    parameters = {"symbol": currency, "interval": interval, 'startTime': starttime, 'endTime': endtime}
-    data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
-    data = data.json()
-
+    data = CryptoStats.getVolume()[currency]
     #adds up all the volumes over the interval
     for value in data:
         slots += 1
@@ -390,18 +388,7 @@ def getModifiedVolume(currency):
 
 #get the binance price of the specified currency
 def getbinanceprice(currency):
-    '''
-    #getting the aggregate trade data and finding one price to return
-    binData = requests.get("https://api.binance.com/api/v1/ticker/allPrices")
-    binData = binData.json()
-    for value in binData:
-        if(value["symbol"] == currency):
-            binPrice = value["price"]
 
-            break;
-
-    return binPrice
-    '''
     priceDict = CryptoStats.getClosePrice()
     return priceDict[currency][0]
 
@@ -412,36 +399,9 @@ def getbinanceprice(currency):
 
 #method to iterate through all the cryptos available on binance and store their price changes, percent price changes,
 #volume changes, percent volume changes, scores, time increasing, and time decreasing
-def updateCrypto(interval, starttime, endtime):
+def updateCrypto(interval, starttime, endtime, minutesBack):
 
     for key,value in priceSymbols.items():
-
-        '''
-        parameter = {'symbol': value, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
-        percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
-        percentChange = percentChange.json()
-
-        lastSlot = getLastSlot(interval, starttime, endtime)
-
-        if percentChange == []:
-            lastSlot = 0
-
-
-        #calculate the percent change over the whole hour and store
-        openPrice = percentChange[0][1]
-        closePrice = percentChange[int(lastSlot)][4]
-
-        #calcualte the percent change in volume over the whole hour and store
-        openVolume = volumeData[value][0]
-        closeVolume = percentChange[int(lastSlot)][5]
-        volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
-
-        #calculate the percentage change between the minute intervals and store
-        #reset the list of stored percentages so a fresh list is stored
-        percentChanges[value] = []
-        for i in percentChange:
-            percentChanges[value].append(calcPercentChange(i[1], i[4]))
-        '''
 
         closeVolumeIndex = minutesBack - 1
 
@@ -470,22 +430,17 @@ def updateCrypto(interval, starttime, endtime):
             i += 1
         print("Percent Changes Dictionary: {} Length of Dictionary: {}".format(percentChanges[value],
                                                                                len(percentChanges[value])))
-
-        '''
-        #reset the lists of the volume amounts and volume percent changes
+        # reset the lists of the volume amounts and volume percent changes
         volumeAmounts[value] = []
         volumePercentChanges[value] = []
 
-        #grabs and stores the volume from the first two intervals that are skipped in the for loop below
-        volumeAmounts[value].append(percentChange[0][5])
-        volumeAmounts[value].append(percentChange[1][5])
+        volumeAmounts[value].append(volumeData[0])
 
-        #stores the volume percent changes and the volume amounts
-        for i in range(2, len(percentChange)):
-           volumePercentChanges[value].append(calcPercentChange(percentChange[i-1][5], percentChange[i][5]))
-           volumeAmounts[value].append(percentChange[i][5])
+        for i in range(1, minutesBack):
+            volumePercentChanges[value].append(calcPercentChange(volumeData[i-1], volumeData[i]))
+            volumeAmounts[value].append(volumeData[i])
 
-        #calculate and store the percent time increasing for volume and price percent changes
+         # calculate and store the percent time increasing for volume and price percent changes
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
         pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
 
@@ -493,30 +448,31 @@ def updateCrypto(interval, starttime, endtime):
         volumePercentData[value]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, value)
 
         modifiedVolume[value] = []
-        #get the modified volume changes
+        # get the modified volume changes
         modifiedVolume[value] = getModifiedVolume(value)
 
-        #use the calculations to get a score
+        # use the calculations to get a score
         calc_score = getScore(value)
         new_score = {value: calc_score}
         scores.update(new_score)
 
-        #calcualte a weightedMovingAverage
+        # calcualte a weightedMovingAverage
         endtt = int(time.time() * 1000)
         startt = endtt - intervalTypes['4h']['inMS']
         weightedMovingAverage[value] = setWeightedMovingAverage(value, intervalTypes['1m']['symbol'], startt, endtt)
 
-    #add currencies to a list of cryptos to pick from if it meets the minimum score
     for key, value in scores.items():
-        if(value > PARAMETERS['MINIMUM_SCORE']):
+        if (value > PARAMETERS['MINIMUM_SCORE']):
             entry = {key: value}
             currencyToTrade.update(entry)
 
-    print ("OUR LIST OF CRYPTO: ")
+    print("OUR LIST OF CRYPTO: ")
     print(currencyToTrade)
     file.write("OUR LIST OF CRYPTO: ")
     file.write(str(currencyToTrade))
-    '''
+    test.write("Volume Amount Dict: {} Volume Percent Dict: {}".format(volumeAmounts, volumePercentChanges))
+
+
 #caclulates and returns the time spent increasing
 #weighted = 0 is false, weighted = 1 is true
  # TODO update the modulo so that it is a modulo not a multiplcation so that
@@ -596,7 +552,7 @@ def getScore(symbol):
     new_score += pricePercentData[symbol]['weightedtimeIncreasing']
 
     new_score += volumePercentData[symbol]['weightedtimeIncreasing']
-    new_score += modifiedVolume[symbol] * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
+    new_score += modifiedVolume[symbol] * PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']
 
     return new_score
 
@@ -787,9 +743,7 @@ def main():
     currentCurrency = ''
     x = 0
 
-    for key, value in priceSymbols.items():
-        price = getbinanceprice(value)
-        print("{}: Price: {}".format(value,price))
+    updateCrypto(1,1,1,30)
     '''
     file.write("\n\n\n\n")
     file.write('------------------------------------------------------------------------------------ \n')
