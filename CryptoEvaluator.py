@@ -147,6 +147,7 @@ CUMULATIVE_PERCENT_CHANGE = 0.0
 
 #get the balance in bitcoins
 def getBalance(symbol):
+    '''
     timestamp = int(time.time() * 1000) - 2000
     # building the request query url plus other parameters(signed)
     headers = {'X-MBX-APIKEY': api_key}
@@ -167,14 +168,14 @@ def getBalance(symbol):
             balance = val["free"]
 
     return balance
-
+    '''
 #buy the specified crypto currency
 def buyBin(symbol):
     global priceBought
-
+    '''
     timestamp = int(time.time() * 1000)
     balance = getBalance('BTC')
-
+    
     #multiply balance by constant ratio of how much we want to spend
     # and then convert quantity from BTC price to amount of coin
     balancetospend = float(balance) * PARAMETERS['PERCENT_TO_SPEND']
@@ -222,10 +223,11 @@ def buyBin(symbol):
    # testBuy = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
    # print(testBuy.text)
    # file.write(testBuy.text + "\n")
-
+    '''
 
 #sell the specified crypto
 def sellBin(symbol):
+    '''
     #current time in ms
     timestamp = int(time.time() * 1000) - 1000
 
@@ -279,12 +281,12 @@ def sellBin(symbol):
 
     print('Quantity to sell: {} of {}'.format(quantity, symbol))
     file.write('Quantity to sell: {} of {} \n'.format(quantity, symbol))
-
+    '''
     #building the sell query string
-    sellParameters = {'symbol': symbol, 'side': 'sell', 'type': 'market', 'timestamp': timestamp, 'quantity': quantity}
-    query = urlencode(sorted(sellParameters.items()))
-    signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
-    query += "&signature=" + signature
+    #sellParameters = {'symbol': symbol, 'side': 'sell', 'type': 'market', 'timestamp': timestamp, 'quantity': quantity}
+    #query = urlencode(sorted(sellParameters.items()))
+    #signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
+    q#uery += "&signature=" + signature
 
     #actually selling
    # testSell = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
@@ -309,12 +311,11 @@ def binStepSize():
 
 #calculates the weighted moving average over the specified interval for a crypto currency
 
-def setWeightedMovingAverage(currency, interval, starttime, endtime):
+def setWeightedMovingAverage(currency, interval, starttime, endtime, minutesBack):
     cumulativePrice = 0.0
 
-    parameters = {"symbol": currency, "interval": interval, 'startTime': starttime, 'endTime': endtime}
-    data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
-    data = data.json()
+    openPriceData = CryptoStats.getOpenPrice[currency]
+    closePriceData = CryptoStats.getClosePrice[currency]
 
     slots = getLastSlot(interval, starttime, endtime) + 1
 
@@ -322,9 +323,9 @@ def setWeightedMovingAverage(currency, interval, starttime, endtime):
         return 0
 
     #adds up the cumulative price changes using each interval
-    for value in data:
-       startPrice = value[1]
-       endPrice = value[4]
+    for x in range (0, minutesBack-1):
+       startPrice = openPriceData[x]
+       endPrice = closePriceData[x]
        change = calcPercentChange(startPrice, endPrice)
 
        cumulativePrice += change
@@ -350,7 +351,7 @@ def getVolume(interval, starttime, endtime, currency):
     #adds up all the volumes over the interval
     for value in data:
         slots += 1
-        volume += int(float(value[5]))
+        volume += int(float(value))
 
     #scales the volume by the price of the crypto currency
     volume *= float(getbinanceprice(currency))
@@ -589,26 +590,22 @@ def calcPercentChange(startVal, endVal):
 
 #checks if the current crypto has been decreasing the past ten minutes
 #if yes it forces a new check to see if there is a better crypto
-def checkFailureCondition(currency, timesIncreasing):
+def checkFailureCondition(currency, timesIncreasing, minutesBack):
 
     print("New Interval")
     file.write("New Interval")
 
-    startTime = int(time.time()*1000) - (int(intervalTypes['5m']['inMS']) * 2)
-    endTime = int(time.time())*1000
-
-    parameter = {'symbol': currency, 'interval': intervalTypes['1m']['symbol'], 'startTime': startTime, 'endTime': endTime}
-    percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
-    percentChange = percentChange.json()
+    openPriceData = CryptoStats.getOpenPrice()[currency]
+    closePriceData = CryptoStats.getClosePrice()[currency]
 
     #get the starting price of the interval
     startPriceInterval = percentChange[0][1]
     timeIncreasingCounter = 0
 
     #iterate through the list of percent changes and add up when the percent change was positive
-    for i in percentChange:
-        startPrice = i[1]
-        endPrice = i[4]
+    for x in range(0, minutesBack):
+        startPrice = openPriceData[x]
+        endPrice = closePriceData[x]
         print("Current Crypto: {} Start Price: {} End Price: ".format(currency, startPrice, endPrice))
         file.write("Current Crypto: {} Start Price: {} End Price: \n".format(currency, startPrice, endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
@@ -634,16 +631,15 @@ def checkTooNegative(symbol):
     startTime = int(time.time()) * 1000 - 60000
     endTime = int(time.time()) * 1000
 
-    parameter = {'symbol': symbol, 'interval': '1m', 'startTime': startTime, 'endTime': endTime}
-    percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
-    percentChange = percentChange.json()
+    openPriceData = CryptoStats.getOpenPrice()[currency]
+    closePriceData = CryptoStats.getClosePrice()[currency]
 
     if (percentChange == []):
         return 0
 
 
-    startPrice = percentChange[0][1]
-    endPrice = percentChange[0][4]
+    startPrice = openPriceData[0]
+    endPrice = closePriceData[0]
     percentChange = calcPercentChange(startPrice, endPrice)
 
     if(percentChange < PARAMETERS['MAX_DECREASE']):
@@ -712,16 +708,14 @@ def increasingOrDecreasing(currency, interval, starttime, endtime):
 
     lastSlot = getLastSlot(interval, starttime, endtime)
 
-    parameter = {'symbol': currency, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
-    percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
-    print(percentChange.text)
-    percentChange = percentChange.json()
+    openPriceData = CryptoStats.getOpenPrice()[currency]
+    closePriceData = CryptoStats.getClosePrice()[currency]
 
     if percentChange == []:
         return 0
 
-    startPrice = percentChange[0][1]
-    endPrice = percentChange[int(lastSlot)][4]
+    startPrice = openPriceData[0]
+    endPrice = closePriceData[0]
 
     calcPChange = calcPercentChange(startPrice, endPrice)
 
