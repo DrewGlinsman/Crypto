@@ -16,7 +16,7 @@ cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\BackTestData'
 #one day in ms
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
-COUNT = 7
+count = 1
 
 def getData(numDays):
 
@@ -58,17 +58,18 @@ def main():
     timefile = open(timefilePath, "r")
     timestamp = int(timefile.readline())
     timefile.close()
-
+    count = 1
     #infinite loop to keep the program running where it will get the data at
     # the exact same timestamp everytime (the time stamp taken from the text file)
     while(0<1):
-        currentTime = int(time.time()*1000)
+        currentTime = int(time.time()*1000)- ONE_DAY * count
         if(timestamp != currentTime):
-            print("I'm sleeping")
+            print("Current Time: {} Timestamp to get to: {}".format(currentTime, timestamp))
             time.sleep(1)
         else:
             print("Getting data")
-            getData(7)
+            getData(1)
+            count+=1
 
 if __name__ == "__main__":
     main()

@@ -185,14 +185,17 @@ def buyBin(symbol):
 
     #store the price the crypto was a bought at for cumulative percent change calculations
     priceBought = ratio
-
+    '''
 
     #mark item as the current crypto being traded and save the buy price at for failure condition
     entry = {symbol:{'buyPrice': ratio, 'timestamp': timestamp}}
     currencyToTrade.clear()
     currencyToTrade.update(entry)
+    '''
+    
     quantity = balancetospend / float(ratio) * PARAMETERS['PERCENT_QUANTITY_TO_SPEND']
-
+    
+    
     # set the step size for the given coin
     stepsize = stepsizes[symbol]
 
