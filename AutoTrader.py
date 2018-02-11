@@ -719,8 +719,9 @@ def checkFailureCondition(currency, timesIncreasing):
     print("New Interval")
     file.write("New Interval")
 
-    startTime = int(time.time()*1000) - (int(intervalTypes['5m']['inMS']) * 2)
-    endTime = int(time.time())*1000
+    endTime = int(time.time()) * 1000
+    startTime = endTime - (int(intervalTypes['5m']['inMS']) * 2)
+
 
     parameter = {'symbol': currency, 'interval': intervalTypes['1m']['symbol'], 'startTime': startTime, 'endTime': endTime}
     percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
@@ -735,7 +736,11 @@ def checkFailureCondition(currency, timesIncreasing):
     for i in percentChange:
         startPrice = i[1]
         endPrice = i[4]
+<<<<<<< HEAD
         print("THE FUCKING ENDPRICE" + str(endPrice) + " " + str(i[4]))
+=======
+
+>>>>>>> 835f1e647b99323f028aae0d1e86765f56a20cae
         print("Current Crypto: {} Start Price: {} End Price: {}".format(currency, startPrice, endPrice))
         file.write("Current Crypto: {} Start Price: {} End Price: {}\n".format(currency, startPrice, endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
