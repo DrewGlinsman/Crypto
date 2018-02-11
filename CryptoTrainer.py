@@ -22,7 +22,7 @@ from PrivateData import api_key, secret_key
 
 # EXPLANATION OF THE PARAMETERS
 
-
+#PERCENT_QUANTITY_TO_SPEND: the amount of the balance calculated to be spent that we can spend (based on the small fee) #todo look more at why this exists
 #PERCENT_TO_SPEND: the amount of the balance of bitcoin to spend. Should be calculated by how many bots are made
 #MINIMUM_PERCENT_INCREASE: lowest percent increase for a cryptocurrency to be considered in the start of the bot
 #MINIMUM_SCORE: the lowest score for a crypto to be addded to the list of scores to be checked for the remaineder of a run
@@ -40,14 +40,17 @@ from PrivateData import api_key, secret_key
 #PERCENT_BY_HOUR_MODIFIER: the modifier for the total percent change of a crypto over a longer interval (> 1hr)
 #VOLUME_PERCENT_BY_HOUR_MODIFIER: the modifier for the volume percent change over a longer interval (> 1hr)
 #FLOOR_PRICE_MODIFIER: the lowest % change above the original price the crypto was bought at before the bot auto sells it (calculated later than the other failure conditions to catch a decreasing price)
+#MODIFIED_VOLUME_MODIFIER: the cumulative volume change based on the % change by interval scale
 #CUMULATIVE_PRICE_MODIFIER: the cumulative price change modifier for the weighted moving average
 #PRIMARY_MODIFIED_VOLUME_SCALER: the scaler to make more volume traded have the same sign as the percent change in the price than the amount that is counted as having the opposite sign
 #WAIT_FOR_CHECK_FAILURE: the number of ticks before the failure condition is checked (the crypto is decreasing over the past 10 minutes)
 #WAIT_FOR_CHECK_TOO_LOW: the number of ticks before ethe program checks to see if a crypto has decreased too low to its starting point
 
-PARAMETERS = {'PERCENT_TO_SPEND': 1, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 1.0, 'MINIMUM_MOVING_AVERAGE': .6, 'MAX_DECREASE': -10, 'MAX_TIME_CYCLE': 3600, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15
-, 'NEGATIVE_WEIGHT': 1.5, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1, 'TIME_INCREASING_MODIFIER': 10, 'VOLUME_INCREASING_MODIFIER': .01, 'PERCENT_BY_HOUR_MODIFIER': 1,
-'VOLUME_INCREASING_MODIFIER': .01, 'PERCENT_BY_HOUR_MODIFIER': 1, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': .1, 'FLOOR_PRICE_MODIFIER': 1.005, 'CUMULATIVE_PRICE_MODIFIER': 100, 'PRIMARY_MODIFIED_VOLUME_SCALER': 2, 'WAIT_FOR_CHECK_FAILURE': 300, 'WAIT_FOR_CHECK_TOO_LOW': 600}
+
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.5, 'MINIMUM_MOVING_AVERAGE': .01, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 3600.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 300.0, 'WAIT_FOR_CHECK_TOO_LOW': 600.0}
+
+
+
 
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
@@ -69,17 +72,21 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS=[]
 
 #number of iterations of bot
-NUM_ITERATIONS = 5
+NUM_ITERATIONS = 10
 
+
+#final dictionary returned to be rewritten to file
+final_Dict = {}
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 
 #param file name + path
-paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
+#todo change to "BEST_PARAMETERS" when actually running
+paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 
 #open a file for appending (a). + creates file if does not exist
-file = open(paramCompletePath, "r")
+file = open(paramCompletePath, "r+")
 
 
 
@@ -88,98 +95,187 @@ file = open(paramCompletePath, "r")
 #typeOfRandom determines what kinds of randomization occurs
 #type 0 means normal, type 1 means larger range of randomization
 #type 3 means none
-def randomizeParams(paramDict, typeOfRandom):
 
+
+
+#TODO remember after to testing not to randomize stuff like cumulative percent change store (i.e data)
+def randomizeParams(paramDict, typeOfRandom):
+    #default range size and stepSize
+    range = 2.0
+    randVal = 0.0
     if(typeOfRandom == 3):
         return 0
     if (typeOfRandom == 0):
-        print('')
-        #todo add a normal kind of randomization
+        for key, value in paramDict.items():
+            randVal = paramDict[key]
+            randVal += random.uniform(-1,1) * range
+            paramDict[key] = randVal
+
+
+    #todo add a normal kind of randomization
     if(typeOfRandom == 1):
-        print('')
-        #todo add a special kind of randomization
+        range = 100.0
+        for key, value in paramDict.items():
+            randVal = paramDict[key]
+            randVal += random.uniform(-1,1) * range
+            paramDict[key] = randVal
 
-    numTest = paramDict['MINIMUM_PERCENT_INCREASE']
-    numTest *= random.randrange(1, 100)
-
-    paramDict['MINIMUM_PERCENT_INCREASE'] = numTest
+    #todo add a special kind of randomization
 
 #function just resets parameters to the defaults
 def resetParameters(paramDict):
     valList = []
     count = 0
+
     file.seek(0)
 
-
+    #loop over the file and split the lines by space and , meaning you only get the value
     for line in file:
-        val = line.split(': ')[1]
+
+        val = line.split(' ')[1]
         trueVal = val.split(',')[0]
         trueVal = float(trueVal)
         valList.append(trueVal)
 
+
+    #parameter dictionary that will loop over params and rewrite them
     for key, value in paramDict.items():
 
         paramDict[key] = valList[count]
         count+=1
 
+
+#write paramDict to a file that will be read from to reset parameters at the start of each test and after each randomization
+def reWriteParameters(paramDict):
+
+    file.seek(0)
+
+    for key, value in paramDict.items():
+
+        print('\'%s\': %s,\n' % (key, value))
+        file.write('\'%s\': %s,\n' % (key, value))
+
+#converts the given string to a Dict. Used to parse the returned string from the bots being trained
+def stringToDict(stringToChange):
+    newDict = {}
+    stringKeySplit = ''
+    stringValSplit = ''
+    counter = 0
+
+    #split the passed string into a list seperated by spaces
+    listSplits = stringToChange.split(' ')
+
+    #loops through each string seperated out into listSplits
+    for i in listSplits:
+        #if the string is from an even position split it into a future key
+        if (counter % 2 == 0):
+            stringKeySplit = i.split('\'')[1]
+        #if the string is from an odd position split it to be a future value and update newDict to contain it
+        if (counter % 2 != 0):
+            if ("," in i):
+                stringValSplit = i.split(',')[0]
+            if("}" in i ):
+                stringValSplit = i.split('}')[0]
+            newDict.update({stringKeySplit: stringValSplit})
+
+
+
+        counter+=1
+
+    return newDict
+
+#makes the string line exclusively consist of the correct string of parameters
+def reformatLine(line):
+
+
+   firstFormat = line.split('LINEBEGIN')[1]
+   reformat = firstFormat.split('DONEEND')[0]
+
+   return reformat
+
+
 def main():
     global NUM_ITERATIONS
     global file
+    global final_Dict
+    global reform
+    typeOfRandom = 3
 
-
-    typeOfRandom = 0
     count = 0
 
-
-
-    #CODE TO RUN MULTIPLE INSTANCES OF BOT
+    #store the multiple processes
     procs = []
 
 
     current_Max = 0.0
+
+    #creates NUM_ITERATIONS amounts of bots
     for i in range(NUM_ITERATIONS):
 
 
         proc = Popen([sys.executable, 'tester.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stdin = PIPE, stderr=PIPE,bufsize=1, universal_newlines=True)
         procs.append(proc)
 
+    #randomizes parameters and runs different instances of the bot using the different starting parameters
     for proc in procs:
+        reform = ''
 
         randomizeParams(PARAMETERS, typeOfRandom)
 
-        print('Changed {}'.format(PARAMETERS['MINIMUM_PERCENT_INCREASE']))
+        #reset typeOfRandom so that every 50th run we use a special set of randomizers
         if(count % 50 == 0):
-            typeOfRandom == 1
-        else:
-            typeOfRandom == 0
+            typeOfRandom = 1
+        if(count % 50 != 0):
+            typeOfRandom = 0
+
+
+        #passing the parameters to the processes
 
         out = proc.communicate(input = str(PARAMETERS))
-
+        timestamp = int(time.time() * 1000)
+        print(str(timestamp))
         count+=1
         #walks through the output from the instance of tester and strips it of the parameters used
         #then stores the parameters if they netted a larger % change than the previous max
         for line in out:
+            #to avoid parsing a line that does not contain this special word indicator
+            if "LINEBEGIN" not in line:
+                break
             val = line
+
 
             if(val == ''):
                 break
-            substring = val.split("\'CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
+            reform = reformatLine(val)
 
-
+            substring = reform.split("\'CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
 
             cumulativePerentChangeStore = substring.split(',', 1)[0]
+
+            print("THIS" + str(cumulativePerentChangeStore))
             cumulativePerentChangeStore = float(cumulativePerentChangeStore)
 
+            print(str(cumulativePerentChangeStore))
 
+            #if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
             if cumulativePerentChangeStore >= current_Max:
                 current_Max = cumulativePerentChangeStore
-                stored_output = line
+                stored_output = reform
+        #reset the parameters dictionary to the original "best" one from the file
         resetParameters(PARAMETERS)
-    print('{}'.format(stored_output))
-    print('{}'.format(current_Max))
 
-    proc.wait()
+    #convert the stored, parsed string into a dictionary
+    final_Dict = stringToDict(stored_output)
 
+    print('Stored : {}'.format(stored_output))
+    print('Current Max: {}'.format(current_Max))
+
+
+
+    #rewrite the parameter file with the final Dict
+    reWriteParameters(final_Dict)
+
+    file.close()
 
 if __name__ == "__main__":
     main()
