@@ -498,9 +498,12 @@ def updateCrypto(interval, starttime, endtime):
         # store percent by hour changes to be used later for scaling
         values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
 
+        #used to scale the volume
+        priceScale = getbinanceprice(value)
+
         #calcualte the percent change in volume over the whole hour and store
-        openVolume = percentChange[0][5]
-        closeVolume = percentChange[int(lastSlot)][5]
+        openVolume = percentChange[0][5] * priceScale
+        closeVolume = percentChange[int(lastSlot)][5] * priceScale
         volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
 
         # store the volume change by hour to be used later for scaling
@@ -519,15 +522,15 @@ def updateCrypto(interval, starttime, endtime):
         volumePercentChanges[value][:] = []
 
         #grabs and stores the volume from the first two intervals that are skipped in the for loop below
-        volumeAmounts[value].append(percentChange[0][5])
-        volumeAmounts[value].append(percentChange[1][5])
+        volumeAmounts[value].append(percentChange[0][5]) * priceScale
+        volumeAmounts[value].append(percentChange[1][5]) * priceScale
 
 
 
         #stores the volume percent changes and the volume amounts
         for i in range(2, len(percentChange)):
-           volumePercentChanges[value].append(calcPercentChange(percentChange[i-1][5], percentChange[i][5]))
-           volumeAmounts[value].append(percentChange[i][5])
+           volumePercentChanges[value].append(calcPercentChange(percentChange[i-1][5] * priceScale, percentChange[i][5] * priceScale))
+           volumeAmounts[value].append(percentChange[i][5]) * priceScale
 
         #calculate and store the percent time increasing for volume and price percent changes
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
@@ -567,8 +570,6 @@ def updateCrypto(interval, starttime, endtime):
         calc_score = getScore(value)
         new_score = {value: calc_score}
         scores.update(new_score)
-        print(value + " " + str(calc_score))
-
         values['SCORE'].append(calc_score)
 
     #add currencies to a list of cryptos to pick from if it meets the minimum score
