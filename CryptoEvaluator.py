@@ -144,6 +144,8 @@ currentBalance = 0.0
 #cumulative percent change of a crypto's price over the course of owning it
 CUMULATIVE_PERCENT_CHANGE = 0.0
 
+#number of minutes we want to iterate backwards
+minutesBack = 0
 
 #get the balance in bitcoins
 def getBalance(symbol):
@@ -311,7 +313,7 @@ def binStepSize():
 
 #calculates the weighted moving average over the specified interval for a crypto currency
 
-def setWeightedMovingAverage(currency, interval, starttime, endtime, minutesBack):
+def setWeightedMovingAverage(currency, minutesBack):
     cumulativePrice = 0.0
 
     openPriceData = CryptoStats.getOpenPrice[currency]
@@ -342,16 +344,16 @@ def setWeightedMovingAverage(currency, interval, starttime, endtime, minutesBack
 
 
 #gets the cumulative volume over a period and scales it based on the currency's price
-def getVolume(interval, starttime, endtime, currency):
+def getVolume(currency, minutesBack):
     slots = 0
     volume = 0
 
     #building the request
     data = CryptoStats.getVolume()[currency]
     #adds up all the volumes over the interval
-    for value in data:
+    for x in range (0, minutesBack):
         slots += 1
-        volume += int(float(value))
+        volume += int(float(data[x]))
 
     #scales the volume by the price of the crypto currency
     volume *= float(getbinanceprice(currency))
@@ -400,7 +402,7 @@ def getbinanceprice(currency):
 
 #method to iterate through all the cryptos available on binance and store their price changes, percent price changes,
 #volume changes, percent volume changes, scores, time increasing, and time decreasing
-def updateCrypto(interval, starttime, endtime, minutesBack):
+def updateCrypto(minutesBack):
 
     for key,value in priceSymbols.items():
 
@@ -458,9 +460,7 @@ def updateCrypto(interval, starttime, endtime, minutesBack):
         scores.update(new_score)
 
         # calcualte a weightedMovingAverage
-        endtt = int(time.time() * 1000)
-        startt = endtt - intervalTypes['4h']['inMS']
-        weightedMovingAverage[value] = setWeightedMovingAverage(value, intervalTypes['1m']['symbol'], startt, endtt)
+        weightedMovingAverage[value] = setWeightedMovingAverage(value, minutesBack)
 
     for key, value in scores.items():
         if (value > PARAMETERS['MINIMUM_SCORE']):
@@ -628,15 +628,12 @@ def checkFailureCondition(currency, timesIncreasing, minutesBack):
 
 #checks whether the function has caused too large of negative decrease the specified interval
 def checkTooNegative(symbol):
-    startTime = int(time.time()) * 1000 - 60000
-    endTime = int(time.time()) * 1000
 
-    openPriceData = CryptoStats.getOpenPrice()[currency]
-    closePriceData = CryptoStats.getClosePrice()[currency]
+    openPriceData = CryptoStats.getOpenPrice()[symbol]
+    closePriceData = CryptoStats.getClosePrice()[symbol]
 
     if (percentChange == []):
         return 0
-
 
     startPrice = openPriceData[0]
     endPrice = closePriceData[0]
@@ -679,7 +676,7 @@ def checkTooLow(currency, timesIncreasing):
     starttime = endtime - intervalTypes['15m']['inMS']
 
     direction = increasingOrDecreasing(currency, intervalTypes['15m']['symbol'], starttime, endtime)
-    allIntervalsDecreasing = checkFailureCondition(currency, timesIncreasing)
+    allIntervalsDecreasing = checkFailureCondition(currency, timesIncreasing, minutesBack)
 
     #check to see if the current price is too low, the crypto is decreasing over the past 15 minutes
     #and all the intervals are decreasing
@@ -704,9 +701,7 @@ def getLastSlot(interval, starttime, endtime):
 
 #returns whether the specified currency is increasing or decreasing over the interval
 # 0 means decreasing, 1 means stable or increasing
-def increasingOrDecreasing(currency, interval, starttime, endtime):
-
-    lastSlot = getLastSlot(interval, starttime, endtime)
+def increasingOrDecreasing(currency):
 
     openPriceData = CryptoStats.getOpenPrice()[currency]
     closePriceData = CryptoStats.getClosePrice()[currency]
@@ -733,11 +728,12 @@ def main():
     global RESTART_LOW
     global EXIT
     global pricesold
-
+    global minutesBack
+    minutesBack = 30
     currentCurrency = ''
     x = 0
 
-    updateCrypto(1,1,1,30)
+    updateCrypto(minutesBack)
     '''
     file.write("\n\n\n\n")
     file.write('------------------------------------------------------------------------------------ \n')
@@ -757,7 +753,7 @@ def main():
         endTime = int(time.time() * 1000)
         startTime = endTime - 3600000
 
-        updateCrypto(intervalTypes['5m']['symbol'], startTime, endTime)
+        updateCrypto(minutesBack)
 
 
         oldCurrency = currentCurrency
@@ -780,7 +776,7 @@ def main():
             time.sleep(1)
 
             if(t % PARAMETERS['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
-                RESTART = checkFailureCondition(currentCurrency, 0)
+                RESTART = checkFailureCondition(currentCurrency, 0, minutesBack)
 
             if(t > PARAMETERS['WAIT_FOR_CHECK_TOO_LOW'] and t % PARAMETERS['WAIT_FOR_CHECK_FAILURE']):
                 RESTART_LOW = checkTooLow(currentCurrency, 1)
