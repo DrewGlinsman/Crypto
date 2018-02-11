@@ -342,11 +342,7 @@ def updateCrypto(minutesBack):
         print("Percent Changes Dictionary: {} Length of Dictionary: {}".format(percentChanges[value], len(percentChanges[value])))
 
 
-        #reset the lists of the volume amounts and volume percent changes
-
-            i += 1
         # reset the lists of the volume amounts and volume percent changes
-
         volumeAmounts[value] = []
         volumePercentChanges[value] = []
 
