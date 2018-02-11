@@ -33,35 +33,22 @@ except ImportError:
 #todo add function to pull data from text files by day into data structures here
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-#drewlogPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
+#logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+logPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
 
 #log file name + path
 
 
 logCompletePath = os.path.join(logPaths, "log.txt")
-#drewlogCompletePath = os.path.join(drewlogPath, "log.txt")
-#drewTestLogPath = os.path.join(drewlogPath, "testlog.txt")
+drewTestLogPath = os.path.join(logPaths, "testlog.txt")
+
 #open a file for appending (a). + creates file if does not exist
-#file = open(drewlogCompletePath, "a+")
-#test = open(drewTestLogPath, "a+")
+test = open(drewTestLogPath, "a+")
 
 logCompletePath = os.path.join(logPaths, "log.txt")
 
 #open a file for appending (a). + creates file if does not exist
 file = open(logCompletePath, "a+")
-
-
-#Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-
-#param file name + path
-paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
-
-#open a file for appending (a). + creates file if does not exist
-fileParams = open(paramCompletePath, "r")
-
-
 
 #GLOBAL_VARIABLES
 
@@ -223,7 +210,6 @@ def setWeightedMovingAverage(currency, minutesBack):
        startPrice = openPriceData[x]
        endPrice = closePriceData[x]
        change = calcPercentChange(startPrice, endPrice)
-       print("start price: {} end price: {} change: {}".format(startPrice, endPrice, change))
 
        cumulativePrice += change
 
@@ -240,18 +226,14 @@ def setWeightedMovingAverage(currency, minutesBack):
 
 #gets the cumulative volume over a period and scales it based on the currency's price
 def getVolume(currency, minutesBack):
-    slots = 0
-    volume = 0
-
+    volume = []
     #building the request
     data = CryptoStats.getVolume()[currency]
     #adds up all the volumes over the interval
     for x in range (0, minutesBack):
-        slots += 1
-        volume += int(float(data[x]))
-
-    #scales the volume by the price of the crypto currency
-    volume *= float(getbinanceprice(currency))
+        data[x] = float(data[x])
+        data[x] *= float(getbinanceprice(currency))
+        volume.append(data[x])
     print("volume: {}".format(volume))
     return volume
 
@@ -282,21 +264,10 @@ def getModifiedVolume(currency):
             oldVolume += float(i) * -1 *(percentChangeScale) * PARAMETERS['NEGATIVE_WEIGHT']
         currentSlot += 1
 
-    print("Modified Volume: {}".format(oldVolume))
     return float(oldVolume)
 
 #get the binance price of the specified currency
 def getbinanceprice(currency):
-
-
-    #getting the aggregate trade data and finding one price to return
-    parameters = {'symbol': currency}
-    binData = requests.get("https://api.binance.com/api/v3/ticker/price", params= parameters)
-    binData = binData.json()
-    binPrice = binData['price']
-    return binPrice
-
-
 
     priceDict = CryptoStats.getClosePrice()
     return priceDict[currency][0]
@@ -317,43 +288,51 @@ def updateCrypto(minutesBack):
         # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
         openPriceData = CryptoStats.getOpenPrice()[value]
         closePriceData = CryptoStats.getClosePrice()[value]
-        volumeData = CryptoStats.getVolume()[value]
+        volumeData = getVolume(value, minutesBack)
 
+        print("Scaled Volume Data: {}".format(volumeData))
+        test.write("Scaled Volume Data: {}".format(volumeData))
         # calculate the percent change over the whole hour and store
         openPrice = openPriceData[0]
         closePrice = closePriceData[0]
         pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
 
+        values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
+
         # calculate the percent change in volume over the whole hour and store
         openVolume = volumeData[0]
-        closeVolume = volumeData[closeVolumeIndex]
         closeVolumeIndex = minutesBack - 1
+        closeVolume = volumeData[closeVolumeIndex]
         volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
 
         # test.write("Currency: {} Open Price: {} Close Price: {} Open Volume: {} Close Volume: {} \n".format(value, openPrice, closePrice, openVolume, closeVolume))
+
+        values['VOLUME_BY_HOUR'].append(volumePercentData[value]['percentbyhour'])
 
         # iterate through all the open and close prices for the given interval
         percentChanges[value] = []
         i = 0
         while (i < minutesBack):
             percentChanges[value].append(calcPercentChange(openPriceData[i], closePriceData[i]))
-
             i+=1
-        print("Percent Changes Dictionary: {} Length of Dictionary: {}".format(percentChanges[value], len(percentChanges[value])))
 
+        # store the time increasing and weighted time increasing for price data to be used for scaling
+        values['TIME_INCREASING'].append(pricePercentData[value]['timeIncreasing'])
+        values['WEIGHTED_TIME_INCREASING'].append(pricePercentData[value]['weightedtimeIncreasing'])
 
-        #reset the lists of the volume amounts and volume percent changes
-
-            i += 1
         # reset the lists of the volume amounts and volume percent changes
-
         volumeAmounts[value] = []
         volumePercentChanges[value] = []
+
+        # store the time increasing and weighted time increasing for volume data to be used for scaling
+        values['VOLUME_TIME_INCREASING'].append(volumePercentData[value]['timeIncreasing'])
+        values['WEIGHTED_VOLUME_TIME_INCREASING'].append(volumePercentData[value]['weightedtimeIncreasing'])
 
         volumeAmounts[value].append(volumeData[0])
 
         for i in range(1, minutesBack):
             volumePercentChanges[value].append(calcPercentChange(volumeData[i-1], volumeData[i]))
+            print("Currency {}: Volume: {}".format(value, volumeData[i]))
             volumeAmounts[value].append(volumeData[i])
 
          # calculate and store the percent time increasing for volume and price percent changes
@@ -367,16 +346,14 @@ def updateCrypto(minutesBack):
         # get the modified volume changes
         modifiedVolume[value] = getModifiedVolume(value)
 
-        print(str(modifiedVolume[value]))
         values['MODIFIED_VOLUME'].append(modifiedVolume[value])
 
         # calcualte a weightedMovingAverage
-        endtt = int(time.time() * 1000)
-        startt = endtt - intervalTypes['4h']['inMS']
-        weightedMovingAverage[value] = setWeightedMovingAverage(value, intervalTypes['1m']['symbol'], startt, endtt)
+        weightedMovingAverage[value] = setWeightedMovingAverage(value, minutesBack)
+
+    setMaxValue()
 
     resetValues()
-
     # gets the score for each crypto
     # moved to its own loop so all the values can be properly scaled by the largest value
     for key, value in priceSymbols.items():
@@ -613,10 +590,8 @@ def checkTooLow(currency, timesIncreasing):
 
     currentPrice = getbinanceprice(currency)
     floorPrice = PARAMETERS['FLOOR_PRICE_MODIFIER'] * priceBought
-    endtime = int(time.time() * 1000)
-    starttime = endtime - intervalTypes['15m']['inMS']
 
-    direction = increasingOrDecreasing(currency, intervalTypes['15m']['symbol'], starttime, endtime)
+    direction = increasingOrDecreasing(currency)
     allIntervalsDecreasing = checkFailureCondition(currency, timesIncreasing, minutesBack)
 
     #check to see if the current price is too low, the crypto is decreasing over the past 15 minutes
@@ -694,9 +669,6 @@ def main():
     minutesBack = 30
     currentCurrency = ''
     x = 0
-
-    updateCrypto(1,1,1,60)
-
 
     file.write("\n\n\n\n")
     file.write('------------------------------------------------------------------------------------ \n')
