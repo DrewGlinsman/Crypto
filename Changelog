@@ -10,5 +10,34 @@ Updated CryptoEvaluator and AutoTrader to use the new Parameter Dictionary
 Updated CryptoTrainer to now pass input to the iterations of the bot
 Can now read and use input inside of the subprocesses
 Added a randomizer to CryptoTrainer to randomize the parameters
-Added a resetParameters method to reset the parameters for each randomization
 
+2/5/18
+Added a resetParameters method to reset the parameters for each randomization
+Added functionality for setting the parameters as the best stored ones in AutoTrader.py
+Added a testing variable to auto trader that makes it not read in the BEST_PARAMETERS text file each time so that if im testing i can use the same values
+
+2//7/18
+Added storage of all the values for the parameters so that they may be scaled
+Added a method to get the max of each of the parameters
+Added MODIFIED_VOLUME_MODIFIER into the parameter list (an old parameter I had forgotten when I ported things
+Added checks in case no currency is selected to be bought. In that case we just sell the current crypto and do nothing until the next check
+Fixed bug where modified volumes were cancelling themeselves out and always returning 0
+Added function to reset list of the values to be used to scale
+Changed modified_volume dictionary to contain values not lists of one value
+
+2/8/18
+Added fully randomized parameters for each bot run
+Fixed parser to only read lines of output that contain a special character printed right before the parameter list
+Added  method reWriteParameters to rewrite the paramters onto the original text file they were pulled from after all the tests
+Updated CryptoEvalutator to have have the values and MaxValues lists as well as the capability (From AutoTrader)
+Added method stringtoDict that takes the string passed (should be the string conversion of a dictionary) and parses it and returns a new dictionary object
+Added method reformatLine to takes the special string grabbed from output that contains the returned parameters. And removes the edge definer strings
+
+2/9/18
+Fixed the auto trader modified volume function so that it appropriately splits the volume up into separate cases where if it is positive or negative the majority of the
+volume associated with that interval is considered "positive"  or "negative" respectively and the minority is considered "negative" or "positive" respectively
+
+2/10/18
+Made it so that neither buybin nor sellbin can be called if either the current crypto or the past one are nothing
+
+2/11/18

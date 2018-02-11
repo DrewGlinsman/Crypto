@@ -3,13 +3,13 @@
 import random
 import sys
 import subprocess
-
-from CryptoTrainer import PARAMETERS
-
+import time
 
 def main():
+   time.sleep(1)
+
    for line in sys.stdin:
-       print(line)
+       print("LINEBEGIN" + line + "DONEEND")
 
 
 
