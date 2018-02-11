@@ -17,11 +17,13 @@ cryptoVolumeData = {}
 
 #path to save the different text files in
 cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
-
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
 #one day in ms
 ONE_DAY = 86400000
+ONE_THIRD_DAY = 28800000
 
 def getData(numDays):
+
 
   #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
   for key, value in priceSymbols.items():
@@ -35,59 +37,108 @@ def getData(numDays):
 
         #while loop with a counter to make sure that the start and endtime stay one day apart but go backwards in time, numdays amount of days
         timeBackwards = 0
-        while(timeBackwards <= ONE_DAY*numDays):
-            endTime = int(time.time()*1000) - timeBackwards
-            startTime = endTime - ONE_DAY
+        while(timeBackwards < ONE_DAY*numDays):
+            endTime = requests.get("https://api.binance.com/api/v1/time")
+            endTime = endTime.json()
+            endTime = endTime['serverTime'] - timeBackwards
+            startTime = endTime - ONE_THIRD_DAY
             parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
-            for i in data:
+            print("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), value, data))
+            for i in reversed(data):
                 oprice.write("{},".format(i[1]))
                 cprice.write("{},".format(i[4]))
                 volume.write("{},".format(i[5]))
-            timeBackwards += ONE_DAY
-
-  for key, value in priceSymbols.items():
-
-      #creating the path lengths and opening the files with read permissions
-      openPriceCryptoPath = os.path.join(cryptoPaths, value + "OpenPrice" + ".txt")
-      closePriceCryptoPath = os.path.join(cryptoPaths, value + "ClosePrice" + ".txt")
-      volumeCryptoPath = os.path.join(cryptoPaths, value + "Volume" + ".txt")
-      oprice = open(openPriceCryptoPath, "r")
-      cprice = open(closePriceCryptoPath, "r")
-      volume = open(volumeCryptoPath, "r")
-
-      #reading through each of the files
-      odata = oprice.readlines()
-      cdata = cprice.readlines()
-      vol = volume.readlines()
-
-      #iterating through each file and adding the correct data to each dictionary
-      for line in odata:
-        words = line.split(",")
-        temp = {value: words}
-        cryptoOpenPriceData.update(temp)
-      for line in cdata:
-          words = line.split(",")
-          temp = {value: words}
-          cryptoClosePriceData.update(temp)
-      for line in vol:
-          words = line.split(",")
-          temp = {value: words}
-          cryptoVolumeData.update(temp)
-          print("Volume: {}".format(words))
+            timeBackwards += ONE_THIRD_DAY
 
   #closing all the files once we're done
   oprice.close()
   cprice.close()
   volume.close()
 
-  print("Open Price Dict: {}".format(cryptoOpenPriceData))
-  print("Close Price DIct: {}".format(cryptoClosePriceData))
-  print("Volume Dict: {}". format(cryptoVolumeData))
+
+def getOpenPrice():
+    #iterating through all the crypto symbols
+    for key, value in priceSymbols.items():
+
+        # creating the path lengths and opening the openprice file with read permissions
+        openPriceCryptoPath = os.path.join(cryptoPaths, value + "OpenPrice" + ".txt")
+        oprice = open(openPriceCryptoPath, "r")
+
+        #reading through the file
+        odata = oprice.readlines()
+
+        # iterating through each file and adding the correct open prices to the dictionary
+        for line in odata:
+            words = line.split(",")
+            # if there is not already a dictionary created for the value create one and put the first value in it
+            if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
+                temp = {value: words}
+                cryptoOpenPriceData.update(temp)
+            # otherwise append the price to the list that is already there
+            else:
+                cryptoOpenPriceData[value].append(words)
+
+    return cryptoOpenPriceData
+
+def getClosePrice():
+    #iterating through all the crypto symbols
+    for key, value in priceSymbols.items():
+
+        #creating the path lengths and opening the close price file with read permissions
+        closePriceCryptoPath = os.path.join(cryptoPaths, value + "ClosePrice" + ".txt")
+        cprice = open(closePriceCryptoPath, "r")
+
+        #reading through the file
+        cdata = cprice.readlines()
+
+        #iterating through each file and adding the correct close price to the dictionary
+        for line in cdata:
+            words = line.split(",")
+            if (cryptoClosePriceData == {} or value not in cryptoClosePriceData):
+                temp = {value: words}
+                cryptoClosePriceData.update(temp)
+            else:
+                cryptoClosePriceData[value].append(words)
+
+    return cryptoClosePriceData
+
+def getVolume():
+
+    #iterate through all the crypto symbols
+    for key, value in priceSymbols.items():
+        # creating the path lengths and opening the files with read permissions
+        volumeCryptoPath = os.path.join(cryptoPaths, value + "Volume" + ".txt")
+        volume = open(volumeCryptoPath, "r")
+
+        # reading through the volume file of the files
+        vol = volume.readlines()
+
+        # iterating through each file and adding the volume data to the dictionary
+        for line in vol:
+            openprice = line.split(",")
+            if (cryptoVolumeData == {} or value not in cryptoVolumeData):
+                temp = {value: openprice}
+                cryptoVolumeData.update(temp)
+            else:
+                cryptoVolumeData[value].append(openprice)
+    return cryptoVolumeData
+
 
 def main():
-    getData(7)
+    file = open(logPath, "w")
+    a = getOpenPrice()
+    b = getClosePrice()
+    c = getVolume()
+
+    file.write("Open Price Data: {} \n".format(a))
+    file.write("----- \n")
+    file.write("Close Price Data: {} \n".format(b))
+    file.write("------ \n")
+    file.write("Volume Data: {} \n".format(c))
+
+    file.close()
 
 if __name__ == "__main__":
     main()

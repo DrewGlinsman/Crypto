@@ -87,6 +87,7 @@ paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
+#open a file for appending (a). + creates file if does not exist
 
 
 
