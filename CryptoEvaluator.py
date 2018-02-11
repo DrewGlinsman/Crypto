@@ -148,183 +148,34 @@ CUMULATIVE_PERCENT_CHANGE = 0.0
 minutesBack = 0
 
 #get the balance in bitcoins
-def getBalance(symbol):
-    '''
-    timestamp = int(time.time() * 1000) - 2000
-    # building the request query url plus other parameters(signed)
-    headers = {'X-MBX-APIKEY': api_key}
-    infoParameter = {'timestamp': timestamp}
-    query = urlencode(sorted(infoParameter.items()))
-    signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
-    query += "&signature=" + signature
 
-    # requesting account info to get the balance
-    accountInfo = requests.get("https://api.binance.com/api/v3/account?" + query, headers=headers)
-    #print(str(accountInfo.text))
-    accountInfo = accountInfo.json()["balances"]
-
-    balance = 0
-
-    for val in accountInfo:
-        if(val["asset"] == symbol):
-            balance = val["free"]
-
-    return balance
-    '''
 #buy the specified crypto currency
 def buyBin(symbol):
+
     global priceBought
-    '''
-    timestamp = int(time.time() * 1000)
-    balance = getBalance('BTC')
-    
-    #multiply balance by constant ratio of how much we want to spend
-    # and then convert quantity from BTC price to amount of coin
-    balancetospend = float(balance) * PARAMETERS['PERCENT_TO_SPEND']
     ratio = getbinanceprice(symbol)
-
-    #store the price the crypto was a bought at for cumulative percent change calculations
-    priceBought = ratio
-    '''
-
     #mark item as the current crypto being traded and save the buy price at for failure condition
-    entry = {symbol:{'buyPrice': ratio, 'timestamp': timestamp}}
+    entry = {symbol:{'buyPrice': ratio, 'timestamp': 0}}
     currencyToTrade.clear()
     currencyToTrade.update(entry)
-    '''
-    
-    quantity = balancetospend / float(ratio) * PARAMETERS['PERCENT_QUANTITY_TO_SPEND']
-    
-    
-    # set the step size for the given coin
-    stepsize = stepsizes[symbol]
-
-    # making the quantity to buy
-    print("Balance of {}: {}".format(symbol, balance))
-    file.write("Balance of {}: {}\n".format(symbol, balance))
-    quantity = float(quantity)
-
-    # based on the stepsize of the currency round the quantity to that amount
-    if (float(stepsize) == float(1)):
-        quantity = int(quantity)
-    if (float(stepsize) == 0.1):
-        quantity = math.floor(quantity * 10) / 10
-    if (float(stepsize) == 0.01):
-        quantity = math.floor(quantity * 100) / 100
-    if (float(stepsize) == 0.001):
-        quantity = math.floor(quantity * 1000) / 1000
-
-    print('Quantity to buy: {} of {}'.format(quantity, symbol))
-    file.write('Quantity to buy: {} of {} \n'.format(quantity, symbol))
-
-    #building the query string for buying(signed)
-    headers = {'X-MBX-APIKEY': api_key}
-    buyParameters = {'symbol': symbol, 'side': 'buy', 'type': 'market', 'timestamp': timestamp, 'quantity': quantity}
-    query = urlencode(sorted(buyParameters.items()))
-    signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
-    query += "&signature=" + signature
-
-    #actually buying
-   # testBuy = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
-   # print(testBuy.text)
-   # file.write(testBuy.text + "\n")
-    '''
 
 #sell the specified crypto
 def sellBin(symbol):
-    '''
-    #current time in ms
-    timestamp = int(time.time() * 1000) - 1000
-
-    #building the request query url plus other parameters(signed)
-    headers = {'X-MBX-APIKEY': api_key}
-    infoParameter = {'timestamp': timestamp}
-    query = urlencode(sorted(infoParameter.items()))
-    signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
-    query += "&signature=" + signature
-
-    #getting the account info
-    accountInfo = requests.get("https://api.binance.com/api/v3/account?" + query, headers=headers)
-
-
-    #getting rid of the 'BTC' part of the crypto asset name
-    if(len(symbol) == 6):
-        asset = symbol[0:3]
-
-    if(len(symbol) == 7):
-        asset = symbol[0:4]
-
-    if(len(symbol) == 8):
-        asset = symbol[0:5]
-
-
-    #iterating through the account info to find the balance of the coin we're selling
-    print(accountInfo.json())
-    file.write(str(accountInfo.json())+ "\n")
-    for i in accountInfo.json()["balances"]:
-        if (i["asset"] == asset):
-            balance = i["free"]
-
-    #set the step size for the given coin
-    stepsize = stepsizes[symbol]
-
-    #making the quantity to sell
-    print("Balance of (): " + str(balance))
-    file.write("Balance of (): " + str(balance) + "\n")
-    quantity = float(balance)
-
-
-    #based on the stepsize of the currency round the quantity to that amount
-    if (float(stepsize) == float(1)):
-        quantity = int(quantity)
-    if (float(stepsize) == 0.1):
-        quantity = math.floor(quantity*10)/10
-    if (float(stepsize) == 0.01):
-        quantity = math.floor(quantity*100)/100
-    if (float(stepsize) == 0.001):
-        quantity = math.floor(quantity*1000)/1000
-
-    print('Quantity to sell: {} of {}'.format(quantity, symbol))
-    file.write('Quantity to sell: {} of {} \n'.format(quantity, symbol))
-    '''
-    #building the sell query string
-    #sellParameters = {'symbol': symbol, 'side': 'sell', 'type': 'market', 'timestamp': timestamp, 'quantity': quantity}
-    #query = urlencode(sorted(sellParameters.items()))
-    #signature = hmac.new(secret_key.encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
-    q#uery += "&signature=" + signature
-
-    #actually selling
-   # testSell = requests.post("https://api.binance.com/api/v3/order?" + query, headers=headers)
-   # print(testSell.text)
-   # file.write(testSell.text + "\n")
-
-#get the binance step sizes of each crypto (the step size is the minimum significant digits allowed by binance for crypto to be traded in)
-def binStepSize():
-    #getting the dictionary of a lot of aggregate data for all symbols
-    stepsizeinfo = requests.get("https://api.binance.com/api/v1/exchangeInfo")
-    bigdata = stepsizeinfo.json()["symbols"]
-
-    #iterating through the dictionary and adding just the stepsizes into our own dictionary
-    for i in bigdata:
-        symbol = i["symbol"]
-        stepsize = i["filters"][1]["stepSize"]
-        temp = {symbol: stepsize}
-        stepsizes.update(temp)
+   return 0
 
 
 #add in the weight todo
-
 #calculates the weighted moving average over the specified interval for a crypto currency
 
 def setWeightedMovingAverage(currency, minutesBack):
     cumulativePrice = 0.0
 
-    openPriceData = CryptoStats.getOpenPrice[currency]
-    closePriceData = CryptoStats.getClosePrice[currency]
+    openPriceData = CryptoStats.getOpenPrice()[currency]
+    closePriceData = CryptoStats.getClosePrice()[currency]
 
-    slots = getLastSlot(interval, starttime, endtime) + 1
+    slots = minutesBack + 1
 
-    if data == []:
+    if openPriceData == []:
         return 0
 
     #adds up the cumulative price changes using each interval
@@ -332,6 +183,7 @@ def setWeightedMovingAverage(currency, minutesBack):
        startPrice = openPriceData[x]
        endPrice = closePriceData[x]
        change = calcPercentChange(startPrice, endPrice)
+       print("start price: {} end price: {} change: {}".format(startPrice, endPrice, change))
 
        cumulativePrice += change
 
@@ -360,6 +212,7 @@ def getVolume(currency, minutesBack):
 
     #scales the volume by the price of the crypto currency
     volume *= float(getbinanceprice(currency))
+    print("volume: {}".format(volume))
     return volume
 
 
@@ -389,7 +242,7 @@ def getModifiedVolume(currency):
             oldVolume += float(i) * -1 *(percentChangeScale) * PARAMETERS['NEGATIVE_WEIGHT']
         currentSlot += 1
 
-
+    print("Modified Volume: {}".format(oldVolume))
     return float(oldVolume)
 
 #get the binance price of the specified currency
@@ -434,8 +287,6 @@ def updateCrypto(minutesBack):
         while (i < minutesBack):
             percentChanges[value].append(calcPercentChange(openPriceData[i], closePriceData[i]))
             i += 1
-        print("Percent Changes Dictionary: {} Length of Dictionary: {}".format(percentChanges[value],
-                                                                               len(percentChanges[value])))
         # reset the lists of the volume amounts and volume percent changes
         volumeAmounts[value] = []
         volumePercentChanges[value] = []
@@ -635,9 +486,6 @@ def checkTooNegative(symbol):
     openPriceData = CryptoStats.getOpenPrice()[symbol]
     closePriceData = CryptoStats.getClosePrice()[symbol]
 
-    if (percentChange == []):
-        return 0
-
     startPrice = openPriceData[0]
     endPrice = closePriceData[0]
     percentChange = calcPercentChange(startPrice, endPrice)
@@ -689,19 +537,6 @@ def checkTooLow(currency, timesIncreasing):
 
     return 0
 
-#calculates and returns the last slot of an array or list based on the interval, starttime, and endtime
-def getLastSlot(interval, starttime, endtime):
-    difference = endtime - starttime
-    intervalInMs = intervalTypes[interval]['inMS']
-
-    if(difference == 0):
-        return 0
-
-    numIntervals = difference/intervalInMs
-
-
-    return numIntervals - 1
-
 #returns whether the specified currency is increasing or decreasing over the interval
 # 0 means decreasing, 1 means stable or increasing
 def increasingOrDecreasing(currency):
@@ -736,18 +571,12 @@ def main():
     currentCurrency = ''
     x = 0
 
-    updateCrypto(minutesBack)
-    '''
     file.write("\n\n\n\n")
     file.write('------------------------------------------------------------------------------------ \n')
 
     print("Date and Time of Run {}".format(datetime.datetime.now()))
     file.write("Date and Time of Run {} \n".format(datetime.datetime.now()))
 
-
-    initialBalance = getBalance('BTC')
-
-    binStepSize()
     while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
         t = 0
         RESTART = 0
@@ -775,7 +604,7 @@ def main():
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
-        while(t < PARAMETERS['MAX_TIME_CYCLE'] and PARAMETERS['RESTART'] == 0 and PARAMETERS['RESTART_TN'] == 0 and PARAMETERS['RESTART_LOW'] == 0):
+        while(t < PARAMETERS['MAX_TIME_CYCLE'] and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0):
             time.sleep(1)
 
             if(t % PARAMETERS['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
@@ -810,6 +639,6 @@ def main():
     file.write("\n" + "\n" + "\n")
 
     file.close()
-    '''
+
 if __name__ == "__main__":
     main()
