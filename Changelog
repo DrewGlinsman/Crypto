@@ -41,4 +41,4 @@ volume associated with that interval is considered "positive"  or "negative" res
 Made it so that neither buybin nor sellbin can be called if either the current crypto or the past one are nothing
 
 2/11/18
-
+Changed getBinancePrice to use the price api call instead of all prices so it no longer needs to iterate until it finds the coin just gets the specific coins most recent price.
