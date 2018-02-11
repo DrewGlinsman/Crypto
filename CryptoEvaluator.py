@@ -309,47 +309,11 @@ def getbinanceprice(currency):
 #method to iterate through all the cryptos available on binance and store their price changes, percent price changes,
 #volume changes, percent volume changes, scores, time increasing, and time decreasing
 
-def updateCrypto(interval, starttime, endtime, minutesBack):
-    #todo add a parameter for the amount of minutes you want to look back
-    for key,value in priceSymbols.items():
-
-
-        parameter = {'symbol': value, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
-        percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
-        percentChange = percentChange.json()
-
-        
-        
-        #calculate the percent change over the whole hour and store
-        openPrice = percentChange[0][1]
-        closePrice = percentChange[int(lastSlot)][4]
-
-        pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
-
-        #store percent by hour changes to be used later for scaling
-        values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
-
-
-        #calcualte the percent change in volume over the whole hour and store
-        openVolume = volumeData[value][0]
-        closeVolume = percentChange[int(lastSlot)][5]
-        volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
-
-
-        #store the volume percent changes by hour for later scaling
-        values['VOLUME_BY_HOUR'].append(volumePercentData[value]['percentbyhour'])
-
-        #calculate the percentage change between the minute intervals and store
-        #reset the list of stored percentages so a fresh list is stored
-        percentChanges[value] = []
-        for i in percentChange:
-            percentChanges[value].append(calcPercentChange(i[1], i[4]))
-
 
 def updateCrypto(minutesBack):
 
     for key,value in priceSymbols.items():
-        
+
         # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
         openPriceData = CryptoStats.getOpenPrice()[value]
         closePriceData = CryptoStats.getClosePrice()[value]
