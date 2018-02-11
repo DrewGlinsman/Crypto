@@ -41,21 +41,7 @@ volume associated with that interval is considered "positive"  or "negative" res
 Made it so that neither buybin nor sellbin can be called if either the current crypto or the past one are nothing
 
 2/11/18
-<<<<<<< HEAD
-<<<<<<< HEAD
 Changed getBinancePrice to use the price api call instead of all prices so it no longer needs to iterate until it finds the coin just gets the specific coins most recent price.
-=======
-=======
-=======
 Made synctatic fixes to auto trader
 Fixed bug where auto trader was not printing the endprice when checking intervals
-
->>>>>>> 835f1e647b99323f028aae0d1e86765f56a20cae
-
-
-<<<<<<< HEAD
->>>>>>> 80defa7d14703bda69341843dcf3ef91aab8d7bc
->>>>>>> df300a503c3889a9fcbfad682b8da670c321a100
->>>>>>> be653246aa77511f8b085b5bad7fb530c19bec88
-=======
->>>>>>> 835f1e647b99323f028aae0d1e86765f56a20cae
+Added volume scaling by price for the update crypto in auto trader
