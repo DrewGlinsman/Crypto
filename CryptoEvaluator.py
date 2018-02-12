@@ -28,18 +28,6 @@ except ImportError:
     from urllib.parse import urlencode
 
 
-paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
-
-
-#param file name + path
-
-#todo change to "BEST_PARAMETERS" when actually running
-paramCompletePath = os.path.join(paramPaths, "testlog.txt")
-
-
-#open a file for appending (a). + creates file if does not exist
-file = open(paramCompletePath, "w")
-
 #todo find a way to get the parameters specific to this run from CrytpoTrainer
 #todo add function to pull data from text files by day into data structures here
 
