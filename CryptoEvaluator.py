@@ -28,8 +28,6 @@ except ImportError:
     from urllib.parse import urlencode
 
 
-#todo find a way to get the parameters specific to this run from CrytpoTrainer
-#todo add function to pull data from text files by day into data structures here
 
 #GLOBAL_VARIABLES
 
