@@ -4,6 +4,7 @@
 import os
 import datetime
 
+from AutoTrader import priceSymbols
 
 class CryptoStatsAnalysis:
 
@@ -37,3 +38,40 @@ class CryptoStatsAnalysis:
 
         # open a file for appending (a). + creates file if does not exist
         file = open(logCompletePath, "a+")
+
+        #Storage Variables: variables used for storing different attributes for the cryptos from each successive buy/sell period
+
+        #holds the score, and calculated basic mean for all the cryptos and whether they were BOUGHT, CHOSEN, or NOTCHOSEN. Each successive iteration uses a different dictionary, should also include buy and sell times
+        runStats = []
+
+        #FINAL VARIABLES: anything used for final evaluation
+        #dictionary where every crypto chosen to be bought is stored and whether they increased or decreased
+        finalChosen = {}
+
+        #dictionary where every crypto that qualified for potentially buying is stored and whether they increased or decreased
+        narrowedDown = {}
+
+        #the list of correlations between the score order and percent change for each buy
+        correlations = []
+
+        #the average correlation between the score order and the percent change
+        averageCorrelation = []
+
+    def newStats(self, statsList):
+        statsList.append(self.newCryptoDict())
+
+    def newCryptoDict(self):
+        newDict = {}
+        for key, value in priceSymbols.items():
+            newDict.update({value: CryptoHolder(value)})
+
+        return newDict
+
+class CryptoHolder():
+
+    #decision can be B for bought, C for chosen, or NC for not chosen
+    def __init__(self, cryptoName):
+        symbol = cryptoName
+        score = 0.0
+        mean = 0.0
+        decision = 'NC'

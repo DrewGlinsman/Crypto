@@ -29,9 +29,10 @@ except ImportError:
     from urllib.parse import urlencode
 
 
-#todo find a way to get the parameters specific to this run from CrytpoTrainer
+#todo make a series of functions used that have random variables in them and random variables left out instead of a simple linear score and simple parameter variation
 #todo add function to pull data from text files by day into data structures here
-
+#todo add in a parser for the stdin
+#todo add in a print statement to send back the parameters
 
 #GLOBAL_VARIABLES
 
