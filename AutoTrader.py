@@ -10,6 +10,9 @@
 #todo continued... every crypto and store the mean in a list so it can be continuously calculated
 #todo continued remember to reset the time values on best parameters.txt
 
+#import for python3 to increase compatability
+from __future__ import absolute_import
+
 import requests
 import hmac
 import hashlib
@@ -18,9 +21,9 @@ import math
 import datetime
 import os.path
 
-from multiprocessing import Pool
-from PrivateData import api_key, secret_key, solume_api_key
 
+from PrivateData import api_key, secret_key, solume_api_key
+import CryptoStatAnalysis
 
 try:
     from urlib import urlencode
@@ -358,8 +361,7 @@ def binStepSize():
         stepsizes.update(temp)
 
 
-#add in the weight todo
-
+#todo add in a weight
 #calculates the weighted moving average over the specified interval for a crypto currency
 
 def setWeightedMovingAverage(currency, interval, starttime, endtime):
@@ -912,6 +914,7 @@ def main():
     currentCurrency = ''
     x = 0
 
+    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(1, 'NT')
 
     info = requests.get("https://api.binance.com/api/v1/exchangeInfo")
     print(info.text)
@@ -947,6 +950,7 @@ def main():
         currentCurrency = priceChecker()
 
         print("Curr currency main " + str(currentCurrency))
+        if(oldCurrency != currentCurrency and oldCurrency != ''):
         if(oldCurrency != currentCurrency and oldCurrency != '' and currentCurrency != ''):
 
             pricesold = getbinanceprice(currentCurrency)
@@ -965,14 +969,16 @@ def main():
             print("THIS RUN SOLD AT: {}".format(datetime.datetime.time(datetime.datetime.now())))
             file.write("THIS RUN SOLD AT: {} \n".format(datetime.datetime.time(datetime.datetime.now())))
 
-        if(oldCurrency != currentCurrency and currentCurrency != '' and oldCurrency != ''):
+
+
+        if(oldCurrency != currentCurrency and currentCurrency != ''):
             buyBin(currentCurrency)
             print("THIS RUN BOUGHT AT: {}".format(datetime.datetime.time(datetime.datetime.now())))
             file.write("THIS RUN BOUGHT AT: {}".format(datetime.datetime.time(datetime.datetime.now())))
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
-        while(t < PARAMETERS['MAX_TIME_CYCLE'] and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0 and currentCurrency != '' and oldCurrency != ''):
+        while(t < PARAMETERS['MAX_TIME_CYCLE'] and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0 and currentCurrency != ''):
             time.sleep(1)
 
             if(t % PARAMETERS['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
@@ -986,7 +992,7 @@ def main():
             t+=1
 
         #just wait 300 seconds before running through again if no crypto was chosen
-        if currentCurrency == '':
+        if currentCurrency == '' or (currentCurrency == oldCurrency):
             time.sleep(300)
 
 
@@ -994,6 +1000,7 @@ def main():
             EXIT = checkExitCondition(currentCurrency)
         x+=1
 
+    cryptoRunStats.newStats()
     print("Cumualtive percent change over the life of all cryptos owneed so far {}".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
     file.write("Cumualtive percent change over the life of all cryptos owneed so far {} \n".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
     sellBin(currentCurrency)

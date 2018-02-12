@@ -79,8 +79,8 @@ NUM_ITERATIONS = 10
 final_Dict = {}
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
 
 #param file name + path
