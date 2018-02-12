@@ -30,11 +30,13 @@ except ImportError:
 
 #todo make a series of functions used that have random variables in them and random variables left out instead of a simple linear score and simple parameter variation
 #todo add function to pull data from text files by day into data structures here
+
 #todo add in a parser for the stdin
 #todo add in a print statement to send back the parameters
 
 logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
 file = open(logPath, "w")
+
 #GLOBAL_VARIABLES
 
 #0 is false, 1 is true
