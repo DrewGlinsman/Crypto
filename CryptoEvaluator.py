@@ -32,23 +32,6 @@ except ImportError:
 #todo find a way to get the parameters specific to this run from CrytpoTrainer
 #todo add function to pull data from text files by day into data structures here
 
-#Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-logPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
-
-#log file name + path
-
-
-logCompletePath = os.path.join(logPaths, "log.txt")
-drewTestLogPath = os.path.join(logPaths, "testlog.txt")
-
-#open a file for appending (a). + creates file if does not exist
-test = open(drewTestLogPath, "a+")
-
-logCompletePath = os.path.join(logPaths, "log.txt")
-
-#open a file for appending (a). + creates file if does not exist
-file = open(logCompletePath, "a+")
 
 #GLOBAL_VARIABLES
 
@@ -335,7 +318,6 @@ def updateCrypto(minutesBack):
 
         for i in range(1, minutesBack):
             volumePercentChanges[value].append(calcPercentChange(volumeData[i-1], volumeData[i]))
-            print("Currency {}: Volume: {}".format(value, volumeData[i]))
             volumeAmounts[value].append(volumeData[i])
 
          # calculate and store the percent time increasing for volume and price percent changes
@@ -491,16 +473,14 @@ def priceChecker():
     maxScore = 0
     for key, value in currencyToTrade.items():
         print("The score of {} is {} ".format(key, scores[key]))
-        file.write("The score of {} is {} \n".format(key, scores[key]))
+
 
         if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(PARAMETERS['MINIMUM_MOVING_AVERAGE'])):
             maxScore = scores[key]
             print("CURRENT HIGH SCORE: The score of {} is {}".format(key, scores[key]))
-            file.write("CURRENT HIGH SCORE: The score of {} is {} \n".format(key, scores[key]))
             currencyToBuy = key
 
     print("Coin with the highest score is {} which is {}".format(currencyToBuy, maxScore))
-    file.write("Coin with the highest score is {} which is {} \n".format(currencyToBuy, maxScore))
 
     return currencyToBuy #potential runtime error if all negative todo
 
@@ -518,7 +498,6 @@ def calcPercentChange(startVal, endVal):
 def checkFailureCondition(currency, timesIncreasing, minutesBack):
 
     print("New Interval")
-    file.write("New Interval")
 
     openPriceData = CryptoStats.getOpenPrice()[currency]
     closePriceData = CryptoStats.getClosePrice()[currency]
@@ -532,7 +511,6 @@ def checkFailureCondition(currency, timesIncreasing, minutesBack):
         startPrice = openPriceData[x]
         endPrice = closePriceData[x]
         print("Current Crypto: {} Start Price: {} End Price: ".format(currency, startPrice, endPrice))
-        file.write("Current Crypto: {} Start Price: {} End Price: \n".format(currency, startPrice, endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
             timeIncreasingCounter += 1
@@ -540,13 +518,10 @@ def checkFailureCondition(currency, timesIncreasing, minutesBack):
 
     intervalPercentChange = calcPercentChange(startPriceInterval, endPrice)
     print("Cumulative percent change over THIS INTERVAL {}".format(intervalPercentChange))
-    file.write("Cumulative percent change over THIS INTERVAL {} \n".format(intervalPercentChange))
     print("Times Increasing over the interval: {}".format(timeIncreasingCounter))
-    file.write("Times Increasing over the interval: {} \n".format(timeIncreasingCounter))
 
     if(timeIncreasingCounter <= timesIncreasing):
         print("DECREASED ALL INTERVALS. RESTART")
-        file.write("DECREASED ALL INTERVALS. RESTART")
         return 1
 
     return 0
@@ -563,7 +538,6 @@ def checkTooNegative(symbol):
 
     if(percentChange < PARAMETERS['MAX_DECREASE']):
         print("TOO NEGATIVE. RESTART")
-        file.write("TOO NEGATIVE. RESTART")
         return 1
 
     return 0
@@ -630,22 +604,6 @@ def resetValues():
     for key, value in values.items():
         values[key] = []
 
-        
-# function just resets parameters to the best stored parameters
-def resetParameters(paramDict):
-    valList = []
-    count = 0
-    file.seek(0)
-
-    for line in file:
-        val = line.split(': ')[1]
-        trueVal = val.split(',')[0]
-        trueVal = float(trueVal)
-        valList.append(trueVal)
-
-    for key, value in paramDict.items():
-        paramDict[key] = valList[count]
-        count += 1
 
 #runs through the values collected and storess the max value
 def setMaxValue():
@@ -661,6 +619,8 @@ def setMaxValue():
     print("THE VALUES {}".format(values))
     print("THE MAX {}".format(maxValues))
 
+#todo add in a parser to read the stdin that will be passed with the parameters from cryptotrainer
+
 def main():
     global CUMULATIVE_PERCENT_CHANGE
     global initialBalance
@@ -674,11 +634,8 @@ def main():
     currentCurrency = ''
     x = 0
 
-    file.write("\n\n\n\n")
-    file.write('------------------------------------------------------------------------------------ \n')
 
     print("Date and Time of Run {}".format(datetime.datetime.now()))
-    file.write("Date and Time of Run {} \n".format(datetime.datetime.now()))
 
     while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
         t = 0
@@ -698,12 +655,10 @@ def main():
         if(oldCurrency != currentCurrency and oldCurrency != ''):
             sellBin(oldCurrency)
             print("THIS RUN SOLD AT: {}".format(datetime.datetime.time(datetime.datetime.now())))
-            file.write("THIS RUN SOLD AT: {} \n".format(datetime.datetime.time(datetime.datetime.now())))
 
         if(oldCurrency != currentCurrency):
             buyBin(currentCurrency)
             print("THIS RUN BOUGHT AT: {}".format(datetime.datetime.time(datetime.datetime.now())))
-            file.write("THIS RUN BOUGHT AT: {}".format(datetime.datetime.time(datetime.datetime.now())))
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
@@ -724,26 +679,18 @@ def main():
 
         pricesold = getbinanceprice(currentCurrency)
         print('Price bought: {} Price sold: {} '.format(priceBought, pricesold))
-        file.write('Price bought: {} Price sold: {} \n'.format(priceBought, pricesold))
 
         cumulativePercentChange = calcPercentChange(priceBought, pricesold)
         PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
         print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
-        file.write("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
 
 
         EXIT = checkExitCondition(currentCurrency)
         x+=1
 
     print("Cumualtive percent change over the life of all cryptos owneed so far {}".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
-    file.write("Cumualtive percent change over the life of all cryptos owneed so far {} \n".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
     sellBin(currentCurrency)
 
-
-    file.write('---------------------------||||||||||||||||----------------------------------------' + "\n")
-    file.write("\n" + "\n" + "\n")
-
-    file.close()
 
 if __name__ == "__main__":
     main()

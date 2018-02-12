@@ -3,6 +3,8 @@ import time
 import requests
 import os
 
+#ADDS TO THE LIST IN REVERSE CHRONOLOGICAL ORDER SO WHENEVER ITERATING THROUGH BACKTESTED DATA USE THE REVERSE FUNCTION
+
 #dictionary that contains all the symbols for the binance API calls
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
@@ -40,6 +42,7 @@ def getData(numDays):
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
             print("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), value, data))
+            for i in data:
                 oprice.write("{},".format(i[1]))
                 cprice.write("{},".format(i[4]))
                 volume.write("{},".format(i[5]))
