@@ -8,6 +8,7 @@
 #todo add suspect youtube channels from reddit list
 #todo make a true weighted mean function that pulls the most recent price every minute from the current crypto and calculates the new mean (if possible pull
 #todo continued... every crypto and store the mean in a list so it can be continuously calculated
+#todo continued remember to reset the time values on best parameters.txt
 
 #import for python3 to increase compatability
 from __future__ import absolute_import
@@ -950,7 +951,21 @@ def main():
 
         print("Curr currency main " + str(currentCurrency))
         if(oldCurrency != currentCurrency and oldCurrency != ''):
+        if(oldCurrency != currentCurrency and oldCurrency != '' and currentCurrency != ''):
+
+            pricesold = getbinanceprice(currentCurrency)
             sellBin(oldCurrency)
+
+            print('Price bought: {} Price sold: {} '.format(priceBought, pricesold))
+            file.write('Price bought: {} Price sold: {} \n'.format(priceBought, pricesold))
+
+            cumulativePercentChange = calcPercentChange(priceBought, pricesold)
+            PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = cumulativePercentChange
+            PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
+
+            print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE']))
+            file.write("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE']))
+
             print("THIS RUN SOLD AT: {}".format(datetime.datetime.time(datetime.datetime.now())))
             file.write("THIS RUN SOLD AT: {} \n".format(datetime.datetime.time(datetime.datetime.now())))
 
@@ -982,15 +997,6 @@ def main():
 
 
         if currentCurrency != '':
-            pricesold = getbinanceprice(currentCurrency)
-            print('Price bought: {} Price sold: {} '.format(priceBought, pricesold))
-            file.write('Price bought: {} Price sold: {} \n'.format(priceBought, pricesold))
-
-            cumulativePercentChange = calcPercentChange(priceBought, pricesold)
-            PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
-            print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
-            file.write("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
-
             EXIT = checkExitCondition(currentCurrency)
         x+=1
 
