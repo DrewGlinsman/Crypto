@@ -499,7 +499,7 @@ def updateCrypto(interval, starttime, endtime):
         values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
 
         #used to scale the volume
-        priceScale = getbinanceprice(value)
+        priceScale = float(getbinanceprice(value))
 
         #calcualte the percent change in volume over the whole hour and store
         openVolume = percentChange[0][5] * priceScale
