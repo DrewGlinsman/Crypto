@@ -2,7 +2,7 @@
 import time
 import requests
 import os
-
+import datetime
 
 #dictionary that contains all the symbols for the binance API calls
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -40,7 +40,6 @@ def getData(numDays):
             parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
-            print("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), value, data))
             for i in reversed(data):
                 oprice.write("{},".format(i[1]))
                 cprice.write("{},".format(i[4]))
@@ -58,19 +57,28 @@ def main():
     timefile = open(timefilePath, "r")
     timestamp = int(timefile.readline())
     timefile.close()
-    count = 1
+
+    #after reading in timestamp convert to a date time object and then strip it down to only hours minutes and seconds
+    timestamp = datetime.datetime.fromtimestamp(timestamp/1000.0).time()
+    timestamp = int(timestamp.strftime("%H%M%S"))
+
+    print("{}".format(timestamp))
+
     #infinite loop to keep the program running where it will get the data at
-    # the exact same timestamp everytime (the time stamp taken from the text file)
     while(0<1):
-        currentTime = int(time.time()*1000) - ONE_DAY * count
-        print("Timestamp: {} Current Time: {}".format(timestamp,currentTime))
-        if(currentTime <= timestamp):
+
+        #get the current time stamp and convert it into a time with only hours minutes and seconds
+        currentTime = int(time.time()*1000)
+        currentTime = datetime.datetime.fromtimestamp(currentTime/1000.0)
+        currentTime = int(currentTime.strftime("%H%M%S"))
+
+        if(currentTime != timestamp):
             print("Current Time: {} Timestamp to get to: {}".format(currentTime, timestamp))
             time.sleep(1)
         else:
             print("Getting data")
             getData(1)
-            count+=1
+ 
 
 if __name__ == "__main__":
     main()
