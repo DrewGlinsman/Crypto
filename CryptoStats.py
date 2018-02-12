@@ -98,7 +98,6 @@ def getOpenPrice():
                 # otherwise append the price to the list that is already there
                 else:
                     cryptoOpenPriceData[value].append(words)
-    print("Size taken up by dictionary: {}".format(sys.getsizeof(cryptoOpenPriceData)))
     return cryptoOpenPriceData
 
 def getClosePrice():
@@ -121,7 +120,6 @@ def getClosePrice():
                     cryptoClosePriceData.update(temp)
                 else:
                     cryptoClosePriceData[value].append(words)
-    print("Size taken up by dictionary: {}".format(sys.getsizeof(cryptoClosePriceData)))
     return cryptoClosePriceData
 
 def getVolume():
@@ -143,7 +141,6 @@ def getVolume():
                     cryptoVolumeData.update(temp)
                 else:
                     cryptoVolumeData[value].append(openprice)
-    print("Size taken up by dictionary: {}".format(sys.getsizeof(cryptoVolumeData)))
     return cryptoVolumeData
 
 def main():
