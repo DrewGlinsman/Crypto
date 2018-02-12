@@ -9,7 +9,6 @@ import math
 import datetime
 import os.path
 
-
 import CryptoStats
 
 from multiprocessing import Pool
@@ -32,7 +31,8 @@ except ImportError:
 #todo find a way to get the parameters specific to this run from CrytpoTrainer
 #todo add function to pull data from text files by day into data structures here
 
-
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
+file = open(logPath, "w")
 #GLOBAL_VARIABLES
 
 #0 is false, 1 is true
@@ -268,6 +268,7 @@ def updateCrypto(minutesBack):
     for key,value in priceSymbols.items():
 
         # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
+        file.write("{}".format(CryptoStats.getOpenPrice()))
         openPriceData = CryptoStats.getOpenPrice()[value]
         closePriceData = CryptoStats.getClosePrice()[value]
         volumeData = getVolume(value, minutesBack)
@@ -433,7 +434,8 @@ def getScore(symbol):
     # setting up the scaled values for checking
     values['VOLUME_BY_HOUR'].append(volumePercentData[symbol]['percentbyhour'] / maxValues['VOLUME_BY_HOUR'])
     values['PERCENT_BY_HOUR'].append(((pricePercentData[symbol]['percentbyhour']) / maxValues['PERCENT_BY_HOUR']))
-    values['TIME_INCREASING'].append(pricePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
+    if(maxValues['TIME_INCREASING']!=0):
+        values['TIME_INCREASING'].append(pricePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
     values['VOLUME_TIME_INCREASING'].append(volumePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
     values['WEIGHTED_TIME_INCREASING'].append((pricePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_TIME_INCREASING']))
     values['WEIGHTED_VOLUME_TIME_INCREASING'].append((volumePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_VOLUME_TIME_INCREASING']))

@@ -1,7 +1,7 @@
 import time
 import requests
 import os
-
+import sys
 
 #dictionary that contains all the symbols for the binance API calls
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -75,73 +75,76 @@ def binStepSize():
 
 
 
+
 def getOpenPrice():
-    #iterating through all the crypto symbols
-    for key, value in priceSymbols.items():
+    if(cryptoOpenPriceData == {}):
+        #iterating through all the crypto symbols
+        for key, value in priceSymbols.items():
 
-        # creating the path lengths and opening the openprice file with read permissions
-        openPriceCryptoPath = os.path.join(cryptoPaths, value + "OpenPrice" + ".txt")
-        oprice = open(openPriceCryptoPath, "r")
+            # creating the path lengths and opening the openprice file with read permissions
+            openPriceCryptoPath = os.path.join(cryptoPaths, value + "OpenPrice" + ".txt")
+            oprice = open(openPriceCryptoPath, "r")
 
-        #reading through the file
-        odata = oprice.readlines()
+            #reading through the file
+            odata = oprice.readlines()
 
-        # iterating through each file and adding the correct open prices to the dictionary
-        for line in odata:
-            words = line.split(",")
-            # if there is not already a dictionary created for the value create one and put the first value in it
-            if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
-                temp = {value: words}
-                cryptoOpenPriceData.update(temp)
-            # otherwise append the price to the list that is already there
-            else:
-                cryptoOpenPriceData[value].append(words)
-
+            # iterating through each file and adding the correct open prices to the dictionary
+            for line in odata:
+                words = line.split(",")
+                # if there is not already a dictionary created for the value create one and put the first value in it
+                if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
+                    temp = {value: words}
+                    cryptoOpenPriceData.update(temp)
+                # otherwise append the price to the list that is already there
+                else:
+                    cryptoOpenPriceData[value].append(words)
+    print("Size taken up by dictionary: {}".format(sys.getsizeof(cryptoOpenPriceData)))
     return cryptoOpenPriceData
 
 def getClosePrice():
-    #iterating through all the crypto symbols
-    for key, value in priceSymbols.items():
+    if(cryptoClosePriceData == {}):
+        #iterating through all the crypto symbols
+        for key, value in priceSymbols.items():
 
-        #creating the path lengths and opening the close price file with read permissions
-        closePriceCryptoPath = os.path.join(cryptoPaths, value + "ClosePrice" + ".txt")
-        cprice = open(closePriceCryptoPath, "r")
+            #creating the path lengths and opening the close price file with read permissions
+            closePriceCryptoPath = os.path.join(cryptoPaths, value + "ClosePrice" + ".txt")
+            cprice = open(closePriceCryptoPath, "r")
 
-        #reading through the file
-        cdata = cprice.readlines()
+            #reading through the file
+            cdata = cprice.readlines()
 
-        #iterating through each file and adding the correct close price to the dictionary
-        for line in cdata:
-            words = line.split(",")
-            if (cryptoClosePriceData == {} or value not in cryptoClosePriceData):
-                temp = {value: words}
-                cryptoClosePriceData.update(temp)
-            else:
-                cryptoClosePriceData[value].append(words)
-
+            #iterating through each file and adding the correct close price to the dictionary
+            for line in cdata:
+                words = line.split(",")
+                if (cryptoClosePriceData == {} or value not in cryptoClosePriceData):
+                    temp = {value: words}
+                    cryptoClosePriceData.update(temp)
+                else:
+                    cryptoClosePriceData[value].append(words)
+    print("Size taken up by dictionary: {}".format(sys.getsizeof(cryptoClosePriceData)))
     return cryptoClosePriceData
 
 def getVolume():
+    if(cryptoVolumeData == {}):
+        #iterate through all the crypto symbols
+        for key, value in priceSymbols.items():
+            # creating the path lengths and opening the files with read permissions
+            volumeCryptoPath = os.path.join(cryptoPaths, value + "Volume" + ".txt")
+            volume = open(volumeCryptoPath, "r")
 
-    #iterate through all the crypto symbols
-    for key, value in priceSymbols.items():
-        # creating the path lengths and opening the files with read permissions
-        volumeCryptoPath = os.path.join(cryptoPaths, value + "Volume" + ".txt")
-        volume = open(volumeCryptoPath, "r")
+            # reading through the volume file of the files
+            vol = volume.readlines()
 
-        # reading through the volume file of the files
-        vol = volume.readlines()
-
-        # iterating through each file and adding the volume data to the dictionary
-        for line in vol:
-            openprice = line.split(",")
-            if (cryptoVolumeData == {} or value not in cryptoVolumeData):
-                temp = {value: openprice}
-                cryptoVolumeData.update(temp)
-            else:
-                cryptoVolumeData[value].append(openprice)
+            # iterating through each file and adding the volume data to the dictionary
+            for line in vol:
+                openprice = line.split(",")
+                if (cryptoVolumeData == {} or value not in cryptoVolumeData):
+                    temp = {value: openprice}
+                    cryptoVolumeData.update(temp)
+                else:
+                    cryptoVolumeData[value].append(openprice)
+    print("Size taken up by dictionary: {}".format(sys.getsizeof(cryptoVolumeData)))
     return cryptoVolumeData
-
 
 def main():
     getData(COUNT)
