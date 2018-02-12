@@ -14,6 +14,7 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
 cryptoOpenPriceData = {}
 cryptoClosePriceData = {}
 cryptoVolumeData = {}
+stepsize = {}
 
 #path to save the different text files in
 cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
@@ -57,6 +58,21 @@ def getData(numDays):
   oprice.close()
   cprice.close()
   volume.close()
+
+#get the binance step sizes of each crypto (the step size is the minimum significant digits allowed by binance for crypto to be traded in)
+def binStepSize():
+    #getting the dictionary of a lot of aggregate data for all symbols
+    global stepsize
+    stepsizeinfo = requests.get("https://api.binance.com/api/v1/exchangeInfo")
+    bigdata = stepsizeinfo.json()["symbols"]
+
+    #iterating through the dictionary and adding just the stepsizes into our own dictionary
+    for i in bigdata:
+        symbol = i["symbol"]
+        stepsize = i["filters"][1]["stepSize"]
+        temp = {symbol: stepsize}
+        stepsizes.update(temp)
+
 
 
 def getOpenPrice():
