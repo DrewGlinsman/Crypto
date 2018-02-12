@@ -17,8 +17,8 @@ cryptoVolumeData = {}
 stepsize = {}
 
 #path to save the different text files in
-#cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
-cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
+cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
+#cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
 
 #one day in ms
 ONE_DAY = 86400000

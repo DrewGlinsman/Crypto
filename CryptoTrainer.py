@@ -80,8 +80,8 @@ NUM_ITERATIONS = 3
 final_Dict = {}
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
 
 #param file name + path
@@ -247,7 +247,7 @@ def main():
         out = proc.communicate(input = str(PARAMETERS))
         timestamp = int(time.time() * 1000)
         print(str(timestamp))
-
+        print(str(out))
         #walks through the output from the instance of tester and strips it of the parameters used
         #then stores the parameters if they netted a larger % change than the previous max
         for line in out:
@@ -275,7 +275,7 @@ def main():
             if cumulativePerentChangeStore >= current_Max or count == 0:
                 current_Max = cumulativePerentChangeStore
                 stored_output = reform
-            count += 1
+        count += 1
         #reset the parameters dictionary to the original "best" one from the file
         resetParameters(PARAMETERS)
 

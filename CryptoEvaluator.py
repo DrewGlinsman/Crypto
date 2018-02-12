@@ -35,13 +35,13 @@ except ImportError:
 
 #todo add in a parser for the stdin
 #todo add in a print statement to send back the parameters
-logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
-#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
+#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
 file = open(logPath, "w")
 
 
-#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
 
 #param file name + path
 
