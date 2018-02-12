@@ -36,8 +36,8 @@ TESTING = 1
 
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-
+#ogPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+logPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
 #log file name + path
 logCompletePath = os.path.join(logPaths, "log.txt")
 
@@ -45,7 +45,8 @@ logCompletePath = os.path.join(logPaths, "log.txt")
 file = open(logCompletePath, "a+")
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+paramPaths= r'C:\Users\DrewG\Documents\Github\Crypto'
 
 #param file name + path
 paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
@@ -504,8 +505,8 @@ def updateCrypto(interval, starttime, endtime):
         priceScale = float(getbinanceprice(value))
 
         #calcualte the percent change in volume over the whole hour and store
-        openVolume = percentChange[0][5] * priceScale
-        closeVolume = percentChange[int(lastSlot)][5] * priceScale
+        openVolume = float(percentChange[0][5]) * priceScale
+        closeVolume = float(percentChange[int(lastSlot)][5]) * priceScale
         volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
 
         # store the volume change by hour to be used later for scaling
@@ -524,15 +525,15 @@ def updateCrypto(interval, starttime, endtime):
         volumePercentChanges[value][:] = []
 
         #grabs and stores the volume from the first two intervals that are skipped in the for loop below
-        volumeAmounts[value].append(percentChange[0][5]) * priceScale
-        volumeAmounts[value].append(percentChange[1][5]) * priceScale
+        volumeAmounts[value].append(float(percentChange[0][5]) * priceScale)
+        volumeAmounts[value].append(float(percentChange[1][5]) * priceScale)
 
 
 
         #stores the volume percent changes and the volume amounts
         for i in range(2, len(percentChange)):
-           volumePercentChanges[value].append(calcPercentChange(percentChange[i-1][5] * priceScale, percentChange[i][5] * priceScale))
-           volumeAmounts[value].append(percentChange[i][5]) * priceScale
+           volumePercentChanges[value].append(calcPercentChange(float(percentChange[i-1][5]) * priceScale, float(percentChange[i][5]) * priceScale))
+           volumeAmounts[value].append(float(percentChange[i][5]) * priceScale)
 
         #calculate and store the percent time increasing for volume and price percent changes
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)

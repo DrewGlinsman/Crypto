@@ -50,3 +50,4 @@ Removed the file writing from CryptoEvaluator
 Added special import to AutoTrader and an instance of the CrptoStatAnalysis class
 Added initialization variables for the CryptoStatAnalyis class that hold score, mean percent price change, and different choice data
 Added another class in CryptoStatAnalysis that holds different stats for each crypto
+Got CryptoEvaluator to be API independent
