@@ -4,6 +4,7 @@
 #todo add a function to randomize the parameters when requested
 #todo update the best parameters text file
 #todo make the randomize parameters function implement the different types of randomization
+#todo make it so that every test having extremely negative output does not still overwrite best parameters
 
 import sys
 import random
@@ -47,9 +48,9 @@ from PrivateData import api_key, secret_key
 #WAIT_FOR_CHECK_TOO_LOW: the number of ticks before ethe program checks to see if a crypto has decreased too low to its starting point
 
 
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.5, 'MINIMUM_MOVING_AVERAGE': .01, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0}
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0}
 
-
+UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_T)O_LOW']
 
 
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -72,7 +73,7 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS=[]
 
 #number of iterations of bot
-NUM_ITERATIONS = 10
+NUM_ITERATIONS = 3
 
 
 #final dictionary returned to be rewritten to file
@@ -92,34 +93,40 @@ paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
 
+def keyCheck(key):
+    for i in UNCHANGED_PARAMS:
+        if i == key:
+            return 1
+
+    return 0
+
 #randomizes the parameters before sending them to a subprocess
 #typeOfRandom determines what kinds of randomization occurs
 #type 0 means normal, type 1 means larger range of randomization
 #type 3 means none
-
-
-
 #TODO remember after to testing not to randomize stuff like cumulative percent change store (i.e data)
 def randomizeParams(paramDict, typeOfRandom):
     #default range size and stepSize
-    range = 2.0
+    range = 5.0
     randVal = 0.0
     if(typeOfRandom == 3):
         return 0
     if (typeOfRandom == 0):
         for key, value in paramDict.items():
-            randVal = paramDict[key]
-            randVal += random.uniform(-1,1) * range
-            paramDict[key] = randVal
+            if(keyCheck(key)):
+                randVal = paramDict[key]
+                randVal += random.uniform(-1,1) * range
+                paramDict[key] = randVal
 
 
     #todo add a normal kind of randomization
     if(typeOfRandom == 1):
         range = 100.0
         for key, value in paramDict.items():
-            randVal = paramDict[key]
-            randVal += random.uniform(-1,1) * range
-            paramDict[key] = randVal
+            if(keyCheck(key)):
+                randVal = paramDict[key]
+                randVal += random.uniform(-1,1) * range
+                paramDict[key] = randVal
 
     #todo add a special kind of randomization
 
@@ -132,7 +139,6 @@ def resetParameters(paramDict):
 
     #loop over the file and split the lines by space and , meaning you only get the value
     for line in file:
-
         val = line.split(' ')[1]
         trueVal = val.split(',')[0]
         trueVal = float(trueVal)
@@ -152,9 +158,14 @@ def reWriteParameters(paramDict):
     file.seek(0)
 
     for key, value in paramDict.items():
+        #if we are at the very last parameter do not print a new line
+        if key == 'WAIT_FOR_CHECK_TOO_LOW':
+            print('\'%s\': %s,' % (key, value))
+            file.write('\'%s\': %s,' % (key, value))
 
-        print('\'%s\': %s,\n' % (key, value))
-        file.write('\'%s\': %s,\n' % (key, value))
+        if key != 'WAIT_FOR_CHECK_TOO_LOW':
+            print('\'%s\': %s,\n' % (key, value))
+            file.write('\'%s\': %s,\n' % (key, value))
 
 #converts the given string to a Dict. Used to parse the returned string from the bots being trained
 def stringToDict(stringToChange):
@@ -214,12 +225,13 @@ def main():
     for i in range(NUM_ITERATIONS):
 
 
-        proc = Popen([sys.executable, 'tester.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stdin = PIPE, stderr=PIPE,bufsize=1, universal_newlines=True)
+        proc = Popen([sys.executable, 'CryptoEvaluator.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stdin = PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
         procs.append(proc)
 
     #randomizes parameters and runs different instances of the bot using the different starting parameters
     for proc in procs:
         reform = ''
+
 
         randomizeParams(PARAMETERS, typeOfRandom)
 
@@ -235,10 +247,11 @@ def main():
         out = proc.communicate(input = str(PARAMETERS))
         timestamp = int(time.time() * 1000)
         print(str(timestamp))
-        count+=1
+
         #walks through the output from the instance of tester and strips it of the parameters used
         #then stores the parameters if they netted a larger % change than the previous max
         for line in out:
+            print(line)
             #to avoid parsing a line that does not contain this special word indicator
             if "LINEBEGIN" not in line:
                 break
@@ -259,9 +272,10 @@ def main():
             print(str(cumulativePerentChangeStore))
 
             #if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
-            if cumulativePerentChangeStore >= current_Max:
+            if cumulativePerentChangeStore >= current_Max or count == 0:
                 current_Max = cumulativePerentChangeStore
                 stored_output = reform
+            count += 1
         #reset the parameters dictionary to the original "best" one from the file
         resetParameters(PARAMETERS)
 

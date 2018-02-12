@@ -4,3 +4,6 @@
 .idea/vcs.xml
 .idea/modules.xml
 .idea/workspace.xml
+__pycache__/CryptoStats.cpython-36.pyc
+__pycache__/CryptoTrainer.cpython-36.pyc
+__pycache__/PrivateData.cpython-36.pyc

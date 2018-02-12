@@ -8,6 +8,7 @@ import time
 import math
 import datetime
 import os.path
+import sys
 
 import CryptoStats
 
@@ -27,6 +28,29 @@ try:
 except ImportError:
     from urllib.parse import urlencode
 
+
+
+#todo make a series of functions used that have random variables in them and random variables left out instead of a simple linear score and simple parameter variation
+#todo add function to pull data from text files by day into data structures here
+
+#todo add in a parser for the stdin
+#todo add in a print statement to send back the parameters
+logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
+#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
+file = open(logPath, "w")
+
+
+#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
+paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+
+#param file name + path
+
+#todo change to "BEST_PARAMETERS" when actually running
+paramCompletePath = os.path.join(paramPaths, "testlog.txt")
+
+
+#open a file for appending (a). + creates file if does not exist
+file = open(paramCompletePath, "w")
 
 
 #GLOBAL_VARIABLES
@@ -153,6 +177,33 @@ PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM
 startMinute = 0
 endMinute = 60
 currentMinute = 0
+
+
+def readTheInput():
+    stringKeySplit = ''
+    stringValSplit = ''
+    counter = 0
+
+    for line in sys.stdin:
+        if line != '':
+            # split the passed string into a list seperated by spaces
+            listSplits = line.split(' ')
+
+            # loops through each string seperated out into listSplits
+            for i in listSplits:
+                # if the string is from an even position split it into a future key
+                if (counter % 2 == 0):
+                    stringKeySplit = i.split('\'')[1]
+                # if the string is from an odd position split it to be a future value and update newDict to contain it
+                if (counter % 2 != 0):
+                    if ("," in i):
+                        stringValSplit = i.split(',')[0]
+                    if ("}" in i):
+                        stringValSplit = i.split('}')[0]
+                        PARAMETERS.update({stringKeySplit: float(stringValSplit)})
+
+                counter += 1
+
 
 #get the balance in bitcoins
 
@@ -361,8 +412,8 @@ def updateCrypto(startMinute, endMinute, currentMinute):
             entry = {key: value}
             currencyToTrade.update(entry)
 
-    print("OUR LIST OF CRYPTO: ")
-    print(currencyToTrade)
+    #print("OUR LIST OF CRYPTO: ")
+    #print(currencyToTrade)
 
 
 
@@ -476,15 +527,15 @@ def priceChecker():
     # the coin with the highest score that also is above the minimum moving average
     maxScore = 0
     for key, value in currencyToTrade.items():
-        print("The score of {} is {} ".format(key, scores[key]))
+        #print("The score of {} is {} ".format(key, scores[key]))
 
 
         if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(PARAMETERS['MINIMUM_MOVING_AVERAGE'])):
             maxScore = scores[key]
-            print("CURRENT HIGH SCORE: The score of {} is {}".format(key, scores[key]))
+            #print("CURRENT HIGH SCORE: The score of {} is {}".format(key, scores[key]))
             currencyToBuy = key
 
-    print("Coin with the highest score is {} which is {}".format(currencyToBuy, maxScore))
+    #print("Coin with the highest score is {} which is {}".format(currencyToBuy, maxScore))
 
     return currencyToBuy #potential runtime error if all negative todo
 
@@ -501,7 +552,7 @@ def calcPercentChange(startVal, endVal):
 #if yes it forces a new check to see if there is a better crypto
 def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
 
-    print("New Interval")
+    #print("New Interval")
 
     openPriceData = CryptoStats.getOpenPrice()[currency]
     closePriceData = CryptoStats.getClosePrice()[currency]
@@ -514,18 +565,18 @@ def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
     for x in range(startMinute, endMinute):
         startPrice = openPriceData[x]
         endPrice = closePriceData[x]
-        print("Current Crypto: {} Start Price: {} End Price: {}".format(currency, startPrice, endPrice))
+        #print("Current Crypto: {} Start Price: {} End Price: {}".format(currency, startPrice, endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
             timeIncreasingCounter += 1
 
 
     intervalPercentChange = calcPercentChange(startPriceInterval, endPrice)
-    print("Cumulative percent change over THIS INTERVAL {}".format(intervalPercentChange))
-    print("Times Increasing over the interval: {}".format(timeIncreasingCounter))
+    #print("Cumulative percent change over THIS INTERVAL {}".format(intervalPercentChange))
+    #print("Times Increasing over the interval: {}".format(timeIncreasingCounter))
 
     if(timeIncreasingCounter <= timesIncreasing):
-        print("DECREASED ALL INTERVALS. RESTART")
+        #print("DECREASED ALL INTERVALS. RESTART")
         return 1
 
     return 0
@@ -541,7 +592,7 @@ def checkTooNegative(symbol, currentMinute):
     percentChange = calcPercentChange(startPrice, endPrice)
 
     if(percentChange < PARAMETERS['MAX_DECREASE']):
-        print("TOO NEGATIVE. RESTART")
+        #print("TOO NEGATIVE. RESTART")
         return 1
 
     return 0
@@ -557,11 +608,11 @@ def checkExitCondition(currency, currentMinute):
     percentChange = calcPercentChange(priceBought, currentPrice)
 
     if(percentChange >= PARAMETERS['MAX_PERCENT_CHANGE']):
-        print("HIT MAX PERCENT CHANGE")
+        #print("HIT MAX PERCENT CHANGE")
         return 1
 
     if(percentChange <= -1 * PARAMETERS['MAX_PERCENT_CHANGE']):
-        print("HIT MINIMUM PERCENT CHANGE")
+        #print("HIT MINIMUM PERCENT CHANGE")
         return 1
 
     return 0
@@ -580,7 +631,7 @@ def checkTooLow(currency, timesIncreasing, startMinute, endMinute):
     #check to see if the current price is too low, the crypto is decreasing over the past 15 minutes
     #and all the intervals are decreasing
     if(float(currentPrice) < float(floorPrice) and direction == 0 & allIntervalsDecreasing == 1):
-        print("WAS TOO LOW")
+        #print("WAS TOO LOW")
         return 1
 
     return 0
@@ -621,8 +672,8 @@ def setMaxValue():
                 maxValues[key] = i
                 currentMaxVal = i
 
-    print("THE VALUES {}".format(values))
-    print("THE MAX {}".format(maxValues))
+    #print("THE VALUES {}".format(values))
+    #print("THE MAX {}".format(maxValues))
 
 #todo add in a parser to read the stdin that will be passed with the parameters from cryptotrainer
 
@@ -646,8 +697,9 @@ def main():
     currentCurrency = ''
     x = 0
 
+    readTheInput()
 
-    print("Date and Time of Run {}".format(datetime.datetime.now()))
+    #print("Date and Time of Run {}".format(datetime.datetime.now()))
 
     while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
         t = 0
@@ -668,18 +720,18 @@ def main():
             pricesold = getbinanceprice(oldCurrency, currentMinute)
             sellBin(oldCurrency)
 
-            print("THIS RUN SOLD AT: {}".format(currentMinute))
+            #print("THIS RUN SOLD AT: {}".format(currentMinute))
             cumulativePercentChange = calcPercentChange(priceBought, pricesold)
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = cumulativePercentChange
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
 
-            print('Selling: {} Price bought: {} Price sold: {} '.format(oldCurrency, priceBought, pricesold))
-            print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE']))
+            #print('Selling: {} Price bought: {} Price sold: {} '.format(oldCurrency, priceBought, pricesold))
+            #print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE']))
 
         if(oldCurrency != currentCurrency):
             buyBin(currentCurrency, currentMinute)
-            print("THIS RUN BOUGHT AT: {}".format(currentMinute))
-            print("Buying {} at price: {}".format(currentCurrency, priceBought))
+            #print("THIS RUN BOUGHT AT: {}".format(currentMinute))
+            #print("Buying {} at price: {}".format(currentCurrency, priceBought))
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
@@ -718,9 +770,11 @@ def main():
         x+=1
 
 
-    print("Cumulative percent change over the life of all cryptos owneed so far {}".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
+    #print("Cumulative percent change over the life of all cryptos owneed so far {}".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
     sellBin(currentCurrency)
 
+    #special print statement used to get the parameters back
+    print("LINEBEGIN" + str(PARAMETERS) + "DONEEND")
 
 if __name__ == "__main__":
     main()
