@@ -183,7 +183,6 @@ def setWeightedMovingAverage(currency, minutesBack):
        startPrice = openPriceData[x]
        endPrice = closePriceData[x]
        change = calcPercentChange(startPrice, endPrice)
-       print("start price: {} end price: {} change: {}".format(startPrice, endPrice, change))
 
        cumulativePrice += change
 
@@ -359,8 +358,6 @@ def getTimeIncreasing(isWeighted, currency):
 
             if float(i) < 0.0 and isWeighted == 1:
               slots_increasing += (1*(slots * PARAMETERS['SLOT_WEIGHT'])*i * PARAMETERS['NEGATIVE_WEIGHT'])
-
-
 
     return (slots_increasing/slots) * PARAMETERS['TIME_INCREASING_MODIFIER']
 

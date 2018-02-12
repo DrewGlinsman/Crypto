@@ -40,7 +40,7 @@ def getData(numDays):
             parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
-            for i in reversed(data):
+            for i in data:
                 oprice.write("{},".format(i[1]))
                 cprice.write("{},".format(i[4]))
                 volume.write("{},".format(i[5]))
