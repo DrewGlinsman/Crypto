@@ -29,7 +29,6 @@ except ImportError:
     from urllib.parse import urlencode
 
 
-
 #todo make a series of functions used that have random variables in them and random variables left out instead of a simple linear score and simple parameter variation
 #todo add function to pull data from text files by day into data structures here
 
@@ -50,7 +49,7 @@ paramCompletePath = os.path.join(paramPaths, "testlog.txt")
 
 
 #open a file for appending (a). + creates file if does not exist
-file = open(paramCompletePath, "w")
+file = open(paramCompletePath, "a+")
 
 
 #GLOBAL_VARIABLES
@@ -127,11 +126,11 @@ weightedMovingAverage = {'BTCUSDT': [], 'XRPBTC': [],
 
 #the modified cumulative volume over a period (a negative percent change will result in the volume change being counted as negative towards the
 # cumulative volume stored here
-modifiedVolume = {'BTCUSDT': [], 'XRPBTC': [],
-                'ETHBTC': [], 'BCCBTC': [],
-                'LTCBTC': [], 'DASHBTC': [],
-                'XMRBTC': [], 'QTUMBTC': [], 'ETCBTC': [],
-                'ZECBTC': [], 'ADABTC': [], 'ADXBTC': [], 'AIONBTC' : [], 'AMBBTC': [], 'APPCBTC': [], 'ARKBTC': [], 'ARNBTC': [], 'ASTBTC': [], 'BATBTC': [], 'BCDBTC': [], 'BCPTBTC': [], 'BNBBTC': [], 'BNTBTC': [], 'BQXBTC': [], 'BRDBTC': [], 'BTSBTC': [], 'CDTBTC': [], 'CMTBTC': [], 'CNDBTC': [], 'CTRBTC': [], 'DGDBTC': [], 'DLTBTC': [], 'DNTBTC': [], 'EDOBTC': [], 'ELFBTC': [], 'ENGBTC': [], 'ENJBTC': [], 'EOSBTC': [], 'EVXBTC': [], 'FUELBTC': [], 'FUNBTC': [], 'GASBTC': [], 'GTOBTC': [], 'GVTBTC': [], 'GXSBTC': [], 'HSRBTC': [], 'ICNBTC': [], 'ICXBTC': [], 'IOTABTC': [], 'KMDBTC': [], 'KNCBTC': [], 'LENDBTC': [], 'LINKBTC': [], 'LRCBTC': [], 'LSKBTC': [], 'LUNBTC': [], 'MANABTC': [], 'MCOBTC': [], 'MDABTC': [], 'MODBTC': [], 'MTHBTC': [], 'MTLBTC': [], 'NAVBTC': [], 'NEBLBTC': [], 'NEOBTC': [], 'NULSBTC': [], 'OAXBTC': [], 'OMGBTC': [], 'OSTBTC': [], 'POEBTC': [], 'POWRBTC': [], 'PPTBTC': [], 'QSPBTC': [], 'RCNBTC': [], 'RDNBTC': [], 'REQBTC': [], 'SALTBTC': [], 'SNGLSBTC': [], 'SNMBTC': [], 'SNTBTC': [], 'STORJBTC': [], 'STRATBTC': [], 'SUBBTC': [], 'TNBBTC': [], 'TNTBTC': [], 'TRIGBTC': [], 'TRXBTC': [], 'VENBTC': [], 'VIBBTC': [], 'VIBEBTC': [], 'WABIBTC': [], 'WAVESBTC': [], 'WINGSBTC': [], 'WTCBTC': [], 'XVGBTC': [], 'XZCBTC': [], 'YOYOBTC': [], 'ZRXBTC': []}
+modifiedVolume = {'BTCUSDT': 0.0, 'XRPBTC': 0.0,
+                'ETHBTC': 0.0, 'BCCBTC': 0.0,
+                'LTCBTC': 0.0, 'DASHBTC': 0.0,
+                'XMRBTC': 0.0, 'QTUMBTC': 0.0, 'ETCBTC': 0.0,
+                'ZECBTC': 0.0, 'ADABTC': 0.0, 'ADXBTC': 0.0, 'AIONBTC' : 0.0, 'AMBBTC': 0.0, 'APPCBTC': 0.0, 'ARKBTC': 0.0, 'ARNBTC': 0.0, 'ASTBTC': 0.0, 'BATBTC': 0.0, 'BCDBTC': 0.0, 'BCPTBTC': 0.0, 'BNBBTC': 0.0, 'BNTBTC': 0.0, 'BQXBTC': 0.0, 'BRDBTC': 0.0, 'BTSBTC': 0.0, 'CDTBTC': 0.0, 'CMTBTC': 0.0, 'CNDBTC': 0.0, 'CTRBTC': 0.0, 'DGDBTC': 0.0, 'DLTBTC': 0.0, 'DNTBTC': 0.0, 'EDOBTC': 0.0, 'ELFBTC': 0.0, 'ENGBTC': 0.0, 'ENJBTC': 0.0, 'EOSBTC': 0.0, 'EVXBTC': 0.0, 'FUELBTC': 0.0, 'FUNBTC': 0.0, 'GASBTC': 0.0, 'GTOBTC': 0.0, 'GVTBTC': 0.0, 'GXSBTC': 0.0, 'HSRBTC': 0.0, 'ICNBTC': 0.0, 'ICXBTC': 0.0, 'IOTABTC': 0.0, 'KMDBTC': 0.0, 'KNCBTC': 0.0, 'LENDBTC': 0.0, 'LINKBTC': 0.0, 'LRCBTC': 0.0, 'LSKBTC': 0.0, 'LUNBTC': 0.0, 'MANABTC': 0.0, 'MCOBTC': 0.0, 'MDABTC': 0.0, 'MODBTC': 0.0, 'MTHBTC': 0.0, 'MTLBTC': 0.0, 'NAVBTC': 0.0, 'NEBLBTC': 0.0, 'NEOBTC': 0.0, 'NULSBTC': 0.0, 'OAXBTC': 0.0, 'OMGBTC': 0.0, 'OSTBTC': 0.0, 'POEBTC': 0.0, 'POWRBTC': 0.0, 'PPTBTC': 0.0, 'QSPBTC': 0.0, 'RCNBTC': 0.0, 'RDNBTC': 0.0, 'REQBTC': 0.0, 'SALTBTC': 0.0, 'SNGLSBTC': 0.0, 'SNMBTC': 0.0, 'SNTBTC': 0.0, 'STORJBTC': 0.0, 'STRATBTC': 0.0, 'SUBBTC': 0.0, 'TNBBTC': 0.0, 'TNTBTC': 0.0, 'TRIGBTC': 0.0, 'TRXBTC': 0.0, 'VENBTC': 0.0, 'VIBBTC': 0.0, 'VIBEBTC': 0.0, 'WABIBTC': 0.0, 'WAVESBTC': 0.0, 'WINGSBTC': 0.0, 'WTCBTC': 0.0, 'XVGBTC': 0.0, 'XZCBTC': 0.0, 'YOYOBTC': 0.0, 'ZRXBTC': 0.0}
 
 
 #the binance intervals, their symbols, and their time in milliseconds
@@ -185,6 +184,7 @@ def readTheInput():
     counter = 0
 
     for line in sys.stdin:
+
         if line != '':
             # split the passed string into a list seperated by spaces
             listSplits = line.split(' ')
@@ -198,6 +198,7 @@ def readTheInput():
                 if (counter % 2 != 0):
                     if ("," in i):
                         stringValSplit = i.split(',')[0]
+                        PARAMETERS.update({stringKeySplit: float(stringValSplit)})
                     if ("}" in i):
                         stringValSplit = i.split('}')[0]
                         PARAMETERS.update({stringKeySplit: float(stringValSplit)})
@@ -290,30 +291,73 @@ def getModifiedVolume(currency):
         #makes each volume % change back into a decimal
         percentChangeScale = (percentChangesList[currentSlot] / 100)
 
-
+        #new setup makes two variables that represent the signed partitions of each volume.
+        #todo make the setup better (i.e. check if 1 + % > 1 - % to determine postitive or negative
+        #todo cont and then check to see if 1 - % > % was bigger
+        #todo cont then just multiply whichever is greater by the correct one
+        #todo cont ex: +12%     1 - 12% = .88  and 1 + 12% = 1.12 so we know the % change is positive
+        #todo  cont then,  1 - 12% = .88 and  .12 < .88 so we multiply
+        #todo volume * .88  to get the postiive volume
+        #todo and volume * -.12 to get the negative volume
         #NOTE: can change back to normal if this doesnt work
         if(percentChangesList[currentSlot] < 0):
+            if (( 1 + percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
+                multiplyBy = 1 + percentChangesList[currentSlot] / 100
+            elif(( 1 + percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
+                multiplyBy = percentChangesList[currentSlot] / 100
 
-            oldVolume += float(i) * (percentChangeScale) * float(PARAMETERS['NEGATIVE_WEIGHT'])
 
-            oldVolume += -1 * (1/3) * (float(i) * ( ( percentChangeScale)) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
+            decreasingNegVol = float(i) * (multiplyBy) * float(PARAMETERS['NEGATIVE_WEIGHT'])
+            decreasingPosVol = -1 * (float(i) * (multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
+
+            if decreasingNegVol == (-1 * decreasingPosVol):
+                oldVolume += decreasingNegVol + 0.5 * decreasingPosVol #todo make the 0.5 a parameter
+
+            if (decreasingNegVol != (-1 * decreasingPosVol)):
+                oldVolume += decreasingNegVol + decreasingPosVol
 
         if(percentChangesList[currentSlot] > 0):
 
-            oldVolume += float(i) * ((percentChangeScale) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
+            if (( 1 - percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
+                multiplyBy = 1 - percentChangesList[currentSlot] / 100
+            elif(( 1 - percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
+                multiplyBy = percentChangesList[currentSlot] / 100
 
-            oldVolume += (-1/3) * (float(i) *( percentChangeScale)) * float(PARAMETERS['NEGATIVE_WEIGHT'])
+
+            increasingNegVol = float(i) * ((multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
+            increasingPosVol = (-1) * (float(i) *(multiplyBy)) * float(PARAMETERS['NEGATIVE_WEIGHT'])
+
+
+            if increasingNegVol == (-1 * increasingPosVol):
+                oldVolume += increasingPosVol + 0.5 * increasingNegVol  # todo make the 0.5 a parameter
+
+            if (increasingNegVol != (-1 * increasingPosVol)):
+                oldVolume += increasingNegVol + increasingPosVol
+
+
 
         currentSlot += 1
 
-
+    if (percentChangesList[currentSlot] == 0):
+        oldVolume += 0
+        return float(oldVolume)
+    if(oldVolume == 0):
+        file.write("Old volume was zero for " + str(currency))
     return float(oldVolume)
 
 #get the binance price of the specified currency
 def getbinanceprice(currency, currentMinute):
 
     priceDict = CryptoStats.getClosePrice()
-    return priceDict[currency][currentMinute]
+    if priceDict == {} or currency == '':
+        return 0.0
+
+    try:
+        binPrice = priceDict[currency][currentMinute]
+    except KeyError:
+        file.write("price dict of " + str(currency) + str(priceDict))
+        binPrice = 0.0
+    return binPrice
 
 
     #interval based on this from binance API
@@ -383,7 +427,7 @@ def updateCrypto(startMinute, endMinute, currentMinute):
 
         volumeAmounts[value].append(volumeData[0])
 
-        modifiedVolume[value] = []
+        modifiedVolume[value] = 0
         # get the modified volume changes
         modifiedVolume[value] = getModifiedVolume(value)
 
@@ -393,6 +437,9 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         weightedMovingAverage[value] = setWeightedMovingAverage(value, startMinute, endMinute)
 
     setMaxValue()
+    for i in values:
+        file.write(str(i) + '\n')
+    file.write("THE MAXES " + str(maxValues))
     resetValues()
 
     # gets the score for each crypto
@@ -412,9 +459,8 @@ def updateCrypto(startMinute, endMinute, currentMinute):
             entry = {key: value}
             currencyToTrade.update(entry)
 
-    #print("OUR LIST OF CRYPTO: ")
-    #print(currencyToTrade)
-
+    file.write("OUR LIST OF CRYPTO: " + str(scores))
+    file.write("Currrenty to trade: " + str(currencyToTrade))
 
 
 #caclulates and returns the time spent increasing
@@ -503,7 +549,13 @@ def getScore(symbol):
     values['VOLUME_TIME_INCREASING'].append(volumePercentData[symbol]['timeIncreasing'] / maxValues['TIME_INCREASING'])
     values['WEIGHTED_TIME_INCREASING'].append((pricePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_TIME_INCREASING']))
     values['WEIGHTED_VOLUME_TIME_INCREASING'].append((volumePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_VOLUME_TIME_INCREASING']))
-    values['MODIFIED_VOLUME'].append((modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']))
+
+    try:
+        values['MODIFIED_VOLUME'].append((modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']))
+    except ZeroDivisionError:
+        file.write("Whoopsie zero by division error!" + str(maxValues))
+        for i in values:
+            file.write(str(i) + '\n')
 
 
     #addingup the parameters to the score variable
@@ -514,7 +566,14 @@ def getScore(symbol):
     new_score += (pricePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_TIME_INCREASING'])
 
     new_score += (volumePercentData[symbol]['weightedtimeIncreasing'] / maxValues['WEIGHTED_VOLUME_TIME_INCREASING'])
-    new_score += (modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']) * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
+
+    try:
+        new_score += (modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']) * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
+    except ZeroDivisionError:
+        file.write("Whoopsie this other zero by division error!" + str(maxValues))
+        for i in values:
+            file.write(str(i) + '\n')
+
 
 
     return new_score
@@ -522,18 +581,20 @@ def getScore(symbol):
 
 #finds the next currency to buy
 def priceChecker():
-
+    currencyToBuy = ''
     #Compares the two price lists and sets the currencyToBuy to be
     # the coin with the highest score that also is above the minimum moving average
     maxScore = 0
     for key, value in currencyToTrade.items():
         #print("The score of {} is {} ".format(key, scores[key]))
 
-
-        if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(PARAMETERS['MINIMUM_MOVING_AVERAGE'])):
-            maxScore = scores[key]
-            #print("CURRENT HIGH SCORE: The score of {} is {}".format(key, scores[key]))
-            currencyToBuy = key
+        try:
+            if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(PARAMETERS['MINIMUM_MOVING_AVERAGE'])):
+                maxScore = scores[key]
+                #print("CURRENT HIGH SCORE: The score of {} is {}".format(key, scores[key]))
+                currencyToBuy = key
+        except KeyError:
+            file.write(" LINE 550 key error " + str(key) + " scores[key] " + weightedMovingAverage[key])
 
     #print("Coin with the highest score is {} which is {}".format(currencyToBuy, maxScore))
 
@@ -668,7 +729,7 @@ def setMaxValue():
         currentMaxVal = 0
 
         for i in values[key]:
-            if i > currentMaxVal:
+            if i > currentMaxVal or currentMaxVal == 0:
                 maxValues[key] = i
                 currentMaxVal = i
 
@@ -698,7 +759,8 @@ def main():
     x = 0
 
     readTheInput()
-
+    PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] = 0.0
+    PARAMETERS['CUMULATIVE_PERCENT_CHANGE']
     #print("Date and Time of Run {}".format(datetime.datetime.now()))
 
     while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
@@ -749,7 +811,7 @@ def main():
             currentMinute += 1
 
 
-        if(oldCurrency == currentCurrency):
+        if(oldCurrency == currentCurrency and currentCurrency != ''):
             newPrice = getbinanceprice(currentCurrency, currentMinute)
             cumulativePercentChange = calcPercentChange(priceBought, newPrice)
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange

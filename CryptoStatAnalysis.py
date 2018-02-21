@@ -3,6 +3,9 @@
 
 import os
 import datetime
+import pathlib
+
+
 
 from AutoTrader import priceSymbols
 
@@ -30,11 +33,14 @@ class CryptoStatsAnalysis:
         #concatenates the logpath with a autotrader vs crypto evalutor distinction
         withTraining = withDate + '\\' + training
 
+        #creates a directory if one does not exist
+        pathlib.Path(withTraining).mkdir(parents=True, exist_ok=True)
+
         #file name concatentation with runNum
         fileName = "__" + str(runNum) + "_Analysis.txt"
 
         # log file name + path
-        logCompletePath = os.path.join(logPaths, fileName)
+        logCompletePath = os.path.join(withTraining, fileName)
 
         # open a file for appending (a). + creates file if does not exist
         file = open(logCompletePath, "a+")
