@@ -19,8 +19,6 @@ stepsize = {}
 #path to save the different text files in
 #cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
 cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
-#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
-logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
 
 #one day in ms
 ONE_DAY = 86400000
@@ -148,18 +146,7 @@ def getVolume():
 
 def main():
     getData(COUNT)
-    file = open(logPath, "w")
-    a = getOpenPrice()
-    b = getClosePrice()
-    c = getVolume()
 
-    file.write("Open Price Data: {} \n".format(a))
-    file.write("----- \n")
-    file.write("Close Price Data: {} \n".format(b))
-    file.write("------ \n")
-    file.write("Volume Data: {} \n".format(c))
-
-    file.close()
 
 if __name__ == "__main__":
     main()
