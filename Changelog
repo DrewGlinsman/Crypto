@@ -54,3 +54,16 @@ Got CryptoEvaluator to be API independent
 
 Crypto Trainer no longer randomizes all params.
 
+2/12/18
+AutoTradeer now has a CryptoStatsAnalysis object initialized when it begins
+
+2/13/18
+Added a check for max Value being 0 to crypto evaluator and auto trader to try to fix the division by 0 bug
+
+2/14/18
+Added additional checks in crypto evaluator for passing a blank string to getbinanceprice that should help with key error issues
+Added new modified volume calculation that uses the size of the percent to parition the volume for summation
+Added checks in modififed volume calculation that in receives volumes that would result in a zero sum, it will just halve the smaller amount
+
+2/16/18
+Added some small fixes to make cryptoTrainer run multiple "classes" of evolution not just multiple variations of the bot 
