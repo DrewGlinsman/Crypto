@@ -31,9 +31,9 @@ except ImportError:
 
 #todo make a series of functions used that have random variables in them and random variables left out instead of a simple linear score and simple parameter variation
 #todo add function to pull data from text files by day into data structures here
-
 #todo add in a parser for the stdin
 #todo add in a print statement to send back the parameters
+
 logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
 #logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
 file = open(logPath, "w")
@@ -290,57 +290,14 @@ def getModifiedVolume(currency):
 
         #makes each volume % change back into a decimal
         percentChangeScale = (percentChangesList[currentSlot] / 100)
+        if percentChangeScale < 0:
+            oldVolume += percentChangeScale * volumeAmountList[currentSlot]
 
-        #new setup makes two variables that represent the signed partitions of each volume.
-        #todo make the setup better (i.e. check if 1 + % > 1 - % to determine postitive or negative
-        #todo cont and then check to see if 1 - % > % was bigger
-        #todo cont then just multiply whichever is greater by the correct one
-        #todo cont ex: +12%     1 - 12% = .88  and 1 + 12% = 1.12 so we know the % change is positive
-        #todo  cont then,  1 - 12% = .88 and  .12 < .88 so we multiply
-        #todo volume * .88  to get the postiive volume
-        #todo and volume * -.12 to get the negative volume
-        #NOTE: can change back to normal if this doesnt work
-        if(percentChangesList[currentSlot] < 0):
-            if (( 1 + percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
-                multiplyBy = 1 + percentChangesList[currentSlot] / 100
-            elif(( 1 + percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
-                multiplyBy = percentChangesList[currentSlot] / 100
-
-
-            decreasingNegVol = float(i) * (multiplyBy) * float(PARAMETERS['NEGATIVE_WEIGHT'])
-            decreasingPosVol = -1 * (float(i) * (multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
-
-            if decreasingNegVol == (-1 * decreasingPosVol):
-                oldVolume += decreasingNegVol + 0.5 * decreasingPosVol #todo make the 0.5 a parameter
-
-            if (decreasingNegVol != (-1 * decreasingPosVol)):
-                oldVolume += decreasingNegVol + decreasingPosVol
-
-        if(percentChangesList[currentSlot] > 0):
-
-            if (( 1 - percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
-                multiplyBy = 1 - percentChangesList[currentSlot] / 100
-            elif(( 1 - percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
-                multiplyBy = percentChangesList[currentSlot] / 100
-
-
-            increasingNegVol = float(i) * ((multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
-            increasingPosVol = (-1) * (float(i) *(multiplyBy)) * float(PARAMETERS['NEGATIVE_WEIGHT'])
-
-
-            if increasingNegVol == (-1 * increasingPosVol):
-                oldVolume += increasingPosVol + 0.5 * increasingNegVol  # todo make the 0.5 a parameter
-
-            if (increasingNegVol != (-1 * increasingPosVol)):
-                oldVolume += increasingNegVol + increasingPosVol
 
 
 
         currentSlot += 1
 
-    if (percentChangesList[currentSlot] == 0):
-        oldVolume += 0
-        return float(oldVolume)
     if(oldVolume == 0):
         file.write("Old volume was zero for " + str(currency))
     return float(oldVolume)
@@ -760,7 +717,7 @@ def main():
 
     readTheInput()
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] = 0.0
-    PARAMETERS['CUMULATIVE_PERCENT_CHANGE']
+    PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = 0.0
     #print("Date and Time of Run {}".format(datetime.datetime.now()))
 
     while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
@@ -814,6 +771,7 @@ def main():
         if(oldCurrency == currentCurrency and currentCurrency != ''):
             newPrice = getbinanceprice(currentCurrency, currentMinute)
             cumulativePercentChange = calcPercentChange(priceBought, newPrice)
+            PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = cumulativePercentChange
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
             priceBought = newPrice
 

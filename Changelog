@@ -66,4 +66,8 @@ Added new modified volume calculation that uses the size of the percent to parit
 Added checks in modififed volume calculation that in receives volumes that would result in a zero sum, it will just halve the smaller amount
 
 2/16/18
-Added some small fixes to make cryptoTrainer run multiple "classes" of evolution not just multiple variations of the bot 
+Added some small fixes to make cryptoTrainer run multiple "classes" of evolution not just multiple variations of the bot
+
+2/21/18
+Added a oldcode text file to temporarily hold old code I haven't decided if I like yet
+Added a function to crypto trainer to check if there are command line arguments and if there are it pulls out the number of desired classes and iterations
