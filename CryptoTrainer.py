@@ -5,21 +5,16 @@
 #todo update the best parameters text file
 #todo make the randomize parameters function implement the different types of randomization
 #todo make it so that every test having extremely negative output does not still overwrite best parameters
+#todo add in on/off switches and make them do different things for different parameters (i.e. something like negative weight should get treated like a 1.0 not a 0.0 since it is used in necessary calculations)
+#todo add in different negative weights depending on which is used.
+#todo add command line functionality so that you can input num_classes and num_iterations manually when running from command line
 
 import sys
 import random
-import requests
-import hmac
-import hashlib
 import time
-import math
-import datetime
-import re
 import os
-from subprocess import Popen, PIPE, run
+from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
-
-#weird errors removed
 
 # EXPLANATION OF THE PARAMETERS
 
@@ -46,11 +41,16 @@ from PrivateData import api_key, secret_key
 #PRIMARY_MODIFIED_VOLUME_SCALER: the scaler to make more volume traded have the same sign as the percent change in the price than the amount that is counted as having the opposite sign
 #WAIT_FOR_CHECK_FAILURE: the number of ticks before the failure condition is checked (the crypto is decreasing over the past 10 minutes)
 #WAIT_FOR_CHECK_TOO_LOW: the number of ticks before ethe program checks to see if a crypto has decreased too low to its starting point
+#VARIATION_NUM: number stored for what variation on the bot this is, 0 base
+#CLASS_NUM: number stored for the class, 0 means no class, 1 and up are the actual classes
+#INTERVAL_TO_TEST: the interval over which the bot will be tested (think hour, day, week etc...); used with the crypto evaluator
+#MINUTES_IN_PAST: how far back you want the end point of the test to be
+
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0, 'CLASS_NUM': 0, 'INTERVAL_TO_TEST':  10080, 'MINUTES_IN_PAST': 1440}
 
 
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0}
 
-UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW']
+UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW', 'VARIATION_NUMBER', 'CLASS_NUM', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST']
 
 
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -73,10 +73,10 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS=[]
 
 #number of iterations of bot
-NUM_ITERATIONS = 50
+NUM_ITERATIONS = 6
 
 #number of classes of bots to run
-NUM_CLASSES = 5
+NUM_CLASSES = 10
 
 
 #final dictionary returned to be rewritten to file
@@ -149,7 +149,6 @@ def resetParameters(paramDict):
         trueVal = float(trueVal)
         valList.append(trueVal)
 
-
     #parameter dictionary that will loop over params and rewrite them
     for key, value in paramDict.items():
 
@@ -161,14 +160,20 @@ def resetParameters(paramDict):
 def reWriteParameters(paramDict):
 
     file.seek(0)
+    lenParam = len(paramDict)
+    count = 1
+    for key, value in paramDict.items():
+        if count == lenParam:
+            lastParam = key
+        count+=1
 
     for key, value in paramDict.items():
         #if we are at the very last parameter do not print a new line
-        if key == 'WAIT_FOR_CHECK_TOO_LOW':
+        if key == lastParam:
             print('\'%s\': %s,' % (key, value))
             file.write('\'%s\': %s,' % (key, value))
 
-        if key != 'WAIT_FOR_CHECK_TOO_LOW':
+        if key != lastParam:
             print('\'%s\': %s,\n' % (key, value))
             file.write('\'%s\': %s,\n' % (key, value))
 
@@ -201,6 +206,33 @@ def stringToDict(stringToChange):
 
     return newDict
 
+#if there is input on the command line it will assign the NUM_CLASSES and NUM_ITERATIONS based on the flags passed
+# the flag -cl5 will set the classes to 5. the flag -it6 will set the iterations to 6
+def setVals():
+
+    global NUM_CLASSES
+    global NUM_ITERATIONS
+
+    argv_len = len(sys.argv)
+    stringargs = str(sys.argv)
+    stringarglist = stringargs.split()
+
+    #if there is more than one arguement (the py file name) than it will loop for the flags in the string
+    # of arguments passed, then it splits the string up based on the flags if found
+    # flags must be seperated by whitespaces
+    if argv_len > 1:
+        if '-c1' in stringargs:
+            for i in stringarglist:
+                if '-cl' in i:
+                    NUM_CLASSES = int(i.split('-c1', 1)[1])
+        if '-it' in stringargs:
+            for j in stringarglist:
+                if '-it' in j:
+                    NUM_ITERATIONS = int(j.split('-it', 1)[1])
+
+
+
+
 #makes the string line exclusively consist of the correct string of parameters
 def reformatLine(line):
 
@@ -218,28 +250,37 @@ def main():
     global final_Dict
     global reform
 
+    #untested function that should check if there are command line arguments
+    #setVals()
+
     #store the multiple processes
-
-
     for i in range(NUM_CLASSES):
         typeOfRandom = 3
         current_Max = 0.0
         procs = []
         count = 0
+        variationNum = 0
+
+        #if this is the second class you need to reopen the file because it has been closed to commit the changes of the first class
+        if i > 0:
+            paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
+            file = open(paramCompletePath, "r+")
 
         #creates NUM_ITERATIONS amounts of bots
-        for i in range(NUM_ITERATIONS):
+        for j in range(NUM_ITERATIONS):
 
 
             proc = Popen([sys.executable, 'CryptoEvaluator.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stdin = PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
             procs.append(proc)
 
-        #randomizes parameters and runs different instances of the bot using the different starting parameters
+         #randomizes parameters and runs different instances of the bot using the different starting parameters
         for proc in procs:
             reform = ''
 
-
+            #randomize parameters and send the bot their class and variation num
             randomizeParams(PARAMETERS, typeOfRandom)
+            PARAMETERS['CLASS_NUM'] = i + 1
+            PARAMETERS['VARIATION_NUMBER'] = variationNum
 
             #reset typeOfRandom so that every 50th run we use a special set of randomizers
             if(count % 50 == 0):
@@ -292,10 +333,11 @@ def main():
 
         #rewrite the parameter file with the final Dict
         reWriteParameters(final_Dict)
-        for i in procs:
-            i.wait()
+        for z in procs:
+            z.wait()
+
+        file.close()
 
 
-    file.close()
 if __name__ == "__main__":
     main()

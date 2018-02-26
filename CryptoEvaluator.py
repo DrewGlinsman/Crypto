@@ -1,24 +1,13 @@
 # Copyright (c) 2018 A&D
 # Auto trading bot that uses parameters sent by CryptoTrainer to test them
 
-import requests
-import hmac
-import hashlib
-import time
-import math
-import datetime
+
 import os.path
 import sys
+import CryptoStatAnalysis
 
 import CryptoStats
 
-from multiprocessing import Pool
-from PrivateData import api_key, secret_key
-
-
-import CryptoStats
-from multiprocessing import Pool
-from PrivateData import api_key, secret_key
 from CryptoTrainer import PARAMETERS
 from CryptoStats import getOpenPrice, getClosePrice, getVolume
 
@@ -31,12 +20,13 @@ except ImportError:
 
 #todo make a series of functions used that have random variables in them and random variables left out instead of a simple linear score and simple parameter variation
 #todo add function to pull data from text files by day into data structures here
-
 #todo add in a parser for the stdin
 #todo add in a print statement to send back the parameters
-#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
-logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
-file = open(logPath, "w")
+
+logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
+#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
+file = open(logPath, "a+")
+
 
 
 paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
@@ -133,6 +123,11 @@ modifiedVolume = {'BTCUSDT': 0.0, 'XRPBTC': 0.0,
                 'ZECBTC': 0.0, 'ADABTC': 0.0, 'ADXBTC': 0.0, 'AIONBTC' : 0.0, 'AMBBTC': 0.0, 'APPCBTC': 0.0, 'ARKBTC': 0.0, 'ARNBTC': 0.0, 'ASTBTC': 0.0, 'BATBTC': 0.0, 'BCDBTC': 0.0, 'BCPTBTC': 0.0, 'BNBBTC': 0.0, 'BNTBTC': 0.0, 'BQXBTC': 0.0, 'BRDBTC': 0.0, 'BTSBTC': 0.0, 'CDTBTC': 0.0, 'CMTBTC': 0.0, 'CNDBTC': 0.0, 'CTRBTC': 0.0, 'DGDBTC': 0.0, 'DLTBTC': 0.0, 'DNTBTC': 0.0, 'EDOBTC': 0.0, 'ELFBTC': 0.0, 'ENGBTC': 0.0, 'ENJBTC': 0.0, 'EOSBTC': 0.0, 'EVXBTC': 0.0, 'FUELBTC': 0.0, 'FUNBTC': 0.0, 'GASBTC': 0.0, 'GTOBTC': 0.0, 'GVTBTC': 0.0, 'GXSBTC': 0.0, 'HSRBTC': 0.0, 'ICNBTC': 0.0, 'ICXBTC': 0.0, 'IOTABTC': 0.0, 'KMDBTC': 0.0, 'KNCBTC': 0.0, 'LENDBTC': 0.0, 'LINKBTC': 0.0, 'LRCBTC': 0.0, 'LSKBTC': 0.0, 'LUNBTC': 0.0, 'MANABTC': 0.0, 'MCOBTC': 0.0, 'MDABTC': 0.0, 'MODBTC': 0.0, 'MTHBTC': 0.0, 'MTLBTC': 0.0, 'NAVBTC': 0.0, 'NEBLBTC': 0.0, 'NEOBTC': 0.0, 'NULSBTC': 0.0, 'OAXBTC': 0.0, 'OMGBTC': 0.0, 'OSTBTC': 0.0, 'POEBTC': 0.0, 'POWRBTC': 0.0, 'PPTBTC': 0.0, 'QSPBTC': 0.0, 'RCNBTC': 0.0, 'RDNBTC': 0.0, 'REQBTC': 0.0, 'SALTBTC': 0.0, 'SNGLSBTC': 0.0, 'SNMBTC': 0.0, 'SNTBTC': 0.0, 'STORJBTC': 0.0, 'STRATBTC': 0.0, 'SUBBTC': 0.0, 'TNBBTC': 0.0, 'TNTBTC': 0.0, 'TRIGBTC': 0.0, 'TRXBTC': 0.0, 'VENBTC': 0.0, 'VIBBTC': 0.0, 'VIBEBTC': 0.0, 'WABIBTC': 0.0, 'WAVESBTC': 0.0, 'WINGSBTC': 0.0, 'WTCBTC': 0.0, 'XVGBTC': 0.0, 'XZCBTC': 0.0, 'YOYOBTC': 0.0, 'ZRXBTC': 0.0}
 
 
+
+
+#holds the the other stat items in it
+statDict = {}
+
 #the binance intervals, their symbols, and their time in milliseconds
 intervalTypes = { '1m': {'symbol': '1m', 'inMS': 60000},  '3m': {'symbol': '3m', 'inMS': 180000}, '5m': {'symbol': '5m', 'inMS': 300000}, '15m': {'symbol': '15m', 'inMS': 900000}, '30m': {'symbol': '30m', 'inMS': 1800000}, '1h': {'symbol': '1h', 'inMS': 3600000}, '2h': {'symbol': '2h', 'inMS': 7200000}, '4h': {'symbol': '4h', 'inMS': 14400000}, '6h': {'symbol': '6h', 'inMS': 21600000}, '8h': {'symbol': '8h', 'inMS': 28800000}, '12h': {'symbol': '12h', 'inMS': 43200000}, '1d': {'symbol': '1d', 'inMS': 86400000}, '3d': {'symbol': '3d', 'inMS': 259200000}, '1w': {'symbol': '1w' , 'inMS': 604800000}, '1M': {'symbol': '1M', 'inMS': 2629746000}}
 
@@ -168,8 +163,8 @@ values = {'PERCENT_BY_HOUR': [], 'VOLUME_BY_HOUR': [], 'TIME_INCREASING': [], 'W
 #hold the max values to be used for scaling
 maxValues = {'PERCENT_BY_HOUR': 0.0, 'VOLUME_BY_HOUR': 0.0, 'TIME_INCREASING': 0.0, 'WEIGHTED_TIME_INCREASING': 0.0, 'VOLUME_TIME_INCREASING': 0.0, 'WEIGHTED_VOLUME_TIME_INCREASING': 0.0, 'MODIFIED_VOLUME': 0.0, 'SCORE': 0.0}
 
-
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0}
+#todo remember that the wait parameters for this one should be different from the ones in auto trader where they are in seconds not minutes
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0, 'CLASS_NUM': 0, 'INTERVAL_TO_TEST': 1440, 'MINUTES_IN_PAST': 0}
 
 
 #number of minutes we want to iterate backwards
@@ -177,7 +172,7 @@ startMinute = 0
 endMinute = 60
 currentMinute = 0
 
-
+#todo add a way to read in the runNumber from the crypto trainer
 def readTheInput():
     stringKeySplit = ''
     stringValSplit = ''
@@ -230,8 +225,8 @@ def sellBin(symbol):
 def setWeightedMovingAverage(currency, startMinute, endMinute):
     cumulativePrice = 0.0
 
-    openPriceData = CryptoStats.getOpenPrice()[currency]
-    closePriceData = CryptoStats.getClosePrice()[currency]
+    openPriceData = CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]
+    closePriceData = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]
 
     slots = endMinute - startMinute - 1
 
@@ -261,7 +256,7 @@ def setWeightedMovingAverage(currency, startMinute, endMinute):
 def getVolume(currency, currentMinute):
     volume = []
     #building the request
-    data = CryptoStats.getVolume()[currency]
+    data = CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]
     #adds up all the volumes over the interval
     for x in data:
         if(x != ''):
@@ -290,57 +285,16 @@ def getModifiedVolume(currency):
 
         #makes each volume % change back into a decimal
         percentChangeScale = (percentChangesList[currentSlot] / 100)
-
-        #new setup makes two variables that represent the signed partitions of each volume.
-        #todo make the setup better (i.e. check if 1 + % > 1 - % to determine postitive or negative
-        #todo cont and then check to see if 1 - % > % was bigger
-        #todo cont then just multiply whichever is greater by the correct one
-        #todo cont ex: +12%     1 - 12% = .88  and 1 + 12% = 1.12 so we know the % change is positive
-        #todo  cont then,  1 - 12% = .88 and  .12 < .88 so we multiply
-        #todo volume * .88  to get the postiive volume
-        #todo and volume * -.12 to get the negative volume
-        #NOTE: can change back to normal if this doesnt work
-        if(percentChangesList[currentSlot] < 0):
-            if (( 1 + percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
-                multiplyBy = 1 + percentChangesList[currentSlot] / 100
-            elif(( 1 + percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
-                multiplyBy = percentChangesList[currentSlot] / 100
-
-
-            decreasingNegVol = float(i) * (multiplyBy) * float(PARAMETERS['NEGATIVE_WEIGHT'])
-            decreasingPosVol = -1 * (float(i) * (multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
-
-            if decreasingNegVol == (-1 * decreasingPosVol):
-                oldVolume += decreasingNegVol + 0.5 * decreasingPosVol #todo make the 0.5 a parameter
-
-            if (decreasingNegVol != (-1 * decreasingPosVol)):
-                oldVolume += decreasingNegVol + decreasingPosVol
-
-        if(percentChangesList[currentSlot] > 0):
-
-            if (( 1 - percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
-                multiplyBy = 1 - percentChangesList[currentSlot] / 100
-            elif(( 1 - percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
-                multiplyBy = percentChangesList[currentSlot] / 100
-
-
-            increasingNegVol = float(i) * ((multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
-            increasingPosVol = (-1) * (float(i) *(multiplyBy)) * float(PARAMETERS['NEGATIVE_WEIGHT'])
-
-
-            if increasingNegVol == (-1 * increasingPosVol):
-                oldVolume += increasingPosVol + 0.5 * increasingNegVol  # todo make the 0.5 a parameter
-
-            if (increasingNegVol != (-1 * increasingPosVol)):
-                oldVolume += increasingNegVol + increasingPosVol
+        if percentChangeScale < 0:
+            oldVolume += percentChangeScale * volumeAmountList[currentSlot] * PARAMETERS['NEGATIVE_WEIGHT']
+        #todo the below may have not been there for the last set of tests
+        if percentChangeScale >= 0:
+            oldVolume += percentChangeScale * volumeAmountList[currentSlot]
 
 
 
         currentSlot += 1
 
-    if (percentChangesList[currentSlot] == 0):
-        oldVolume += 0
-        return float(oldVolume)
     if(oldVolume == 0):
         file.write("Old volume was zero for " + str(currency))
     return float(oldVolume)
@@ -348,7 +302,7 @@ def getModifiedVolume(currency):
 #get the binance price of the specified currency
 def getbinanceprice(currency, currentMinute):
 
-    priceDict = CryptoStats.getClosePrice()
+    priceDict = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
     if priceDict == {} or currency == '':
         return 0.0
 
@@ -372,22 +326,27 @@ def getbinanceprice(currency, currentMinute):
 def updateCrypto(startMinute, endMinute, currentMinute):
 
     for key,value in priceSymbols.items():
-
         # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
-        openPriceData = CryptoStats.getOpenPrice()[value]
-        closePriceData = CryptoStats.getClosePrice()[value]
+        openPriceData = CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[value]
+        if startMinute == 0:
+            file.write("Open data " + str(openPriceData))
+        closePriceData = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[value]
         volumeData = getVolume(value, currentMinute)
 
+
+        #todo figure out why this and the one below always starts at 0
         # calculate the percent change over the whole hour and store
-        openPrice = openPriceData[0]
-        closePrice = closePriceData[0]
+        openPrice = openPriceData[startMinute]
+        closePriceIndex = endMinute - 1
+        closePrice = closePriceData[closePriceIndex]
         pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
 
         values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
 
+        #todo figure out if it should have been endMinute - startMinute - 1 or just endMinute - 1
         # calculate the percent change in volume over the whole hour and store
-        openVolume = volumeData[0]
-        closeVolumeIndex = endMinute - startMinute - 1
+        openVolume = volumeData[startMinute]
+        closeVolumeIndex = endMinute - 1
         closeVolume = volumeData[closeVolumeIndex]
         volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
 
@@ -437,9 +396,7 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         weightedMovingAverage[value] = setWeightedMovingAverage(value, startMinute, endMinute)
 
     setMaxValue()
-    for i in values:
-        file.write(str(i) + '\n')
-    file.write("THE MAXES " + str(maxValues))
+
     resetValues()
 
     # gets the score for each crypto
@@ -615,8 +572,8 @@ def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
 
     #print("New Interval")
 
-    openPriceData = CryptoStats.getOpenPrice()[currency]
-    closePriceData = CryptoStats.getClosePrice()[currency]
+    openPriceData = CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]
+    closePriceData = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]
 
     #get the starting price of the interval
     startPriceInterval = openPriceData[startMinute]
@@ -645,8 +602,8 @@ def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
 #checks whether the function has caused too large of negative decrease the specified interval
 def checkTooNegative(symbol, currentMinute):
 
-    openPriceData = CryptoStats.getOpenPrice()[symbol]
-    closePriceData = CryptoStats.getClosePrice()[symbol]
+    openPriceData = CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[symbol]
+    closePriceData = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[symbol]
 
     startPrice = openPriceData[currentMinute]
     endPrice = closePriceData[currentMinute]
@@ -701,8 +658,8 @@ def checkTooLow(currency, timesIncreasing, startMinute, endMinute):
 # 0 means decreasing, 1 means stable or increasing
 def increasingOrDecreasing(currency, startMinute, endMinute):
 
-    openPriceData = CryptoStats.getOpenPrice()[currency]
-    closePriceData = CryptoStats.getClosePrice()[currency]
+    openPriceData = CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]
+    closePriceData = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]
 
 
     startPrice = openPriceData[startMinute]
@@ -736,6 +693,18 @@ def setMaxValue():
     #print("THE VALUES {}".format(values))
     #print("THE MAX {}".format(maxValues))
 
+#creates a dictionary with all the different statistic holding dictionaries that are created with each run
+def createStatsDict():
+    statDict.update({'percentChanges': percentChanges})
+    statDict.update({'volumePercentChanges': volumePercentChanges})
+    statDict.update({'volumeAmounts': volumeAmounts})
+    statDict.update({'pricePercentData': pricePercentData})
+    statDict.update({'volumePercentData': volumePercentData})
+    statDict.update({'weightedMovingAverage': weightedMovingAverage})
+    statDict.update({'modifiedVolume': modifiedVolume})
+
+
+
 #todo add in a parser to read the stdin that will be passed with the parameters from cryptotrainer
 
 def main():
@@ -755,12 +724,15 @@ def main():
     endMinute = 60
     currentMinute = startMinute
 
+    #creates a statistic object to record the different decisions and then analyze them
+    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], 'NT', startMinute, endMinute, PARAMETERS)
+
     currentCurrency = ''
     x = 0
 
     readTheInput()
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] = 0.0
-    PARAMETERS['CUMULATIVE_PERCENT_CHANGE']
+    PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = 0.0
     #print("Date and Time of Run {}".format(datetime.datetime.now()))
 
     while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
@@ -768,10 +740,12 @@ def main():
         RESTART = 0
         RESTART_LOW = 0
         RESTART_TN = 0
+        didSell = 0
+        didBuy = 0
         currentMinute = startMinute
 
         updateCrypto(startMinute, endMinute, currentMinute)
-
+        currentMinute += 1
 
         oldCurrency = currentCurrency
         currentCurrency = priceChecker()
@@ -781,6 +755,7 @@ def main():
 
             pricesold = getbinanceprice(oldCurrency, currentMinute)
             sellBin(oldCurrency)
+            didSell = 1
 
             #print("THIS RUN SOLD AT: {}".format(currentMinute))
             cumulativePercentChange = calcPercentChange(priceBought, pricesold)
@@ -790,10 +765,16 @@ def main():
             #print('Selling: {} Price bought: {} Price sold: {} '.format(oldCurrency, priceBought, pricesold))
             #print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE']))
 
-        if(oldCurrency != currentCurrency):
+        if(oldCurrency != currentCurrency)and (currentCurrency != ''):
             buyBin(currentCurrency, currentMinute)
+            didBuy = 1
             #print("THIS RUN BOUGHT AT: {}".format(currentMinute))
             #print("Buying {} at price: {}".format(currentCurrency, priceBought))
+
+        # if you bought or sold something OR if you did neither than set up a new dictionary of holders to evaluate this decision
+        if didBuy == 1 or didSell == 1 or currentCurrency == '':
+            cryptoRunStats.newStats(currentMinute, statDict, didBuy, didSell, currentCurrency, oldCurrency)
+
 
         #while statement is more flexible way to wait for a period of time or a restart
         # restart could be caused by a met failure condition or a met sustained one
@@ -814,6 +795,7 @@ def main():
         if(oldCurrency == currentCurrency and currentCurrency != ''):
             newPrice = getbinanceprice(currentCurrency, currentMinute)
             cumulativePercentChange = calcPercentChange(priceBought, newPrice)
+            PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = cumulativePercentChange
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
             priceBought = newPrice
 
@@ -837,6 +819,10 @@ def main():
 
     #special print statement used to get the parameters back
     print("LINEBEGIN" + str(PARAMETERS) + "DONEEND")
+    #print(len(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT']))
+    #print(str(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT'][0]))
+    #print(str(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT'][len(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT']) - 1]))
+
 
 if __name__ == "__main__":
     main()

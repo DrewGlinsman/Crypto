@@ -1,0 +1,47 @@
+#just some old code that no longer works but hasn't been phased totally out
+for cryptoEvaluator in modified volume
+
+        #new setup makes two variables that represent the signed partitions of each volume.
+        #todo make the setup better (i.e. check if 1 + % > 1 - % to determine postitive or negative
+        #todo cont and then check to see if 1 - % > % was bigger
+        #todo cont then just multiply whichever is greater by the correct one
+        #todo cont ex: +12%     1 - 12% = .88  and 1 + 12% = 1.12 so we know the % change is positive
+        #todo  cont then,  1 - 12% = .88 and  .12 < .88 so we multiply
+        #todo volume * .88  to get the postiive volume
+        #todo and volume * -.12 to get the negative volume
+        #NOTE: can change back to normal if this doesnt work
+        if(percentChangesList[currentSlot] < 0):
+            if (( 1 + percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
+                multiplyBy = 1 + percentChangesList[currentSlot] / 100
+            elif(( 1 + percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
+                multiplyBy = percentChangesList[currentSlot] / 100
+
+
+            decreasingNegVol = float(i) * (multiplyBy) * float(PARAMETERS['NEGATIVE_WEIGHT'])
+            decreasingPosVol = -1 * (float(i) * (multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
+
+            if decreasingNegVol == (-1 * decreasingPosVol):
+                oldVolume += decreasingNegVol + 0.5 * decreasingPosVol #todo make the 0.5 a parameter
+
+            if (decreasingNegVol != (-1 * decreasingPosVol)):
+                oldVolume += decreasingNegVol + decreasingPosVol
+
+        if(percentChangesList[currentSlot] > 0):
+
+            if (( 1 - percentChangesList[currentSlot]) > percentChangesList[currentSlot]):
+                multiplyBy = 1 - percentChangesList[currentSlot] / 100
+            elif(( 1 - percentChangesList[currentSlot]) < percentChangesList[currentSlot]):
+                multiplyBy = percentChangesList[currentSlot] / 100
+
+
+            increasingNegVol = float(i) * ((multiplyBy) * float(PARAMETERS['PRIMARY_MODIFIED_VOLUME_SCALER']))
+            increasingPosVol = (-1) * (float(i) *(multiplyBy)) * float(PARAMETERS['NEGATIVE_WEIGHT'])
+
+
+            if increasingNegVol == (-1 * increasingPosVol):
+                oldVolume += increasingPosVol + 0.5 * increasingNegVol  # todo make the 0.5 a parameter
+
+            if (increasingNegVol != (-1 * increasingPosVol)):
+                oldVolume += increasingNegVol + increasingPosVol
+
+

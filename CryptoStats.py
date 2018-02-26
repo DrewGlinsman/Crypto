@@ -20,10 +20,13 @@ stepsize = {}
 cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
 #cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
 
+logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+file = open(logPath, "w")
+
 #one day in ms
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
-COUNT = 7
+COUNT = 14
 
 def getData(numDays):
 
@@ -70,17 +73,19 @@ def binStepSize():
     #iterating through the dictionary and adding just the stepsizes into our own dictionary
     for i in bigdata:
         symbol = i["symbol"]
-        stepsize = i["filters"][1]["stepSize"]
-        temp = {symbol: stepsize}
-        stepsizes.update(temp)
+        stepsizem = i["filters"][1]["stepSize"]
+        temp = {symbol: stepsizem}
+        stepsize.update(temp)
 
 
 
 
-def getOpenPrice():
+def getOpenPrice(interval, minutesBack):
     if(cryptoOpenPriceData == {}):
         #iterating through all the crypto symbols
         for key, value in priceSymbols.items():
+            #the number of number of minutes we have gone back so far
+            mins = 0
 
             # creating the path lengths and opening the openprice file with read permissions
             openPriceCryptoPath = os.path.join(cryptoPaths, value + "OpenPrice" + ".txt")
@@ -92,20 +97,27 @@ def getOpenPrice():
             # iterating through each file and adding the correct open prices to the dictionary
             for line in odata:
                 words = line.split(",")
-                # if there is not already a dictionary created for the value create one and put the first value in it
-                if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
-                    temp = {value: words}
-                    cryptoOpenPriceData.update(temp)
-                # otherwise append the price to the list that is already there
-                else:
-                    cryptoOpenPriceData[value].append(words)
+                #iterate through each data point in the line
+                for i in words:
+                    #check to see that the datapoint is between the endpoint and startpoint of the interval to train on
+                    if mins > minutesBack and mins <= (minutesBack + interval):
+                        # if there is not already a dictionary created for the value create one and put the first value in it
+                        if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
+                            temp = {value: [i]}
+                            cryptoOpenPriceData.update(temp)
+                        # otherwise append the price to the list that is already there
+                        else:
+                            cryptoOpenPriceData[value].append(i)
+                    mins+=1
+
     return cryptoOpenPriceData
 
-def getClosePrice():
+def getClosePrice(interval, minutesBack):
     if(cryptoClosePriceData == {}):
         #iterating through all the crypto symbols
         for key, value in priceSymbols.items():
-
+            #the number of number of minutes we have gone back so far
+            mins = 0
             #creating the path lengths and opening the close price file with read permissions
             closePriceCryptoPath = os.path.join(cryptoPaths, value + "ClosePrice" + ".txt")
             cprice = open(closePriceCryptoPath, "r")
@@ -116,17 +128,25 @@ def getClosePrice():
             #iterating through each file and adding the correct close price to the dictionary
             for line in cdata:
                 words = line.split(",")
-                if (cryptoClosePriceData == {} or value not in cryptoClosePriceData):
-                    temp = {value: words}
-                    cryptoClosePriceData.update(temp)
-                else:
-                    cryptoClosePriceData[value].append(words)
+                # iterate through each data point in the line
+                for i in words:
+                    # check to see that the datapoint is between the endpoint and startpoint of the interval to train on
+                    if mins > minutesBack and mins <= (minutesBack + interval):
+                        if (cryptoClosePriceData == {} or value not in cryptoClosePriceData):
+                            temp = {value: [i]}
+                            cryptoClosePriceData.update(temp)
+                        else:
+                            cryptoClosePriceData[value].append(i)
+
+                    mins+=1
     return cryptoClosePriceData
 
-def getVolume():
+def getVolume(interval, minutesBack):
     if(cryptoVolumeData == {}):
         #iterate through all the crypto symbols
         for key, value in priceSymbols.items():
+            # the number of number of minutes we have gone back so far
+            mins = 0
             # creating the path lengths and opening the files with read permissions
             volumeCryptoPath = os.path.join(cryptoPaths, value + "Volume" + ".txt")
             volume = open(volumeCryptoPath, "r")
@@ -137,15 +157,21 @@ def getVolume():
             # iterating through each file and adding the volume data to the dictionary
             for line in vol:
                 openprice = line.split(",")
-                if (cryptoVolumeData == {} or value not in cryptoVolumeData):
-                    temp = {value: openprice}
-                    cryptoVolumeData.update(temp)
-                else:
-                    cryptoVolumeData[value].append(openprice)
+                # iterate through each data point in the line
+                for i in openprice:
+                    # check to see that the datapoint is between the endpoint and startpoint of the interval to train on
+                    if mins > minutesBack and mins <= (minutesBack + interval):
+                        if (cryptoVolumeData == {} or value not in cryptoVolumeData):
+                            temp = {value: [i]}
+                            cryptoVolumeData.update(temp)
+                        else:
+                            cryptoVolumeData[value].append(i)
+                    mins+=1
     return cryptoVolumeData
 
 def main():
     getData(COUNT)
+
 
 
 if __name__ == "__main__":

@@ -66,4 +66,22 @@ Added new modified volume calculation that uses the size of the percent to parit
 Added checks in modififed volume calculation that in receives volumes that would result in a zero sum, it will just halve the smaller amount
 
 2/16/18
-Added some small fixes to make cryptoTrainer run multiple "classes" of evolution not just multiple variations of the bot 
+Added some small fixes to make cryptoTrainer run multiple "classes" of evolution not just multiple variations of the bot
+
+2/21/18
+Added a oldcode text file to temporarily hold old code I haven't decided if I like yet
+Added a function to crypto trainer to check if there are command line arguments and if there are it pulls out the number of desired classes and iterations
+
+2/23/18
+added more clarity to the functions in crypto stats
+began implementation of the crypto stats analysis class into crypto evaluator
+added a variation num parameter and a class num parameter
+added a function to set up a stat Dictionary to be sent to crypto run to crypto evaluator
+the crypto stats object for each crypto evaluator now creates a new dictionary with statistics from the run
+
+2/24/18
+added a set of new parameters that will give both a starting point for a test in the past as well as the interval length to train over
+
+2/25/18
+fixed the rewriting params method in crypto trainer to recognize a last value in the parameter list
+fixed minor bugs that affected the resetting and proper randomization of parameters in crypto trainer
