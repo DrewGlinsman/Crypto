@@ -41,11 +41,16 @@ from PrivateData import api_key, secret_key
 #PRIMARY_MODIFIED_VOLUME_SCALER: the scaler to make more volume traded have the same sign as the percent change in the price than the amount that is counted as having the opposite sign
 #WAIT_FOR_CHECK_FAILURE: the number of ticks before the failure condition is checked (the crypto is decreasing over the past 10 minutes)
 #WAIT_FOR_CHECK_TOO_LOW: the number of ticks before ethe program checks to see if a crypto has decreased too low to its starting point
+#VARIATION_NUM: number stored for what variation on the bot this is, 0 base
+#CLASS_NUM: number stored for the class, 0 means no class, 1 and up are the actual classes
+#INTERVAL_TO_TEST: the interval over which the bot will be tested (think hour, day, week etc...); used with the crypto evaluator
+#MINUTES_IN_PAST: how far back you want the end point of the test to be
+
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0, 'CLASS_NUM': 0, 'INTERVAL_TO_TEST':  10080, 'MINUTES_IN_PAST': 1440}
 
 
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0}
 
-UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW']
+UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW', 'VARIATION_NUMBER', 'CLASS_NUM', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST']
 
 
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -68,7 +73,7 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS=[]
 
 #number of iterations of bot
-NUM_ITERATIONS = 100
+NUM_ITERATIONS = 6
 
 #number of classes of bots to run
 NUM_CLASSES = 10
@@ -144,7 +149,6 @@ def resetParameters(paramDict):
         trueVal = float(trueVal)
         valList.append(trueVal)
 
-
     #parameter dictionary that will loop over params and rewrite them
     for key, value in paramDict.items():
 
@@ -156,14 +160,20 @@ def resetParameters(paramDict):
 def reWriteParameters(paramDict):
 
     file.seek(0)
+    lenParam = len(paramDict)
+    count = 1
+    for key, value in paramDict.items():
+        if count == lenParam:
+            lastParam = key
+        count+=1
 
     for key, value in paramDict.items():
         #if we are at the very last parameter do not print a new line
-        if key == 'WAIT_FOR_CHECK_TOO_LOW':
+        if key == lastParam:
             print('\'%s\': %s,' % (key, value))
             file.write('\'%s\': %s,' % (key, value))
 
-        if key != 'WAIT_FOR_CHECK_TOO_LOW':
+        if key != lastParam:
             print('\'%s\': %s,\n' % (key, value))
             file.write('\'%s\': %s,\n' % (key, value))
 
@@ -240,6 +250,8 @@ def main():
     global final_Dict
     global reform
 
+
+
     #untested function that should check if there are command line arguments
     #setVals()
 
@@ -249,7 +261,7 @@ def main():
         current_Max = 0.0
         procs = []
         count = 0
-
+        variationNum = 0
 
         #if this is the second class you need to reopen the file because it has been closed to commit the changes of the first class
         if i > 0:
@@ -263,12 +275,14 @@ def main():
             proc = Popen([sys.executable, 'CryptoEvaluator.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stdin = PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
             procs.append(proc)
 
-        #randomizes parameters and runs different instances of the bot using the different starting parameters
+         #randomizes parameters and runs different instances of the bot using the different starting parameters
         for proc in procs:
             reform = ''
 
-
+            #randomize parameters and send the bot their class and variation num
             randomizeParams(PARAMETERS, typeOfRandom)
+            PARAMETERS['CLASS_NUM'] = i + 1
+            PARAMETERS['VARIATION_NUMBER'] = variationNum
 
             #reset typeOfRandom so that every 50th run we use a special set of randomizers
             if(count % 50 == 0):

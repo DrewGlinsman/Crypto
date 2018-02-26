@@ -14,15 +14,16 @@ class CryptoStatsAnalysis:
 
     #place data attributes in here that you do not want stored by different instances of the bot
     #or redefine them using the parameter list passed
-    def __init__(self, run, training):
+    def __init__(self, variationNum, classNum,  training, startMinute, endMinute, PARAMS):
 
         ###### SETTING PATHS FOR SAVING ANALYSIS IN FILES #######
         #used in opening the appropriate file for this
-        runNum = run
+        self.variationNum = variationNum
+        self.classNum = classNum
 
         #training = T will make the analysis files get stored with the other training
         #training = NT will make the analysis files get stored with the normal trading
-        training = training
+        self.training = training
 
         # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
         logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Analysis'
@@ -37,7 +38,7 @@ class CryptoStatsAnalysis:
         pathlib.Path(withTraining).mkdir(parents=True, exist_ok=True)
 
         #file name concatentation with runNum
-        fileName = "__" + str(runNum) + "_Analysis.txt"
+        fileName = "__" + str(classNum) + ':' + str(variationNum) + "_Analysis.txt"
 
         # log file name + path
         logCompletePath = os.path.join(withTraining, fileName)
@@ -47,29 +48,48 @@ class CryptoStatsAnalysis:
 
         #Storage Variables: variables used for storing different attributes for the cryptos from each successive buy/sell period
 
-        #holds the score, and calculated basic mean for all the cryptos and whether they were BOUGHT, CHOSEN, or NOTCHOSEN. Each successive iteration uses a different dictionary, should also include buy and sell times
-        runStats = []
+        # Each successive iteration uses a different dictionary, each dictionary has a timestamp and a list of crypto objects with their stored data,should also include buy and sell times
+        self.runStats = []
+
+        #the parameters the bot used
+        self.params = PARAMS
+
+        #overall interval the bot trained on
+        self.startMinute = startMinute
+        self.endMinute = endMinute
+
 
         #FINAL VARIABLES: anything used for final evaluation
         #dictionary where every crypto chosen to be bought is stored and whether they increased or decreased
-        finalChosen = {}
+        self.finalChosen = {}
 
         #dictionary where every crypto that qualified for potentially buying is stored and whether they increased or decreased
-        narrowedDown = {}
+        self.narrowedDown = {}
 
         #the list of correlations between the score order and percent change for each buy
-        correlations = []
+        self.correlations = []
 
         #the average correlation between the score order and the percent change
-        averageCorrelation = []
+        self.averageCorrelation = []
 
-    def newStats(self, statsList):
-        statsList.append(self.newCryptoDict())
+    #adds a dictionary where every crypto has a special holder object assigned to it with all important information to it from that moment when the dictionary was made
+    # this method is called each time a crypto has been bought, as well as when the cryptos decide to keep the same crypto currency, and when they choose not to buy one
+    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold):
+        self.runStats.append(self.newCryptoDict(minute, statsDict, didBuy, didSell, bought, sold))
 
-    def newCryptoDict(self):
+
+    #returns a dictionary with one holder object for each crypto as well as a  stored currentMinute
+    def newCryptoDict(self, timestamp, statsDict, didBuy, didSell, bought, sold):
         newDict = {}
         for key, value in priceSymbols.items():
             newDict.update({value: CryptoHolder(value)})
+        newDict.update({'currentMinute': timestamp})
+        newDict.update({'statsDict': statsDict})
+        newDict.update({'didBuy': didBuy})
+        newDict.update({'didSell': didSell})
+        newDict.update({'bought': bought})
+        newDict.update({'sold': sold})
+
 
         return newDict
 
@@ -77,7 +97,7 @@ class CryptoHolder():
 
     #decision can be B for bought, C for chosen, or NC for not chosen
     def __init__(self, cryptoName):
-        symbol = cryptoName
-        score = 0.0
-        mean = 0.0
-        decision = 'NC'
+        self.symbol = cryptoName
+        self.score = 0.0
+        self.mean = 0.0
+        self.decision = 'NC'
