@@ -38,8 +38,8 @@ TESTING = 1
 
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-#logPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
+#logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+logPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
 #log file name + path
 logCompletePath = os.path.join(logPaths, "log.txt")
 
@@ -47,8 +47,8 @@ logCompletePath = os.path.join(logPaths, "log.txt")
 file = open(logCompletePath, "a+")
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-#paramPaths= r'C:\Users\DrewG\Documents\Github\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+paramPaths= r'C:\Users\DrewG\Documents\Github\Crypto'
 
 #param file name + path
 paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")

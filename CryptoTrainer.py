@@ -260,6 +260,7 @@ def main():
         procs = []
         count = 0
         variationNum = 0
+        minInDay = 1440
 
         #if this is the second class you need to reopen the file because it has been closed to commit the changes of the first class
         if i > 0:
@@ -281,6 +282,8 @@ def main():
             randomizeParams(PARAMETERS, typeOfRandom)
             PARAMETERS['CLASS_NUM'] = i + 1
             PARAMETERS['VARIATION_NUMBER'] = variationNum
+            #make the max cycles equal to the number of days of the interval in hours
+            PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
 
             #reset typeOfRandom so that every 50th run we use a special set of randomizers
             if(count % 50 == 0):

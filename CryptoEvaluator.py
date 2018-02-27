@@ -23,8 +23,8 @@ except ImportError:
 #todo add in a parser for the stdin
 #todo add in a print statement to send back the parameters
 
-logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
-#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
+#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
 file = open(logPath, "a+")
 
 
@@ -621,7 +621,7 @@ def checkExitCondition(currency, currentMinute):
 
     global priceBought
 
-    currentPrice= getbinanceprice(currency, currentMinute)
+    currentPrice = getbinanceprice(currency, currentMinute)
 
     percentChange = calcPercentChange(priceBought, currentPrice)
 
@@ -792,6 +792,7 @@ def main():
             currentMinute += 1
 
 
+
         if(oldCurrency == currentCurrency and currentCurrency != ''):
             newPrice = getbinanceprice(currentCurrency, currentMinute)
             cumulativePercentChange = calcPercentChange(priceBought, newPrice)
@@ -803,8 +804,9 @@ def main():
             EXIT = checkExitCondition(currentCurrency, currentMinute)
 
         if currentCurrency == '':
-            startMinute += 5
-            endMinute += 5
+            temp = startMinute
+            startMinute += ((currentMinute - startMinute) + 5)
+            endMinute += ((currentMinute - temp) + 5)
 
         else:
             temp = startMinute

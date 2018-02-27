@@ -26,7 +26,8 @@ class CryptoStatsAnalysis:
         self.training = training
 
         # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-        logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Analysis'
+        #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Analysis'
+        logPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Analysis'
 
         #concatenates the logpath with a date so each analysis log set is in its own file by day
         withDate = logPaths + '\\' + str(datetime.datetime.now().date())

@@ -20,7 +20,9 @@ stepsize = {}
 cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
 #cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
 
-logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+
 file = open(logPath, "w")
 
 #one day in ms
