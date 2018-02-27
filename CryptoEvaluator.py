@@ -802,8 +802,9 @@ def main():
             EXIT = checkExitCondition(currentCurrency, currentMinute)
 
         if currentCurrency == '':
-            startMinute += 5
-            endMinute += 5
+            temp = startMinute
+            startMinute += 5 + (currentMinute - startMinute)
+            endMinute += 5 + (currentMinute - temp)
 
         else:
             temp = startMinute

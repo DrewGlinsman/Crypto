@@ -85,3 +85,6 @@ added a set of new parameters that will give both a starting point for a test in
 2/25/18
 fixed the rewriting params method in crypto trainer to recognize a last value in the parameter list
 fixed minor bugs that affected the resetting and proper randomization of parameters in crypto trainer
+
+2/26/18
+added a log file for the trainer

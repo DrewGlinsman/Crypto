@@ -73,10 +73,13 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS=[]
 
 #number of iterations of bot
-NUM_ITERATIONS = 6
+NUM_ITERATIONS = 3
 
 #number of classes of bots to run
 NUM_CLASSES = 10
+
+#number of minutes in a day
+minInDay = 1440
 
 
 #final dictionary returned to be rewritten to file
@@ -86,16 +89,18 @@ final_Dict = {}
 paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 #paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
+logParamPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
 
 #param file name + path
 
 #todo change to "BEST_PARAMETERS" when actually running
 paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
-
+logparamCompletePath = os.path.join(logParamPaths, 'trainerLog.txt')
 
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
 
+file2 = open(logparamCompletePath, "a+")
 def keyCheck(key):
     for i in UNCHANGED_PARAMS:
         if i == key:
@@ -161,21 +166,27 @@ def reWriteParameters(paramDict):
 
     file.seek(0)
     lenParam = len(paramDict)
+    file2.write("PARAMETER DICTIONARY " + str(paramDict))
+    file2.write("LENGTH OF PARAMETER DICT " + str(lenParam))
     count = 1
     for key, value in paramDict.items():
         if count == lenParam:
             lastParam = key
         count+=1
 
+    file2.write("LAST PARAM " + str(lastParam))
+
     for key, value in paramDict.items():
         #if we are at the very last parameter do not print a new line
         if key == lastParam:
             print('\'%s\': %s,' % (key, value))
             file.write('\'%s\': %s,' % (key, value))
+            file2.write('HEY LOOK AT THIS \'%s\': %s,' % (key, value))
 
         if key != lastParam:
             print('\'%s\': %s,\n' % (key, value))
             file.write('\'%s\': %s,\n' % (key, value))
+            file2.write('HEY LOOK HERE \'%s\': %s,' % (key, value))
 
 #converts the given string to a Dict. Used to parse the returned string from the bots being trained
 def stringToDict(stringToChange):
@@ -249,6 +260,7 @@ def main():
     global file
     global final_Dict
     global reform
+    global minInDay
 
 
 
@@ -283,6 +295,8 @@ def main():
             randomizeParams(PARAMETERS, typeOfRandom)
             PARAMETERS['CLASS_NUM'] = i + 1
             PARAMETERS['VARIATION_NUMBER'] = variationNum
+            #make the max cycles equal to the number of days of the interval in hours
+            PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
 
             #reset typeOfRandom so that every 50th run we use a special set of randomizers
             if(count % 50 == 0):
