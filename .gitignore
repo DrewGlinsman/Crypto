@@ -7,3 +7,5 @@
 __pycache__/CryptoStats.cpython-36.pyc
 __pycache__/CryptoTrainer.cpython-36.pyc
 __pycache__/PrivateData.cpython-36.pyc
+Logs/dlog.txt
+*.txt
