@@ -46,8 +46,7 @@ from PrivateData import api_key, secret_key
 #INTERVAL_TO_TEST: the interval over which the bot will be tested (think hour, day, week etc...); used with the crypto evaluator
 #MINUTES_IN_PAST: how far back you want the end point of the test to be
 
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0, 'CLASS_NUM': 0, 'INTERVAL_TO_TEST':  10080, 'MINUTES_IN_PAST': 1440}
-
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
 
 
 UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW', 'VARIATION_NUMBER', 'CLASS_NUM', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST']
@@ -70,13 +69,13 @@ PARAM_CHOSEN = {}
 
 
 #list of each variation of the parameter list, one is passed to each instance of the bot
-PARAMETER_VARIATIONS=[]
+PARAMETER_VARIATIONS = []
 
 #number of iterations of bot
-NUM_ITERATIONS = 3
+NUM_ITERATIONS = 6
 
 #number of classes of bots to run
-NUM_CLASSES = 10
+NUM_CLASSES = 30
 
 #number of minutes in a day
 minInDay = 1440
@@ -101,6 +100,7 @@ logparamCompletePath = os.path.join(logParamPaths, 'trainerLog.txt')
 file = open(paramCompletePath, "r+")
 
 file2 = open(logparamCompletePath, "a+")
+
 def keyCheck(key):
     for i in UNCHANGED_PARAMS:
         if i == key:
@@ -165,6 +165,8 @@ def resetParameters(paramDict):
 def reWriteParameters(paramDict):
 
     file.seek(0)
+    foundLast = 0
+
     lenParam = len(paramDict)
     file2.write("PARAMETER DICTIONARY " + str(paramDict))
     file2.write("LENGTH OF PARAMETER DICT " + str(lenParam))
@@ -179,11 +181,12 @@ def reWriteParameters(paramDict):
     for key, value in paramDict.items():
         #if we are at the very last parameter do not print a new line
         if key == lastParam:
+            foundLast = 1
             print('\'%s\': %s,' % (key, value))
             file.write('\'%s\': %s,' % (key, value))
             file2.write('HEY LOOK AT THIS \'%s\': %s,' % (key, value))
 
-        if key != lastParam:
+        if key != lastParam and foundLast == 0:
             print('\'%s\': %s,\n' % (key, value))
             file.write('\'%s\': %s,\n' % (key, value))
             file2.write('HEY LOOK HERE \'%s\': %s,' % (key, value))
@@ -262,8 +265,6 @@ def main():
     global reform
     global minInDay
 
-
-
     #untested function that should check if there are command line arguments
     #setVals()
 
@@ -274,6 +275,7 @@ def main():
         procs = []
         count = 0
         variationNum = 0
+        minInDay = 1440
 
         #if this is the second class you need to reopen the file because it has been closed to commit the changes of the first class
         if i > 0:
@@ -304,7 +306,6 @@ def main():
             if(count % 50 != 0):
                 typeOfRandom = 0
 
-
             #passing the parameters to the processes
             out = proc.communicate(input = str(PARAMETERS))
             timestamp = int(time.time() * 1000)
@@ -318,7 +319,6 @@ def main():
                 if "LINEBEGIN" not in line:
                     break
                 val = line
-
 
                 if(val == ''):
                     break

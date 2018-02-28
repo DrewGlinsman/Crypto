@@ -3,6 +3,10 @@ import requests
 import os
 import sys
 
+#todo figure out if it is better to insert items at front of the lists or to just remake the lists in reverse order
+
+
+
 #dictionary that contains all the symbols for the binance API calls
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
@@ -21,12 +25,14 @@ stepsize = {}
 cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
 
 logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+
 file = open(logPath, "w")
 
 #one day in ms
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
-COUNT = 14
+COUNT = 50
 
 def getData(numDays):
 
@@ -82,6 +88,7 @@ def binStepSize():
 
 def getOpenPrice(interval, minutesBack):
     if(cryptoOpenPriceData == {}):
+        reversedDicte = {}
         #iterating through all the crypto symbols
         for key, value in priceSymbols.items():
             #the number of number of minutes we have gone back so far
@@ -105,10 +112,24 @@ def getOpenPrice(interval, minutesBack):
                         if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
                             temp = {value: [i]}
                             cryptoOpenPriceData.update(temp)
+                            reversedDicte.update({value : [i]})
                         # otherwise append the price to the list that is already there
                         else:
                             cryptoOpenPriceData[value].append(i)
+                            reversedDicte[value].insert(0, i)
                     mins+=1
+
+        #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
+        # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
+        # it can be used to train oldest to newest in the evalutator
+        reversedDict = {}
+        for key, value in priceSymbols.items():
+            reversedData = []
+            for i in reversed(cryptoOpenPriceData[value]):
+                reversedData.append(i)
+            reversedDict.update({value: reversedData})
+
+        return reversedDict
 
     return cryptoOpenPriceData
 
@@ -139,6 +160,19 @@ def getClosePrice(interval, minutesBack):
                             cryptoClosePriceData[value].append(i)
 
                     mins+=1
+
+        #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
+        # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
+        # it can be used to train oldest to newest in the evalutator
+        reversedDict = {}
+        for key, value in priceSymbols.items():
+            reversedData = []
+            for i in reversed(cryptoClosePriceData[value]):
+                reversedData.append(i)
+            reversedDict.update({value: reversedData})
+
+        return reversedDict
+
     return cryptoClosePriceData
 
 def getVolume(interval, minutesBack):
@@ -167,10 +201,24 @@ def getVolume(interval, minutesBack):
                         else:
                             cryptoVolumeData[value].append(i)
                     mins+=1
+
+        #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
+        # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
+        # it can be used to train oldest to newest in the evalutator
+        reversedDict = {}
+        for key, value in priceSymbols.items():
+            reversedData = []
+            for i in reversed(cryptoVolumeData[value]):
+                reversedData.append(i)
+            reversedDict.update({value: reversedData})
+
+        return reversedDict
+
     return cryptoVolumeData
 
 def main():
     getData(COUNT)
+
 
 
 

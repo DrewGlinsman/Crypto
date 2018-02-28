@@ -88,3 +88,7 @@ fixed minor bugs that affected the resetting and proper randomization of paramet
 
 2/26/18
 added a log file for the trainer
+
+2/27/18
+Added a check to the file rewriter where it will not keep printing if it finds that you are on the last string
+Added some extra code to reverse all the crypto lists that are pulled from the crypto stats stored data
