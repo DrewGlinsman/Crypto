@@ -4,17 +4,38 @@
 import os
 import datetime
 import pathlib
+from CryptoEvaluator import calcPercentChange
 
-
-
-from AutoTrader import priceSymbols
+#dictionary that contains all the symbols for the binance API calls
+priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
+                'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
+                'LTC': 'LTCBTC', 'Dash': 'DASHBTC',
+                'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
+                'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 
 class CryptoStatsAnalysis:
 
 
     #place data attributes in here that you do not want stored by different instances of the bot
     #or redefine them using the parameter list passed
-    def __init__(self, variationNum, classNum,  training, startMinute, endMinute, PARAMS):
+    def __init__(self, variationNum, classNum,  training, startMinute, endMinute, PARAMS, timestamp, openPrices, closePrices, volumes):
+        #the parameters the bot used
+        self.params = PARAMS
+
+        #store timestamp
+        self.timestamp = timestamp
+
+        #initialize values to be set later
+        self.numBuys = 0
+        self.numSells = 0
+
+        #initalize the list that will hold each consecutively owned crypto and the percent changes over the periods it is held
+        self.allOwnedPercentChanges = []
+
+        #initialize the dictionariies that will hold the open and close price data as well as the volume data used
+        self.openPriceData = openPrices
+        self.closePriceData = closePrices
+        self.volumeData = volumes
 
         ###### SETTING PATHS FOR SAVING ANALYSIS IN FILES #######
         #used in opening the appropriate file for this
@@ -35,65 +56,116 @@ class CryptoStatsAnalysis:
         #concatenates the logpath with a autotrader vs crypto evalutor distinction
         withTraining = withDate + '\\' + training
 
+        #concatenates with the class of the run included
+        withClass = withTraining + '\\Class__' + str(int(classNum))
+
         #creates a directory if one does not exist
-        pathlib.Path(withTraining).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(withClass).mkdir(parents=True, exist_ok=True)
 
         #file name concatentation with runNum
-        fileName = "__" + str(classNum) + ':' + str(variationNum) + "_Analysis.txt"
+        fileName = "__Time=" + str(timestamp) + '___Class=' + str(int(classNum)) + '___Variation=' + str(int(variationNum)) + "__Analysis.txt"
 
         # log file name + path
-        logCompletePath = os.path.join(withTraining, fileName)
+        logCompletePath = os.path.join(withClass, fileName)
 
         # open a file for appending (a). + creates file if does not exist
-        file = open(logCompletePath, "a+")
+        self.file = open(logCompletePath, "a+")
 
         #Storage Variables: variables used for storing different attributes for the cryptos from each successive buy/sell period
 
         # Each successive iteration uses a different dictionary, each dictionary has a timestamp and a list of crypto objects with their stored data,should also include buy and sell times
         self.runStats = []
 
-        #the parameters the bot used
-        self.params = PARAMS
+        #Each cycle has its own set of basic information
+        self.runsInfo = []
+
 
         #overall interval the bot trained on
         self.startMinute = startMinute
         self.endMinute = endMinute
 
 
-        #FINAL VARIABLES: anything used for final evaluation
-        #dictionary where every crypto chosen to be bought is stored and whether they increased or decreased
-        self.finalChosen = {}
-
-        #dictionary where every crypto that qualified for potentially buying is stored and whether they increased or decreased
-        self.narrowedDown = {}
-
-        #the list of correlations between the score order and percent change for each buy
-        self.correlations = []
-
-        #the average correlation between the score order and the percent change
-        self.averageCorrelation = []
 
     #adds a dictionary where every crypto has a special holder object assigned to it with all important information to it from that moment when the dictionary was made
     # this method is called each time a crypto has been bought, as well as when the cryptos decide to keep the same crypto currency, and when they choose not to buy one
-    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold):
-        self.runStats.append(self.newCryptoDict(minute, statsDict, didBuy, didSell, bought, sold))
+    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld):
+        self.runStats.append({decisionNum: self.newCryptoDict()})
+        self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld)})
+
+        for key, value in decisions.items():
+            count = 0.0
+            posCryptos = 0.0
+            for i in value:
+                change = self.caclulatePercentChange(minute, timeHeld, i)
+                if change > 0.0:
+                    posCryptos += 1.0
+                count += 1.0
 
 
-    #returns a dictionary with one holder object for each crypto as well as a  stored currentMinute
-    def newCryptoDict(self, timestamp, statsDict, didBuy, didSell, bought, sold):
+            if count == 0.0:
+                self.runsInfo[decisionNum].setPosOverInterval(0.0, key)
+            else:
+                average = posCryptos / count
+                self.runsInfo[decisionNum][decisionNum].setPosOverInterval(average, key)
+
+    #returns a dictionary with one holder object for each crypto
+    def newCryptoDict(self):
         newDict = {}
         for key, value in priceSymbols.items():
             newDict.update({value: CryptoHolder(value)})
-        newDict.update({'currentMinute': timestamp})
-        newDict.update({'statsDict': statsDict})
-        newDict.update({'didBuy': didBuy})
-        newDict.update({'didSell': didSell})
-        newDict.update({'bought': bought})
-        newDict.update({'sold': sold})
-
 
         return newDict
 
+    #sets the value passed to be whatever value num is specified
+    def setVal(self, value, valueNum):
+        if valueNum == 0:
+            self.numBuys = value
+        elif valueNum == 1:
+            self.numSells = value
+        elif valueNum == 2:
+            self.allOwnedPercentChanges = value
+
+    #calculates the percentage change over the interval for the currency
+    def caclulatePercentChange(self, minute, timeHeld, currency):
+        change = calcPercentChange(self.openPriceData[currency][minute - timeHeld], self.closePriceData[currency][minute])
+
+        return change
+
+    #calls the functions in order to format the analysis file correctly
+    def writeToFile(self):
+        self.basicInfo()
+        self.buysAndSales()
+        self.posCorrelations()
+
+        self.file.close()
+
+    #prints the date and timestamp
+    def basicInfo(self):
+        self.file.write('----------------------------------------- \n')
+        self.file.write('Run was at ' + str(self.timestamp) + '\n')
+        self.file.write('The Parameters \n')
+        for key, value in self.params.items():
+            self.file.write(str(key) + ':' + str(value) +'\n')
+
+    #writes the buys and sale numbers to the analysis file
+    def buysAndSales(self):
+        self.file.write('----------------------------------------- \n')
+        self.file.write('Number of buys ' + str(self.numBuys) + '\n')
+        self.file.write('Number of sales ' + str(self.numSells) + '\n')
+
+    #print out the positive correlation for each crypto for every decision made
+    def posCorrelations(self):
+        count = 0
+        self.file.write('----------------------------------------- \n')
+        for i in self.runsInfo:
+            self.file.write('\n')
+            self.file.write('Decision ' + str(count) + ': \n')
+
+            for key, value in i[count].posOverInterval.items():
+                self.file.write(str(key) + ': ' + str(value) + '\n')
+            count += 1
+
+#stores the information calculated for each cryptocurrency at each decision point
 class CryptoHolder():
 
     #decision can be B for bought, C for chosen, or NC for not chosen
@@ -102,3 +174,20 @@ class CryptoHolder():
         self.score = 0.0
         self.mean = 0.0
         self.decision = 'NC'
+
+#stores the basic information about the period being evaluated
+class cyrptoRunInfo():
+
+    def __init__(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld):
+        self.statsDict = statsDict
+        self.minute = minute
+        self.didBuy = didBuy
+        self.didSell = didSell
+        self.bought = bought
+        self.sold = sold
+        self.decisions = decisions
+        self.timeHeld = timeHeld
+        self.posOverInterval = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0, 'chosenNotCut': 0.0, 'theMax': 0.0}
+
+    def setPosOverInterval(self, average, key):
+        self.posOverInterval[key] = average * 100

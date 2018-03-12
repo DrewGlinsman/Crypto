@@ -5,10 +5,12 @@
 import os.path
 import sys
 import CryptoStatAnalysis
-
+import datetime
+import time
+import pathlib
 import CryptoStats
 
-from CryptoTrainer import PARAMETERS
+from CryptoTrainer import PARAMETERS, minInDay
 from CryptoStats import getOpenPrice, getClosePrice, getVolume
 
 try:
@@ -19,27 +21,10 @@ except ImportError:
 
 
 #todo make a series of functions used that have random variables in them and random variables left out instead of a simple linear score and simple parameter variation
-#todo add function to pull data from text files by day into data structures here
 #todo add in a parser for the stdin
-#todo add in a print statement to send back the parameters
+#todo add a minimum volume parameter to weed out the cryptos not traded at a high enough rate
+#todo add a minimum financial transaction amount per minute that must be occuring (uses the minimum volume and current price of each crypto)
 
-logPath = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\dlog.txt'
-#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs\dlog.txt'
-file = open(logPath, "a+")
-
-
-
-#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\Logs'
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-
-#param file name + path
-
-#todo change to "BEST_PARAMETERS" when actually running
-paramCompletePath = os.path.join(paramPaths, "testlog.txt")
-
-
-#open a file for appending (a). + creates file if does not exist
-file = open(paramCompletePath, "a+")
 
 
 #GLOBAL_VARIABLES
@@ -63,9 +48,6 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'LTC': 'LTCBTC', 'Dash': 'DASHBTC',
                 'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
                 'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
-
-
-
 
 
 #percent changes of the prices for each crypto with an interval size over a specified period of time
@@ -105,7 +87,7 @@ volumePercentData = {'BTCUSDT': {'percentbyhour': 0, 'timeIncreasing': 0, 'weigh
                 'XMRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'QTUMBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ETCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0},
                 'ZECBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ADABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ADXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'AIONBTC' : {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'AMBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'APPCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ARKBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ARNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ASTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BATBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BCDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BCPTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BNBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BQXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BRDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'BTSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CDTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CMTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CNDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'CTRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'DGDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'DLTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'DNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'EDOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ELFBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ENGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ENJBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'EOSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'EVXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'FUELBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'FUNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GASBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GTOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GVTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'GXSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'HSRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ICNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ICXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'IOTABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'KMDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'KNCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LENDBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LINKBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LRCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LSKBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'LUNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MANABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MCOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MDABTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MODBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MTHBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'MTLBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NAVBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NEBLBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NEOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'NULSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'OAXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'OMGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'OSTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'POEBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'POWRBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'PPTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'QSPBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'RCNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'RDNBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'REQBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SALTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SNGLSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SNMBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'STORJBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'STRATBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'SUBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TNBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TNTBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TRIGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'TRXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'VENBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'VIBBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'VIBEBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WABIBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WAVESBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WINGSBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'WTCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'XVGBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'XZCBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'YOYOBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}, 'ZRXBTC': {'percentbyhour': 0, 'timeIncreasing': 0, 'weightedtimeIncreasing': 0}}
 
-#stores the calculated weightedMovingAverad
+#stores the calculated weightedMovingAverage
 weightedMovingAverage = {'BTCUSDT': [], 'XRPBTC': [],
                 'ETHBTC': [], 'BCCBTC': [],
                 'LTCBTC': [], 'DASHBTC': [],
@@ -122,8 +104,8 @@ modifiedVolume = {'BTCUSDT': 0.0, 'XRPBTC': 0.0,
                 'XMRBTC': 0.0, 'QTUMBTC': 0.0, 'ETCBTC': 0.0,
                 'ZECBTC': 0.0, 'ADABTC': 0.0, 'ADXBTC': 0.0, 'AIONBTC' : 0.0, 'AMBBTC': 0.0, 'APPCBTC': 0.0, 'ARKBTC': 0.0, 'ARNBTC': 0.0, 'ASTBTC': 0.0, 'BATBTC': 0.0, 'BCDBTC': 0.0, 'BCPTBTC': 0.0, 'BNBBTC': 0.0, 'BNTBTC': 0.0, 'BQXBTC': 0.0, 'BRDBTC': 0.0, 'BTSBTC': 0.0, 'CDTBTC': 0.0, 'CMTBTC': 0.0, 'CNDBTC': 0.0, 'CTRBTC': 0.0, 'DGDBTC': 0.0, 'DLTBTC': 0.0, 'DNTBTC': 0.0, 'EDOBTC': 0.0, 'ELFBTC': 0.0, 'ENGBTC': 0.0, 'ENJBTC': 0.0, 'EOSBTC': 0.0, 'EVXBTC': 0.0, 'FUELBTC': 0.0, 'FUNBTC': 0.0, 'GASBTC': 0.0, 'GTOBTC': 0.0, 'GVTBTC': 0.0, 'GXSBTC': 0.0, 'HSRBTC': 0.0, 'ICNBTC': 0.0, 'ICXBTC': 0.0, 'IOTABTC': 0.0, 'KMDBTC': 0.0, 'KNCBTC': 0.0, 'LENDBTC': 0.0, 'LINKBTC': 0.0, 'LRCBTC': 0.0, 'LSKBTC': 0.0, 'LUNBTC': 0.0, 'MANABTC': 0.0, 'MCOBTC': 0.0, 'MDABTC': 0.0, 'MODBTC': 0.0, 'MTHBTC': 0.0, 'MTLBTC': 0.0, 'NAVBTC': 0.0, 'NEBLBTC': 0.0, 'NEOBTC': 0.0, 'NULSBTC': 0.0, 'OAXBTC': 0.0, 'OMGBTC': 0.0, 'OSTBTC': 0.0, 'POEBTC': 0.0, 'POWRBTC': 0.0, 'PPTBTC': 0.0, 'QSPBTC': 0.0, 'RCNBTC': 0.0, 'RDNBTC': 0.0, 'REQBTC': 0.0, 'SALTBTC': 0.0, 'SNGLSBTC': 0.0, 'SNMBTC': 0.0, 'SNTBTC': 0.0, 'STORJBTC': 0.0, 'STRATBTC': 0.0, 'SUBBTC': 0.0, 'TNBBTC': 0.0, 'TNTBTC': 0.0, 'TRIGBTC': 0.0, 'TRXBTC': 0.0, 'VENBTC': 0.0, 'VIBBTC': 0.0, 'VIBEBTC': 0.0, 'WABIBTC': 0.0, 'WAVESBTC': 0.0, 'WINGSBTC': 0.0, 'WTCBTC': 0.0, 'XVGBTC': 0.0, 'XZCBTC': 0.0, 'YOYOBTC': 0.0, 'ZRXBTC': 0.0}
 
-
-
+#stored volume, mean, and score
+storedScores = {}
 
 #holds the the other stat items in it
 statDict = {}
@@ -164,22 +146,75 @@ values = {'PERCENT_BY_HOUR': [], 'VOLUME_BY_HOUR': [], 'TIME_INCREASING': [], 'W
 maxValues = {'PERCENT_BY_HOUR': 0.0, 'VOLUME_BY_HOUR': 0.0, 'TIME_INCREASING': 0.0, 'WEIGHTED_TIME_INCREASING': 0.0, 'VOLUME_TIME_INCREASING': 0.0, 'WEIGHTED_VOLUME_TIME_INCREASING': 0.0, 'MODIFIED_VOLUME': 0.0, 'SCORE': 0.0}
 
 #todo remember that the wait parameters for this one should be different from the ones in auto trader where they are in seconds not minutes
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
 
 
 #number of minutes we want to iterate backwards
 startMinute = 0
 endMinute = 60
+startMinNum = 0
+endMinNum = 60
 currentMinute = 0
 
+#true price for the crrpto being bought
+truePriceBought = 0.0
+
+#the number of buys
+numBuys = 0
+
+#the number of sells
+numSells = 0
+
+#whether testing or not
+testCheck = 1
+
+#percent Changes over all sepearted periods of time
+allOwnedCryptoPercentChanges = []
+
+#cryptos seperated by decision into those disregarded, those chosen but not making final cut because of their mean, those selected that have the appropriate mean, and the crypto that is chosen, has the right mean, and is the max
+cryptosSeperated = {'Disregarded': [], 'Chosen': [], 'chosenButCut': [], 'chosenNotCut': [], 'theMax': []}
+
+file = ''
+
+
+def buildLogs(timestamp):
+    global file
+    # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
+    # logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Analysis'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Evaluator'
+
+    # concatenates the logpath with a date so each analysis log set is in its own file by day
+    withDate = logPaths + '\\' + str(datetime.datetime.now().date())
+
+    withClass = withDate + '\\' + str(PARAMETERS['CLASS_NUM'])
+
+    withtimestamp = withClass + '\\' + str(timestamp)
+
+    # creates a directory if one does not exist
+    pathlib.Path(withtimestamp).mkdir(parents=True, exist_ok=True)
+
+    # file name concatentation with runNum
+    fileName = "__" + str(int(PARAMETERS['VARIATION_NUMBER'])) + '_' + str(timestamp) + "_Evaluation.txt"
+
+    # log file name + path
+    logCompletePath = os.path.join(withtimestamp, fileName)
+
+    # open a file for appending (a). + creates file if does not exist
+    file = open(logCompletePath, "a+")
+
+
 #todo add a way to read in the runNumber from the crypto trainer
-def readTheInput():
+def readTheInput(testing):
     stringKeySplit = ''
-    stringValSplit = ''
     counter = 0
 
-    for line in sys.stdin:
+    if testing == 1:
+        # make the max cycles equal to the number of days of the interval in hours
+        PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
+        print(str(PARAMETERS['MAX_CYCLES']))
+        return
 
+    for line in sys.stdin:
         if line != '':
             # split the passed string into a list seperated by spaces
             listSplits = line.split(' ')
@@ -207,8 +242,11 @@ def readTheInput():
 def buyBin(symbol, currentMinute):
 
     global priceBought
+    global truePriceBought
+
     ratio = getbinanceprice(symbol, currentMinute)
     priceBought = ratio
+    truePriceBought = ratio
     #mark item as the current crypto being traded and save the buy price at for failure condition
     entry = {symbol:{'buyPrice': ratio, 'timestamp': 0}}
     currencyToTrade.clear()
@@ -328,8 +366,6 @@ def updateCrypto(startMinute, endMinute, currentMinute):
     for key,value in priceSymbols.items():
         # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
         openPriceData = CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[value]
-        if startMinute == 0:
-            file.write("Open data " + str(openPriceData))
         closePriceData = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[value]
         volumeData = getVolume(value, currentMinute)
 
@@ -359,7 +395,7 @@ def updateCrypto(startMinute, endMinute, currentMinute):
 
         for i in range(startMinute, endMinute):
             percentChanges[value].append(calcPercentChange(openPriceData[i], closePriceData[i]))
-            i+=1
+            i += 1
 
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
         pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
@@ -396,7 +432,6 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         weightedMovingAverage[value] = setWeightedMovingAverage(value, startMinute, endMinute)
 
     setMaxValue()
-
     resetValues()
 
     # gets the score for each crypto
@@ -407,14 +442,26 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         calc_score = getScore(value)
         new_score = {value: calc_score}
         scores.update(new_score)
+        storedScores.update({key: new_score})
 
-        # calcualte a weightedMovingAverage
+        # calculate a weightedMovingAverage
         weightedMovingAverage[value] = setWeightedMovingAverage(value, startMinute, endMinute)
 
+
+    #add cryptos and their scores to dictionary of currencies to trade if they are above the minimum score
+    #record which cryptos were not chosen, and which were chosen that had the right score or had the right score and mean
     for key, value in scores.items():
+        entry = {key: value}
         if (value > PARAMETERS['MINIMUM_SCORE']):
-            entry = {key: value}
             currencyToTrade.update(entry)
+            cryptosSeperated['Chosen'].append(key)
+            if(weightedMovingAverage[key] < PARAMETERS['MINIMUM_MOVING_AVERAGE']):
+                cryptosSeperated['chosenButCut'].append(key)
+            else:
+                cryptosSeperated['chosenNotCut'].append(key)
+
+        else:
+            cryptosSeperated['Disregarded'].append(key)
 
     file.write("OUR LIST OF CRYPTO: " + str(scores))
     file.write("Currrenty to trade: " + str(currencyToTrade))
@@ -543,18 +590,20 @@ def priceChecker():
     # the coin with the highest score that also is above the minimum moving average
     maxScore = 0
     for key, value in currencyToTrade.items():
-        #print("The score of {} is {} ".format(key, scores[key]))
+        file.write("The score of " + str(key) +  ' is ' + str(scores[key]) + '\n')
 
         try:
             if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(PARAMETERS['MINIMUM_MOVING_AVERAGE'])):
                 maxScore = scores[key]
-                #print("CURRENT HIGH SCORE: The score of {} is {}".format(key, scores[key]))
+                file.write('CURRENT HIGH SCORE: The score of ' + str(key) +  ' is ' + str( scores[key]) + '\n')
                 currencyToBuy = key
+
         except KeyError:
             file.write(" LINE 550 key error " + str(key) + " scores[key] " + weightedMovingAverage[key])
 
-    #print("Coin with the highest score is {} which is {}".format(currencyToBuy, maxScore))
+    file.write('Coin with the highest score is ' + str(currencyToBuy) + ' which is ' + str(maxScore) + '\n' )
 
+    cryptosSeperated['theMax'].append(currencyToBuy)
     return currencyToBuy #potential runtime error if all negative todo
 
 
@@ -583,18 +632,18 @@ def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
     for x in range(startMinute, endMinute):
         startPrice = openPriceData[x]
         endPrice = closePriceData[x]
-        #print("Current Crypto: {} Start Price: {} End Price: {}".format(currency, startPrice, endPrice))
+        file.write("Current Crypto: " + str(currency) + ' Start Price: ' +str(startPrice) + ' End Price: ' + str(endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
             timeIncreasingCounter += 1
 
 
     intervalPercentChange = calcPercentChange(startPriceInterval, endPrice)
-    #print("Cumulative percent change over THIS INTERVAL {}".format(intervalPercentChange))
-    #print("Times Increasing over the interval: {}".format(timeIncreasingCounter))
+    file.write('Cumulative percent change over THIS INTERVAL ' + str((intervalPercentChange)))
+    file.write("Times Increasing over the interval: " + str(timeIncreasingCounter))
 
     if(timeIncreasingCounter <= timesIncreasing):
-        #print("DECREASED ALL INTERVALS. RESTART")
+        file.write("DECREASED ALL INTERVALS. RESTART")
         return 1
 
     return 0
@@ -610,7 +659,7 @@ def checkTooNegative(symbol, currentMinute):
     percentChange = calcPercentChange(startPrice, endPrice)
 
     if(percentChange < PARAMETERS['MAX_DECREASE']):
-        #print("TOO NEGATIVE. RESTART")
+        file.write("TOO NEGATIVE. RESTART")
         return 1
 
     return 0
@@ -626,11 +675,11 @@ def checkExitCondition(currency, currentMinute):
     percentChange = calcPercentChange(priceBought, currentPrice)
 
     if(percentChange >= PARAMETERS['MAX_PERCENT_CHANGE']):
-        #print("HIT MAX PERCENT CHANGE")
+        file.write("HIT MAX PERCENT CHANGE")
         return 1
 
     if(percentChange <= -1 * PARAMETERS['MAX_PERCENT_CHANGE']):
-        #print("HIT MINIMUM PERCENT CHANGE")
+        file.write("HIT MINIMUM PERCENT CHANGE")
         return 1
 
     return 0
@@ -649,7 +698,7 @@ def checkTooLow(currency, timesIncreasing, startMinute, endMinute):
     #check to see if the current price is too low, the crypto is decreasing over the past 15 minutes
     #and all the intervals are decreasing
     if(float(currentPrice) < float(floorPrice) and direction == 0 & allIntervalsDecreasing == 1):
-        #print("WAS TOO LOW")
+        file.write("WAS TOO LOW")
         return 1
 
     return 0
@@ -672,7 +721,7 @@ def increasingOrDecreasing(currency, startMinute, endMinute):
 
     return 0
 
-
+#reset the list of parameter values
 def resetValues():
     #reset the list of parameter value that are calculated below
     for key, value in values.items():
@@ -690,8 +739,8 @@ def setMaxValue():
                 maxValues[key] = i
                 currentMaxVal = i
 
-    #print("THE VALUES {}".format(values))
-    #print("THE MAX {}".format(maxValues))
+    file.write("THE VALUES {}".format(values))
+    file.write("THE MAX {}".format(maxValues))
 
 #creates a dictionary with all the different statistic holding dictionaries that are created with each run
 def createStatsDict():
@@ -702,6 +751,15 @@ def createStatsDict():
     statDict.update({'volumePercentData': volumePercentData})
     statDict.update({'weightedMovingAverage': weightedMovingAverage})
     statDict.update({'modifiedVolume': modifiedVolume})
+    statDict.update({'storedScores': storedScores})
+
+#sets all the list of how the cryptos were seperated back to being empty
+def resetDecisionsStored(dict):
+
+
+    for key, value in dict.items():
+
+        value[:] = []
 
 
 
@@ -719,68 +777,142 @@ def main():
     global startMinute
     global endMinute
     global currentMinute
+    global numBuys
+    global numSells
+    global startMinNum
+    global endMinNum
+    global truePriceBought
+    global cryptosSeperated
 
-    startMinute = 0
-    endMinute = 60
+
+    #get the timestamp for the files for the log and analysis files
+    timestamp = int(time.time() * 1000)
+    #builds a series of log files using the timestamp
+    buildLogs(timestamp)
+
+    #initialize the minutes that will define the period
+    startMinute = startMinNum
+    endMinute = endMinNum
     currentMinute = startMinute
 
+
+    openPriceData = getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
+    closePriceData = getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
+    volumeData = CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
     #creates a statistic object to record the different decisions and then analyze them
-    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], 'NT', startMinute, endMinute, PARAMETERS)
+    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], 'NT', startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData)
 
+    #intitialize the starting currency and the number of cycles the program has run through
+    # a cycle is either a period where a crypto was held or where one was bought/sold
     currentCurrency = ''
-    x = 0
+    cycles = 0
 
-    readTheInput()
+    #the time a crypto was held for in minutes
+    timeHeld = 0
+
+    #reads in the input, usually from the cryptotrainer
+    readTheInput(testing = testCheck)
+    #initialize the percent change over the whole test and the percent change over the lifetime of owning a crypto
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] = 0.0
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = 0.0
-    #print("Date and Time of Run {}".format(datetime.datetime.now()))
 
-    while(x < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
+    #set the date and time at the top of the log file
+    file.write("Date and Time of Run " + str(datetime.datetime.now()))
+
+
+    #runs the bot for a set number of cycles or unless the EXIT condition is met (read the function checkExitCondition)
+    # cycles is either a period where a crypto is held and ones where they are bought/sold
+    while(cycles < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
+
+        #intialize the time the bot will run for
         t = 0
+
+
+        #intialize three exit conditions that are checked periodically while a crypto is held
         RESTART = 0
         RESTART_LOW = 0
         RESTART_TN = 0
+
+        #intialize the checkers that are set whether a buy or sell occured
         didSell = 0
         didBuy = 0
+
+        #reset current minute to be the start minute
         currentMinute = startMinute
 
+        #run update crypto to assign scores and sort through all the cryptos and advance a minute because of how long it takes to run
         updateCrypto(startMinute, endMinute, currentMinute)
         currentMinute += 1
+        timeOfDecision = currentMinute
 
+        #reset the old currency to be equal to whatever the current crypto currency is
         oldCurrency = currentCurrency
+
+        #set the current currency to be whatever the price checker returns
+        # can be a nothing string, the same crypto, or a new one
         currentCurrency = priceChecker()
 
-
+        #sell a crypto if the new currency chosen is different from the last one and the last one is not nothing
         if(oldCurrency != currentCurrency and oldCurrency != ''):
 
+            #store the price it was sold at
             pricesold = getbinanceprice(oldCurrency, currentMinute)
+
+            #sell the old currency
             sellBin(oldCurrency)
+
+            #set sell checker
             didSell = 1
 
-            #print("THIS RUN SOLD AT: {}".format(currentMinute))
+            #calculate and store the percent change from when the crypto was bought to when it was sold
             cumulativePercentChange = calcPercentChange(priceBought, pricesold)
+            truePercentChange = calcPercentChange(truePriceBought, pricesold)
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = cumulativePercentChange
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
 
-            #print('Selling: {} Price bought: {} Price sold: {} '.format(oldCurrency, priceBought, pricesold))
-            #print("FINAL percent change over the life of owning this crypto " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE']))
 
-        if(oldCurrency != currentCurrency)and (currentCurrency != ''):
+            #writing to the log about when the run sold and what it bought at and what it sold at
+            # as well as what was sold and how it changed
+            file.write("THIS RUN SOLD AT: " + str(currentMinute))
+            file.write('Selling:  ' + str(oldCurrency) + ' Price bought: ' + str(priceBought) +  ' Price sold: ' + str(pricesold) + '\n')
+            file.write("FINAL percent change over the life of owning this crypto " + str(truePercentChange))
+
+            #calcualates the length of the list of all the owned cryptos in order and their corresponding lists of percent changesover each crycle
+            lenAllOwned = len(allOwnedCryptoPercentChanges)
+
+            #if the currency currency is not the same one at the end of the list then make a new dictionary and append it
+            #the new dictionary will be the current currency as the key and then a list of percent changes
+            #else you just add a new the new percent change to the end of the list of percent changes over the life of that
+            # cycle of owning that cryptocurrency
+            if lenAllOwned == 0 or currentCurrency != allOwnedCryptoPercentChanges[lenAllOwned - 1]:
+                newDict = {currentCurrency: [cumulativePercentChange]}
+                allOwnedCryptoPercentChanges.append(newDict)
+            else:
+                allOwnedCryptoPercentChanges[lenAllOwned - 1][currentCurrency].append(cumulativePercentChange)
+
+
+
+        #buy the new cryptocurrency if there was one selected
+        if(oldCurrency != currentCurrency) and (currentCurrency != ''):
             buyBin(currentCurrency, currentMinute)
             didBuy = 1
-            #print("THIS RUN BOUGHT AT: {}".format(currentMinute))
-            #print("Buying {} at price: {}".format(currentCurrency, priceBought))
 
-        # if you bought or sold something OR if you did neither than set up a new dictionary of holders to evaluate this decision
-        if didBuy == 1 or didSell == 1 or currentCurrency == '':
-            cryptoRunStats.newStats(currentMinute, statDict, didBuy, didSell, currentCurrency, oldCurrency)
+            #more output to files about the buying
+            file.write("THIS RUN BOUGHT AT: " + str(currentMinute))
+            file.write("Buying " + str(currentCurrency) + " at price: " + str(priceBought))
 
 
-        #while statement is more flexible way to wait for a period of time or a restart
-        # restart could be caused by a met failure condition or a met sustained one
 
+        #if you buy increment the buy counter
+        if didBuy == 1:
+            numBuys += 1
+        if didSell == 1:
+            numSells+=1
+
+
+        #holding of the crypto currency for minutes less than the specied max or until one of the restart conditions is met
+        # assuming there is a current currency owned
         while(t < PARAMETERS['MAX_TIME_CYCLE'] and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0 and currentCurrency != ''):
-
             if(t % PARAMETERS['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
                 RESTART = checkFailureCondition(currentCurrency, 0, currentMinute, currentMinute+9)
 
@@ -788,43 +920,90 @@ def main():
                 RESTART_LOW = checkTooLow(currentCurrency, 0, currentMinute, currentMinute+1)
 
             RESTART_TN = checkTooNegative(currentCurrency, currentMinute)
+
+            #advance the time and currency minute
             t+=1
             currentMinute += 1
 
 
-
+        #if you kept the same crypto as the last cycle stole the percent chnage you have gotten from the last cycle of holding the crypto or from when it was bought
         if(oldCurrency == currentCurrency and currentCurrency != ''):
+
+            #get the new price bought and calculate a percent change over this interval of holding the cyrpto
             newPrice = getbinanceprice(currentCurrency, currentMinute)
             cumulativePercentChange = calcPercentChange(priceBought, newPrice)
+
+            #adds the percent change to the list of all the crypto currencies that have been owned over this run
+            #more detail in similar code above
+            lenAllOwned = len(allOwnedCryptoPercentChanges)
+
+            if lenAllOwned == 0 or currentCurrency not in allOwnedCryptoPercentChanges[lenAllOwned - 1]:
+                newDict = {currentCurrency: [cumulativePercentChange]}
+                allOwnedCryptoPercentChanges.append(newDict)
+            else:
+                allOwnedCryptoPercentChanges[lenAllOwned - 1][currentCurrency].append(cumulativePercentChange)
+
+
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = cumulativePercentChange
             PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] += cumulativePercentChange
+
+            #set the price bought to the new price found for the interval
             priceBought = newPrice
 
-        if currentCurrency != '':
+        #check the exit immediately condition
+        if currentCurrency != '' and currentMinute < (PARAMETERS['INTERVAL_TO_TEST']):
             EXIT = checkExitCondition(currentCurrency, currentMinute)
 
+        #if no crypto was chosen you wait 5 minutes and start again
         if currentCurrency == '':
             temp = startMinute
             startMinute += 5 + (currentMinute - startMinute)
             endMinute += 5 + (currentMinute - temp)
 
+        #otherwise you reset the current minute and endminute
         else:
             temp = startMinute
             startMinute += (currentMinute - startMinute)
             endMinute += (currentMinute - temp)
 
-        x+=1
+        #make a new crypto stats snapshot for analysis of the decision making process
+        # startMinute is misleading here. it will be equal to the start of the next cycle not the one that we just walked through
+        cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeOfDecision)
 
+        cycles += 1
 
-    #print("Cumulative percent change over the life of all cryptos owneed so far {}".format(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
+    #print to file the final percent changes over the run
+    file.write("Cumulative percent change over the life of all cryptos owneed so far " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
+
+    #sell if there is a crypto left and increment numSells
     sellBin(currentCurrency)
+    numSells += 1
+
+
+    file.write('Bought ' + str(numBuys) + 'times \n')
+    file.write('Sold ' + str(numSells) + 'times\n')
+
+    #set variables of the crypto stat analysis object
+    cryptoRunStats.setVal(numBuys, 0)
+    cryptoRunStats.setVal(numSells, 1)
+    cryptoRunStats.setVal(allOwnedCryptoPercentChanges, 2)
+
+    #write the analysis to the file
+    cryptoRunStats.writeToFile()
 
     #special print statement used to get the parameters back
     print("LINEBEGIN" + str(PARAMETERS) + "DONEEND")
-    #print(len(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT']))
-    #print(str(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT'][0]))
-    #print(str(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT'][len(CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])['BTCUSDT']) - 1]))
+
+    print(str(allOwnedCryptoPercentChanges))
+    cumulativeCheck = 0.0
+    for owned in allOwnedCryptoPercentChanges:
+        for key, value in owned.items():
+            for change in value:
+                cumulativeCheck += change
+
+    print(str(cumulativeCheck))
 
 
+    file.close()
 if __name__ == "__main__":
     main()

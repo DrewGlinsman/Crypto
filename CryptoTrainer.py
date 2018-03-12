@@ -12,7 +12,9 @@
 import sys
 import random
 import time
+import datetime
 import os
+import pathlib
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
 
@@ -72,10 +74,10 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS = []
 
 #number of iterations of bot
-NUM_ITERATIONS = 6
+NUM_ITERATIONS = 1
 
 #number of classes of bots to run
-NUM_CLASSES = 30
+NUM_CLASSES = 1
 
 #number of minutes in a day
 minInDay = 1440
@@ -88,18 +90,41 @@ final_Dict = {}
 paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 #paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
-logParamPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
 
 #param file name + path
 
 #todo change to "BEST_PARAMETERS" when actually running
 paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
-logparamCompletePath = os.path.join(logParamPaths, 'trainerLog.txt')
 
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
 
-file2 = open(logparamCompletePath, "a+")
+#makes a log file for this instance of the trainer that is sorted into a folder by the date it was run
+# and its name is just its timestamp
+def buildLogs():
+    global file2
+    timestamp = int(time.time() * 1000)
+
+
+    # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
+    # logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Analysis'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\Trainer'
+
+    # concatenates the logpath with a date so each analysis log set is in its own file by day
+    withDate = logPaths + '\\' + str(datetime.datetime.now().date())
+
+    # creates a directory if one does not exist
+    pathlib.Path(withDate).mkdir(parents=True, exist_ok=True)
+
+    # file name concatentation with runNum
+    fileName = '__'  + str(timestamp) + "_TRAINER.txt"
+
+    # log file name + path
+    logCompletePath = os.path.join(withDate, fileName)
+
+    # open a file for appending (a). + creates file if does not exist
+    file2 = open(logCompletePath, "a+")
+
 
 def keyCheck(key):
     for i in UNCHANGED_PARAMS:
@@ -166,6 +191,7 @@ def reWriteParameters(paramDict):
 
     file.seek(0)
     foundLast = 0
+    line = 0
 
     lenParam = len(paramDict)
     file2.write("PARAMETER DICTIONARY " + str(paramDict))
@@ -190,6 +216,12 @@ def reWriteParameters(paramDict):
             print('\'%s\': %s,\n' % (key, value))
             file.write('\'%s\': %s,\n' % (key, value))
             file2.write('HEY LOOK HERE \'%s\': %s,' % (key, value))
+
+
+    file.seek(0)
+    for i in file:
+        print('LINE '+ str(line) + ' : ' + str(i))
+        line += 1
 
 #converts the given string to a Dict. Used to parse the returned string from the bots being trained
 def stringToDict(stringToChange):
@@ -264,9 +296,11 @@ def main():
     global final_Dict
     global reform
     global minInDay
-
+    buildLogs()
     #untested function that should check if there are command line arguments
     #setVals()
+    resetParameters(PARAMETERS)
+
 
     #store the multiple processes
     for i in range(NUM_CLASSES):
@@ -274,8 +308,8 @@ def main():
         current_Max = 0.0
         procs = []
         count = 0
-        variationNum = 0
-        minInDay = 1440
+        variationNum = 0.0
+        minInDay = 1440.0
 
         #if this is the second class you need to reopen the file because it has been closed to commit the changes of the first class
         if i > 0:

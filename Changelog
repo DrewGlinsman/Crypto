@@ -92,3 +92,22 @@ added a log file for the trainer
 2/27/18
 Added a check to the file rewriter where it will not keep printing if it finds that you are on the last string
 Added some extra code to reverse all the crypto lists that are pulled from the crypto stats stored data
+
+3/4/18
+Added logs with their own files by day for trainer and evaluator
+Added stream url generation to tester.py ans made the parts to test modular
+
+3/10/18
+Added new condition to evakuator for the exit condition
+Converted all print statements to file writes in cryoto evaluator
+Added tracker for the number of sells
+Added tracker for all the decisions in terms of what is bought and sold
+Added storage for the percent changes over the lifetime of owning all cryptos in increments and for whole consecutvie segments of time
+
+3/11/18
+added comments to the main method of cryptoevaluator
+added the timestamp for the build logs method so it matches the cryptostatanalysis timestamp
+added a special true price bought to make the outputed cumulative percent change equal to the correct change
+
+3/12/18
+added a special stats dictionary that will hold the total volume, score, and mean of each crypto for every cycle

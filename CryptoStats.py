@@ -32,10 +32,9 @@ file = open(logPath, "w")
 #one day in ms
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
-COUNT = 50
+COUNT = 21
 
 def getData(numDays):
-
 
   #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
   for key, value in priceSymbols.items():
