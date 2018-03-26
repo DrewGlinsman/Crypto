@@ -2,13 +2,14 @@
 # Auto trading bot that uses parameters sent by CryptoTrainer to test them
 
 
-import os.path
+import os
 import sys
 import CryptoStatAnalysis
 import datetime
 import time
 import pathlib
 import CryptoStats
+import calendar
 
 from CryptoTrainer import PARAMETERS, minInDay
 from CryptoStats import getOpenPrice, getClosePrice, getVolume
@@ -166,7 +167,7 @@ numBuys = 0
 numSells = 0
 
 #whether testing or not
-testCheck = 1
+testCheck = 0
 
 #percent Changes over all sepearted periods of time
 allOwnedCryptoPercentChanges = []
@@ -174,53 +175,124 @@ allOwnedCryptoPercentChanges = []
 #cryptos seperated by decision into those disregarded, those chosen but not making final cut because of their mean, those selected that have the appropriate mean, and the crypto that is chosen, has the right mean, and is the max
 cryptosSeperated = {'Disregarded': [], 'Chosen': [], 'chosenButCut': [], 'chosenNotCut': [], 'theMax': []}
 
+#the timestamp for the entire run of crypro trainer (For logs)
+runTime = -1000
+
 file = ''
 
+#todo finish implementing this system of tracking the crypto we currently own
+#the crypto we currently own
+ownCrypto = 'BTCUDST'
+
+#dictionaires for the modes this can be run in
+modes = {'SoloEvaluator': {'string': 'SoloEvaluator', 'value': 0}, 'SoloTrainer': {'string': 'SoloTrainer', 'value': 1}, 'MultiTrainer': {'string': 'MultiTrainer', 'value': 2}}
+
+#what is running this evaluator
+running = modes['SoloEvaluator']['string']
+
+#the number for the mode  (default = 0)
+mode = modes['SoloEvaluator']['value']
+
+YES = 1
+NO = 0
 
 def buildLogs(timestamp):
     global file
+    global runTime
+    global running
+    global mode
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-    # logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Analysis'
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Evaluator'
+    # logPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+
+    #concatenates with the mode this is running in (solo, training in a class with other variations)
+    withMode = logPaths + '\\Mode-' + running
+
+    date = datetime.date.today()
+    day = date.day
+    month = date.month
+    year = date.year
 
     # concatenates the logpath with a date so each analysis log set is in its own file by day
-    withDate = logPaths + '\\' + str(datetime.datetime.now().date())
+    withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
 
-    withClass = withDate + '\\' + str(PARAMETERS['CLASS_NUM'])
+    withRunTime = withDate + '\\RunTime-' + str(runTime)
 
-    withtimestamp = withClass + '\\' + str(timestamp)
+    withClass = withRunTime + '\\Class-' + str(int(PARAMETERS['CLASS_NUM']))
+
+    # concatenates with the variation number
+    withVarNum = withClass + '\\Variation-' + str(int((PARAMETERS['VARIATION_NUMBER'])))
+
+
 
     # creates a directory if one does not exist
-    pathlib.Path(withtimestamp).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(withVarNum).mkdir(parents=True, exist_ok=True)
 
     # file name concatentation with runNum
-    fileName = "__" + str(int(PARAMETERS['VARIATION_NUMBER'])) + '_' + str(timestamp) + "_Evaluation.txt"
+    fileName = "Time=" + str(timestamp) + '_Evaluator.txt'
 
     # log file name + path
-    logCompletePath = os.path.join(withtimestamp, fileName)
+    logCompletePath = os.path.join(withVarNum ,fileName)
+
 
     # open a file for appending (a). + creates file if does not exist
     file = open(logCompletePath, "a+")
 
 
 #todo add a way to read in the runNumber from the crypto trainer
-def readTheInput(testing):
+def readTheInput():
+    global runTime
+    global running
+    global mode
+    global modes
+    global YES
+    global NO
+
+    #TODO IMPORTANT change variable to 1 anytime you are doing anything other than running just a single evaluator
+    noinput = 1
+
+    #variable to skip an item of list of input strings because it has already been stored
+    halt = NO
+
     stringKeySplit = ''
     counter = 0
 
-    if testing == 1:
+    if noinput == 0:
         # make the max cycles equal to the number of days of the interval in hours
         PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
         print(str(PARAMETERS['MAX_CYCLES']))
         return
 
     for line in sys.stdin:
+
         if line != '':
             # split the passed string into a list seperated by spaces
             listSplits = line.split(' ')
 
             # loops through each string seperated out into listSplits
             for i in listSplits:
+
+                if halt == YES:
+                    halt = NO
+                    counter += 1
+                    continue
+
+                #if the chracter in the stream is the string runtime then grab the next string and store it as the run time
+                if i == 'RunTime':
+                    counter += 1
+                    runTime = listSplits[counter]
+                    halt = YES
+                    continue
+
+                #if the character in the stream is the string mode then grab the next string and store it as the mode
+                if i == 'Mode':
+                    counter += 1
+                    running = modes[listSplits[counter]]['string']
+                    mode = modes[running]['value']
+                    halt = YES
+                    continue
+
+
                 # if the string is from an even position split it into a future key
                 if (counter % 2 == 0):
                     stringKeySplit = i.split('\'')[1]
@@ -311,6 +383,8 @@ def getVolume(currency, currentMinute):
 #when the percent change was negative and positive when the percent change was positive
 def getModifiedVolume(currency):
     oldVolume = 0
+    vols = []
+    volList = []
     currentSlot = 0
 
     percentChangesList = percentChanges[currency]
@@ -322,19 +396,34 @@ def getModifiedVolume(currency):
     for i in volumeAmountList:
 
         #makes each volume % change back into a decimal
-        percentChangeScale = (percentChangesList[currentSlot] / 100)
+
+
+        percentChangeScale = (percentChangesList[currentSlot - 1])
+
         if percentChangeScale < 0:
+            vols.append(percentChangeScale * volumeAmountList[currentSlot] * PARAMETERS['NEGATIVE_WEIGHT'])
+            volList.append({'volumeofslot': volumeAmountList[currentSlot], 'weight': PARAMETERS['NEGATIVE_WEIGHT']})
             oldVolume += percentChangeScale * volumeAmountList[currentSlot] * PARAMETERS['NEGATIVE_WEIGHT']
         #todo the below may have not been there for the last set of tests
         if percentChangeScale >= 0:
+            vols.append( percentChangeScale * volumeAmountList[currentSlot])
+            volList.append({'volumeofslot': volumeAmountList[currentSlot], 'weight': 'NONE'})
             oldVolume += percentChangeScale * volumeAmountList[currentSlot]
 
 
 
         currentSlot += 1
 
-    if(oldVolume == 0):
-        file.write("Old volume was zero for " + str(currency))
+    #if(oldVolume == 0):
+
+        #file.write(str(CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[currency]) + '\n')
+        #file.write('MINUTEs ' + str(PARAMETERS['MINUTES_IN_PAST']) + ' interval ' + str(PARAMETERS['INTERVAL_TO_TEST']) + '\n')
+        #file.write("Old volume was zero for " + str(currency) + '\n')
+        #file.write("VOLS REC " + str(vols) + '\n')
+        #file.write('Vols ' + str(volumeAmounts[currency]) + '\n')
+        #for i in range(len(volList)):
+            #file.write('Item ' + str(i) + ':' + str(volList[i]) + '\n')
+
     return float(oldVolume)
 
 #get the binance price of the specified currency
@@ -391,7 +480,7 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         values['VOLUME_BY_HOUR'].append(volumePercentData[value]['percentbyhour'])
 
         # iterate through all the open and close prices for the given interval
-        percentChanges[value] = []
+        percentChanges[value][:] = []
 
         for i in range(startMinute, endMinute):
             percentChanges[value].append(calcPercentChange(openPriceData[i], closePriceData[i]))
@@ -400,6 +489,11 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
         pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
 
+        # reset the lists of the volume amounts and volume percent changes
+        volumeAmounts[value][:] = []
+        volumePercentChanges[value][:] = []
+
+        volumeAmounts[value].append(volumeData[0])
         # calculate and store the percent time increasing for volume and price percent changes
         for i in range(startMinute, endMinute):
             volumePercentChanges[value].append(calcPercentChange(volumeData[i - 1], volumeData[i]))
@@ -412,15 +506,12 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         values['TIME_INCREASING'].append(pricePercentData[value]['timeIncreasing'])
         values['WEIGHTED_TIME_INCREASING'].append(pricePercentData[value]['weightedtimeIncreasing'])
 
-        # reset the lists of the volume amounts and volume percent changes
-        volumeAmounts[value] = []
-        volumePercentChanges[value] = []
+
 
         # store the time increasing and weighted time increasing for volume data to be used for scaling
         values['VOLUME_TIME_INCREASING'].append(volumePercentData[value]['timeIncreasing'])
         values['WEIGHTED_VOLUME_TIME_INCREASING'].append(volumePercentData[value]['weightedtimeIncreasing'])
 
-        volumeAmounts[value].append(volumeData[0])
 
         modifiedVolume[value] = 0
         # get the modified volume changes
@@ -463,8 +554,8 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         else:
             cryptosSeperated['Disregarded'].append(key)
 
-    file.write("OUR LIST OF CRYPTO: " + str(scores))
-    file.write("Currrenty to trade: " + str(currencyToTrade))
+    #file.write("OUR LIST OF CRYPTO: " + str(scores))
+    #file.write("Currrenty to trade: " + str(currencyToTrade))
 
 
 #caclulates and returns the time spent increasing
@@ -590,18 +681,18 @@ def priceChecker():
     # the coin with the highest score that also is above the minimum moving average
     maxScore = 0
     for key, value in currencyToTrade.items():
-        file.write("The score of " + str(key) +  ' is ' + str(scores[key]) + '\n')
+        #file.write("The score of " + str(key) +  ' is ' + str(scores[key]) + '\n')
 
         try:
             if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(PARAMETERS['MINIMUM_MOVING_AVERAGE'])):
                 maxScore = scores[key]
-                file.write('CURRENT HIGH SCORE: The score of ' + str(key) +  ' is ' + str( scores[key]) + '\n')
+                #file.write('CURRENT HIGH SCORE: The score of ' + str(key) +  ' is ' + str( scores[key]) + '\n')
                 currencyToBuy = key
 
         except KeyError:
             file.write(" LINE 550 key error " + str(key) + " scores[key] " + weightedMovingAverage[key])
 
-    file.write('Coin with the highest score is ' + str(currencyToBuy) + ' which is ' + str(maxScore) + '\n' )
+    #file.write('Coin with the highest score is ' + str(currencyToBuy) + ' which is ' + str(maxScore) + '\n' )
 
     cryptosSeperated['theMax'].append(currencyToBuy)
     return currencyToBuy #potential runtime error if all negative todo
@@ -632,18 +723,18 @@ def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
     for x in range(startMinute, endMinute):
         startPrice = openPriceData[x]
         endPrice = closePriceData[x]
-        file.write("Current Crypto: " + str(currency) + ' Start Price: ' +str(startPrice) + ' End Price: ' + str(endPrice))
+        #file.write("Current Crypto: " + str(currency) + ' Start Price: ' +str(startPrice) + ' End Price: ' + str(endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
             timeIncreasingCounter += 1
 
 
     intervalPercentChange = calcPercentChange(startPriceInterval, endPrice)
-    file.write('Cumulative percent change over THIS INTERVAL ' + str((intervalPercentChange)))
-    file.write("Times Increasing over the interval: " + str(timeIncreasingCounter))
+    #file.write('Cumulative percent change over THIS INTERVAL ' + str((intervalPercentChange)))
+    #file.write("Times Increasing over the interval: " + str(timeIncreasingCounter))
 
     if(timeIncreasingCounter <= timesIncreasing):
-        file.write("DECREASED ALL INTERVALS. RESTART")
+        #file.write("DECREASED ALL INTERVALS. RESTART")
         return 1
 
     return 0
@@ -659,7 +750,7 @@ def checkTooNegative(symbol, currentMinute):
     percentChange = calcPercentChange(startPrice, endPrice)
 
     if(percentChange < PARAMETERS['MAX_DECREASE']):
-        file.write("TOO NEGATIVE. RESTART")
+        #file.write("TOO NEGATIVE. RESTART")
         return 1
 
     return 0
@@ -675,11 +766,11 @@ def checkExitCondition(currency, currentMinute):
     percentChange = calcPercentChange(priceBought, currentPrice)
 
     if(percentChange >= PARAMETERS['MAX_PERCENT_CHANGE']):
-        file.write("HIT MAX PERCENT CHANGE")
+        #file.write("HIT MAX PERCENT CHANGE")
         return 1
 
     if(percentChange <= -1 * PARAMETERS['MAX_PERCENT_CHANGE']):
-        file.write("HIT MINIMUM PERCENT CHANGE")
+        #file.write("HIT MINIMUM PERCENT CHANGE")
         return 1
 
     return 0
@@ -698,7 +789,7 @@ def checkTooLow(currency, timesIncreasing, startMinute, endMinute):
     #check to see if the current price is too low, the crypto is decreasing over the past 15 minutes
     #and all the intervals are decreasing
     if(float(currentPrice) < float(floorPrice) and direction == 0 & allIntervalsDecreasing == 1):
-        file.write("WAS TOO LOW")
+        #file.write("WAS TOO LOW")
         return 1
 
     return 0
@@ -725,7 +816,7 @@ def increasingOrDecreasing(currency, startMinute, endMinute):
 def resetValues():
     #reset the list of parameter value that are calculated below
     for key, value in values.items():
-        values[key] = []
+        values[key][:] = []
 
 
 #runs through the values collected and storess the max value
@@ -739,8 +830,8 @@ def setMaxValue():
                 maxValues[key] = i
                 currentMaxVal = i
 
-    file.write("THE VALUES {}".format(values))
-    file.write("THE MAX {}".format(maxValues))
+    #file.write("THE VALUES {}".format(values))
+    #file.write("THE MAX {}".format(maxValues))
 
 #creates a dictionary with all the different statistic holding dictionaries that are created with each run
 def createStatsDict():
@@ -760,7 +851,6 @@ def resetDecisionsStored(dict):
     for key, value in dict.items():
 
         value[:] = []
-
 
 
 #todo add in a parser to read the stdin that will be passed with the parameters from cryptotrainer
@@ -783,10 +873,19 @@ def main():
     global endMinNum
     global truePriceBought
     global cryptosSeperated
+    global runTime
+    global running
+    global mode
+    global ownCrypto
+    #number of times that the bot chooses not to buy
+    totalAbstain = 0
 
+    #reads in the input, usually from the cryptotrainer
+    readTheInput()
 
     #get the timestamp for the files for the log and analysis files
     timestamp = int(time.time() * 1000)
+
     #builds a series of log files using the timestamp
     buildLogs(timestamp)
 
@@ -799,8 +898,9 @@ def main():
     openPriceData = getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
     closePriceData = getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
     volumeData = CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
+
     #creates a statistic object to record the different decisions and then analyze them
-    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], 'NT', startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData)
+    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], running , startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData, runTime)
 
     #intitialize the starting currency and the number of cycles the program has run through
     # a cycle is either a period where a crypto was held or where one was bought/sold
@@ -810,8 +910,7 @@ def main():
     #the time a crypto was held for in minutes
     timeHeld = 0
 
-    #reads in the input, usually from the cryptotrainer
-    readTheInput(testing = testCheck)
+
     #initialize the percent change over the whole test and the percent change over the lifetime of owning a crypto
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE'] = 0.0
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = 0.0
@@ -826,6 +925,7 @@ def main():
 
         #intialize the time the bot will run for
         t = 0
+        numAbstain = 0
 
 
         #intialize three exit conditions that are checked periodically while a crypto is held
@@ -846,14 +946,18 @@ def main():
         timeOfDecision = currentMinute
 
         #reset the old currency to be equal to whatever the current crypto currency is
-        oldCurrency = currentCurrency
+        if currentCurrency == '':
+            oldCurrency = ownCrypto
+        else:
+            oldCurrency = currentCurrency
 
         #set the current currency to be whatever the price checker returns
         # can be a nothing string, the same crypto, or a new one
         currentCurrency = priceChecker()
 
-        #sell a crypto if the new currency chosen is different from the last one and the last one is not nothing
-        if(oldCurrency != currentCurrency and oldCurrency != ''):
+
+        #sellf the current crypto if you want to buy a new one
+        if (oldCurrency != currentCurrency) and (currentCurrency != '') and currentCurrency != ownCrypto:
 
             #store the price it was sold at
             pricesold = getbinanceprice(oldCurrency, currentMinute)
@@ -873,9 +977,9 @@ def main():
 
             #writing to the log about when the run sold and what it bought at and what it sold at
             # as well as what was sold and how it changed
-            file.write("THIS RUN SOLD AT: " + str(currentMinute))
-            file.write('Selling:  ' + str(oldCurrency) + ' Price bought: ' + str(priceBought) +  ' Price sold: ' + str(pricesold) + '\n')
-            file.write("FINAL percent change over the life of owning this crypto " + str(truePercentChange))
+            #file.write("THIS RUN SOLD AT: " + str(currentMinute))
+            #file.write('Selling:  ' + str(oldCurrency) + ' Price bought: ' + str(priceBought) +  ' Price sold: ' + str(pricesold) + '\n')
+            #file.write("FINAL percent change over the life of owning this crypto " + str(truePercentChange))
 
             #calcualates the length of the list of all the owned cryptos in order and their corresponding lists of percent changesover each crycle
             lenAllOwned = len(allOwnedCryptoPercentChanges)
@@ -893,13 +997,14 @@ def main():
 
 
         #buy the new cryptocurrency if there was one selected
-        if(oldCurrency != currentCurrency) and (currentCurrency != ''):
+        if(oldCurrency != currentCurrency) and (currentCurrency != '') and currentCurrency != ownCrypto:
             buyBin(currentCurrency, currentMinute)
+            ownCrypto = currentCurrency
             didBuy = 1
 
             #more output to files about the buying
-            file.write("THIS RUN BOUGHT AT: " + str(currentMinute))
-            file.write("Buying " + str(currentCurrency) + " at price: " + str(priceBought))
+            #file.write("THIS RUN BOUGHT AT: " + str(currentMinute))
+            #file.write("Buying " + str(currentCurrency) + " at price: " + str(priceBought))
 
 
 
@@ -907,7 +1012,7 @@ def main():
         if didBuy == 1:
             numBuys += 1
         if didSell == 1:
-            numSells+=1
+            numSells += 1
 
 
         #holding of the crypto currency for minutes less than the specied max or until one of the restart conditions is met
@@ -950,6 +1055,14 @@ def main():
             #set the price bought to the new price found for the interval
             priceBought = newPrice
 
+
+        if oldCurrency == ownCrypto and oldCurrency != '':
+            file.write("OLD CURR " + str(oldCurrency) + '\n')
+            file.write("OWN CRYPTO " + str(ownCrypto) + '\n')
+            numAbstain = 1
+            totalAbstain += 1
+
+
         #check the exit immediately condition
         if currentCurrency != '' and currentMinute < (PARAMETERS['INTERVAL_TO_TEST']):
             EXIT = checkExitCondition(currentCurrency, currentMinute)
@@ -968,24 +1081,38 @@ def main():
 
         #make a new crypto stats snapshot for analysis of the decision making process
         # startMinute is misleading here. it will be equal to the start of the next cycle not the one that we just walked through
-        cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeOfDecision)
+        #file.write("CRYPTOS SEPEARTED " + str(cryptosSeperated))
+        file.write("NUM ABSTAIN "  + str(numAbstain) + '\n')
+        file.write('Did buy ' + str(didBuy) + '\n')
+        file.write('Did sell ' + str(didSell) + '\n')
+        file.write('Bought '+ str(currentCurrency) + '\n')
+        file.write('Sold ' + str(oldCurrency) + '\n')
+        file.write('Own ' + str(ownCrypto) + '\n')
+        cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeOfDecision, numAbstain)
+        resetDecisionsStored(cryptosSeperated)
 
         cycles += 1
 
     #print to file the final percent changes over the run
-    file.write("Cumulative percent change over the life of all cryptos owneed so far " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
+    #file.write("Cumulative percent change over the life of all cryptos owneed so far " + str(PARAMETERS['CUMULATIVE_PERCENT_CHANGE_STORE']))
 
     #sell if there is a crypto left and increment numSells
     sellBin(currentCurrency)
     numSells += 1
 
 
-    file.write('Bought ' + str(numBuys) + 'times \n')
-    file.write('Sold ' + str(numSells) + 'times\n')
+    #file.write('Bought ' + str(numBuys) + 'times \n')
+    #file.write('Sold ' + str(numSells) + 'times\n')
 
+    if (numBuys + numSells) < 10:
+        file.write('PARAMS ' + str(PARAMETERS))
+        #file.write('Open' + str(getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
+        #file.write('Close ' + str(getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
+        #file.write('Volume ' + str(CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
     #set variables of the crypto stat analysis object
     cryptoRunStats.setVal(numBuys, 0)
     cryptoRunStats.setVal(numSells, 1)
+    file.write("NUM SELLS  " + str(numSells)+ '\n')
     cryptoRunStats.setVal(allOwnedCryptoPercentChanges, 2)
 
     #write the analysis to the file
@@ -993,15 +1120,8 @@ def main():
 
     #special print statement used to get the parameters back
     print("LINEBEGIN" + str(PARAMETERS) + "DONEEND")
+    print("ABSTAIN" + str(totalAbstain) + 'ENDABSTAIN')
 
-    print(str(allOwnedCryptoPercentChanges))
-    cumulativeCheck = 0.0
-    for owned in allOwnedCryptoPercentChanges:
-        for key, value in owned.items():
-            for change in value:
-                cumulativeCheck += change
-
-    print(str(cumulativeCheck))
 
 
     file.close()

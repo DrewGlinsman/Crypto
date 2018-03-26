@@ -15,6 +15,7 @@ import time
 import datetime
 import os
 import pathlib
+import calendar
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
 
@@ -74,10 +75,10 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS = []
 
 #number of iterations of bot
-NUM_ITERATIONS = 1
+NUM_ITERATIONS = 4
 
 #number of classes of bots to run
-NUM_CLASSES = 1
+NUM_CLASSES = 300
 
 #number of minutes in a day
 minInDay = 1440
@@ -99,28 +100,61 @@ paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
 
+#the timestamp for the run
+runTime = 0
+
+#dictionaires for the modes this can be run in
+modes = {'SoloEvaluator': {'string': 'SoloEvaluator', 'value': 0}, 'SoloTrainer': {'string': 'SoloTrainer', 'value': 1}, 'MultiTrainer': {'string': 'MultiTrainer', 'value': 2}}
+
+#what is running this evaluator
+running = modes['SoloTrainer']['string']
+
+#the mode number
+mode = modes['SoloTrainer']['value']
+
+#a dictionary with attributes passed back from an evaluator
+attributeDict = {}
+
 #makes a log file for this instance of the trainer that is sorted into a folder by the date it was run
 # and its name is just its timestamp
 def buildLogs():
     global file2
-    timestamp = int(time.time() * 1000)
+    global runTime
+    global running
+
 
 
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
     # logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Analysis'
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs\Trainer'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+
+    #concatenates with the mode this is running in (solo, training in a class with other variations)
+    withMode = logPaths + '\\Mode-' + running
+
+    #datetime object that holds the date
+    date =  datetime.date.today()
+    day = date.day
+    month = date.month
+    year = date.year
 
     # concatenates the logpath with a date so each analysis log set is in its own file by day
-    withDate = logPaths + '\\' + str(datetime.datetime.now().date())
+    withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
+
+    withRunTime = withDate + '\\RunTime-' + str(runTime)
+
+    #the label for the trainer so that it gets its own folder
+    withTrainer = withRunTime + '\\Trainer'
 
     # creates a directory if one does not exist
-    pathlib.Path(withDate).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(withTrainer).mkdir(parents=True, exist_ok=True)
 
     # file name concatentation with runNum
-    fileName = '__'  + str(timestamp) + "_TRAINER.txt"
+    fileName = 'RunTime='  + str(runTime) + "_Trainer.txt"
+
+    print("RUN " + str(runTime))
 
     # log file name + path
-    logCompletePath = os.path.join(withDate, fileName)
+    logCompletePath = os.path.join(withTrainer, fileName)
 
     # open a file for appending (a). + creates file if does not exist
     file2 = open(logCompletePath, "a+")
@@ -145,6 +179,7 @@ def randomizeParams(paramDict, typeOfRandom):
     if(typeOfRandom == 3):
         return 0
     if (typeOfRandom == 0):
+
         for key, value in paramDict.items():
 
             if(keyCheck(key) != 1):
@@ -156,6 +191,7 @@ def randomizeParams(paramDict, typeOfRandom):
     #todo add a normal kind of randomization
     if(typeOfRandom == 1):
         range = 100.0
+
         for key, value in paramDict.items():
             if(keyCheck(key) != 1):
                 randVal = paramDict[key]
@@ -208,19 +244,19 @@ def reWriteParameters(paramDict):
         #if we are at the very last parameter do not print a new line
         if key == lastParam:
             foundLast = 1
-            print('\'%s\': %s,' % (key, value))
+            #print('\'%s\': %s,' % (key, value))
             file.write('\'%s\': %s,' % (key, value))
             file2.write('HEY LOOK AT THIS \'%s\': %s,' % (key, value))
 
         if key != lastParam and foundLast == 0:
-            print('\'%s\': %s,\n' % (key, value))
+            #print('\'%s\': %s,\n' % (key, value))
             file.write('\'%s\': %s,\n' % (key, value))
             file2.write('HEY LOOK HERE \'%s\': %s,' % (key, value))
 
 
     file.seek(0)
     for i in file:
-        print('LINE '+ str(line) + ' : ' + str(i))
+        #print('LINE '+ str(line) + ' : ' + str(i))
         line += 1
 
 #converts the given string to a Dict. Used to parse the returned string from the bots being trained
@@ -280,11 +316,16 @@ def setVals():
 
 
 #makes the string line exclusively consist of the correct string of parameters
-def reformatLine(line):
+def reformatLine(line, attDict):
 
 
    firstFormat = line.split('LINEBEGIN')[1]
    reformat = firstFormat.split('DONEEND')[0]
+   attributes = firstFormat.split('DONEEND')[1]
+   num = attributes.split('ABSTAIN')[1]
+   realnum = attributes.split('ENDABSTAIN')[0]
+   print(str(attributes))
+   attDict.update({'NumAbstain': realnum})
 
    return reformat
 
@@ -296,10 +337,16 @@ def main():
     global final_Dict
     global reform
     global minInDay
+    global runTime
+    global mode
+    global running
+
+    runTime = int(time.time() * 1000)
     buildLogs()
     #untested function that should check if there are command line arguments
     #setVals()
     resetParameters(PARAMETERS)
+
 
 
     #store the multiple processes
@@ -310,6 +357,7 @@ def main():
         count = 0
         variationNum = 0.0
         minInDay = 1440.0
+
 
         #if this is the second class you need to reopen the file because it has been closed to commit the changes of the first class
         if i > 0:
@@ -329,8 +377,9 @@ def main():
 
             #randomize parameters and send the bot their class and variation num
             randomizeParams(PARAMETERS, typeOfRandom)
-            PARAMETERS['CLASS_NUM'] = i + 1
+            PARAMETERS['CLASS_NUM'] = i
             PARAMETERS['VARIATION_NUMBER'] = variationNum
+
             #make the max cycles equal to the number of days of the interval in hours
             PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
 
@@ -341,10 +390,12 @@ def main():
                 typeOfRandom = 0
 
             #passing the parameters to the processes
-            out = proc.communicate(input = str(PARAMETERS))
+            out = proc.communicate(input = str(PARAMETERS) + ' RunTime ' + str(runTime) + ' Mode ' + str(running))
             timestamp = int(time.time() * 1000)
             print(str(timestamp))
-            print(out)
+            print("CLASS NUM " + str(PARAMETERS['CLASS_NUM']) + " VARIATION NUMBER " + str(PARAMETERS['VARIATION_NUMBER']))
+            print("OUTPUT" + str(out))
+
             #walks through the output from the instance of tester and strips it of the parameters used
             #then stores the parameters if they netted a larger % change than the previous max
             for line in out:
@@ -356,7 +407,9 @@ def main():
 
                 if(val == ''):
                     break
-                reform = reformatLine(val)
+                reform = reformatLine(val, attributeDict)
+
+                print("REFORM" + str(reform))
 
                 substring = reform.split("\'CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
 
@@ -365,16 +418,16 @@ def main():
                 print("THIS" + str(cumulativePerentChangeStore))
                 cumulativePerentChangeStore = float(cumulativePerentChangeStore)
 
-                print(str(cumulativePerentChangeStore))
+                #print(str(cumulativePerentChangeStore))
 
                 #if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
-                if cumulativePerentChangeStore >= current_Max or count == 0:
+                if (cumulativePerentChangeStore >= current_Max and 20 > (PARAMETERS['MAX_CYCLES'])/2) or count == 0 :
                     current_Max = cumulativePerentChangeStore
                     stored_output = reform
                 count += 1
             #reset the parameters dictionary to the original "best" one from the file
             resetParameters(PARAMETERS)
-
+            variationNum += 1
         #convert the stored, parsed string into a dictionary
         final_Dict = stringToDict(stored_output)
 
