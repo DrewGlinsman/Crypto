@@ -12,7 +12,13 @@
 import sys
 import random
 import time
+import datetime
 import os
+import pathlib
+
+from Websockets import generatePriceSymbols
+import calendar
+
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
 
@@ -46,7 +52,7 @@ from PrivateData import api_key, secret_key
 #INTERVAL_TO_TEST: the interval over which the bot will be tested (think hour, day, week etc...); used with the crypto evaluator
 #MINUTES_IN_PAST: how far back you want the end point of the test to be
 
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0, 'CLASS_NUM': 0, 'INTERVAL_TO_TEST':  10080, 'MINUTES_IN_PAST': 1440}
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
 
 
 
@@ -70,13 +76,17 @@ PARAM_CHOSEN = {}
 
 
 #list of each variation of the parameter list, one is passed to each instance of the bot
-PARAMETER_VARIATIONS=[]
+PARAMETER_VARIATIONS = []
 
 #number of iterations of bot
-NUM_ITERATIONS = 6
+NUM_ITERATIONS = 4
+
 
 #number of classes of bots to run
-NUM_CLASSES = 10
+NUM_CLASSES = 300
+
+#number of minutes in a day
+minInDay = 1440
 
 
 #final dictionary returned to be rewritten to file
@@ -92,9 +102,70 @@ paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 #todo change to "BEST_PARAMETERS" when actually running
 paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 
-
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
+
+#the timestamp for the run
+runTime = 0
+
+#dictionaires for the modes this can be run in
+modes = {'SoloEvaluator': {'string': 'SoloEvaluator', 'value': 0}, 'SoloTrainer': {'string': 'SoloTrainer', 'value': 1}, 'MultiTrainer': {'string': 'MultiTrainer', 'value': 2}}
+
+#what is running this evaluator
+running = modes['SoloTrainer']['string']
+
+#the mode number
+mode = modes['SoloTrainer']['value']
+
+#a dictionary with attributes passed back from an evaluator
+attributeDict = {}
+
+#makes a log file for this instance of the trainer that is sorted into a folder by the date it was run
+# and its name is just its timestamp
+def buildLogs():
+    global file2
+    global runTime
+    global running
+
+
+
+    # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
+
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+    # logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+
+    #concatenates with the mode this is running in (solo, training in a class with other variations)
+    withMode = logPaths + '\\Mode-' + running
+
+    #datetime object that holds the date
+    date =  datetime.date.today()
+    day = date.day
+    month = date.month
+    year = date.year
+
+
+    # concatenates the logpath with a date so each analysis log set is in its own file by day
+    withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
+
+    withRunTime = withDate + '\\RunTime-' + str(runTime)
+
+    #the label for the trainer so that it gets its own folder
+    withTrainer = withRunTime + '\\Trainer'
+
+    # creates a directory if one does not exist
+    pathlib.Path(withTrainer).mkdir(parents=True, exist_ok=True)
+
+    # file name concatentation with runNum
+    fileName = 'RunTime='  + str(runTime) + "_Trainer.txt"
+
+    print("RUN " + str(runTime))
+
+    # log file name + path
+    logCompletePath = os.path.join(withTrainer, fileName)
+
+    # open a file for appending (a). + creates file if does not exist
+    file2 = open(logCompletePath, "a+")
+
 
 def keyCheck(key):
     for i in UNCHANGED_PARAMS:
@@ -115,6 +186,7 @@ def randomizeParams(paramDict, typeOfRandom):
     if(typeOfRandom == 3):
         return 0
     if (typeOfRandom == 0):
+
         for key, value in paramDict.items():
 
             if(keyCheck(key) != 1):
@@ -126,6 +198,7 @@ def randomizeParams(paramDict, typeOfRandom):
     #todo add a normal kind of randomization
     if(typeOfRandom == 1):
         range = 100.0
+
         for key, value in paramDict.items():
             if(keyCheck(key) != 1):
                 randVal = paramDict[key]
@@ -160,22 +233,38 @@ def resetParameters(paramDict):
 def reWriteParameters(paramDict):
 
     file.seek(0)
+    foundLast = 0
+    line = 0
+
     lenParam = len(paramDict)
+    file2.write("PARAMETER DICTIONARY " + str(paramDict))
+    file2.write("LENGTH OF PARAMETER DICT " + str(lenParam))
     count = 1
     for key, value in paramDict.items():
         if count == lenParam:
             lastParam = key
         count+=1
 
+    file2.write("LAST PARAM " + str(lastParam))
+
     for key, value in paramDict.items():
         #if we are at the very last parameter do not print a new line
         if key == lastParam:
-            print('\'%s\': %s,' % (key, value))
+            foundLast = 1
+            #print('\'%s\': %s,' % (key, value))
             file.write('\'%s\': %s,' % (key, value))
+            file2.write('HEY LOOK AT THIS \'%s\': %s,' % (key, value))
 
-        if key != lastParam:
-            print('\'%s\': %s,\n' % (key, value))
+        if key != lastParam and foundLast == 0:
+            #print('\'%s\': %s,\n' % (key, value))
             file.write('\'%s\': %s,\n' % (key, value))
+            file2.write('HEY LOOK HERE \'%s\': %s,' % (key, value))
+
+
+    file.seek(0)
+    for i in file:
+        #print('LINE '+ str(line) + ' : ' + str(i))
+        line += 1
 
 #converts the given string to a Dict. Used to parse the returned string from the bots being trained
 def stringToDict(stringToChange):
@@ -234,11 +323,16 @@ def setVals():
 
 
 #makes the string line exclusively consist of the correct string of parameters
-def reformatLine(line):
+def reformatLine(line, attDict):
 
 
    firstFormat = line.split('LINEBEGIN')[1]
    reformat = firstFormat.split('DONEEND')[0]
+   attributes = firstFormat.split('DONEEND')[1]
+   num = attributes.split('ABSTAIN')[1]
+   realnum = attributes.split('ENDABSTAIN')[0]
+   print(str(attributes))
+   attDict.update({'NumAbstain': realnum})
 
    return reformat
 
@@ -249,9 +343,20 @@ def main():
     global file
     global final_Dict
     global reform
+    global minInDay
+    global runTime
+    global mode
+    global running
 
+    runTime = int(time.time() * 1000)
+    buildLogs()
+    priceList = generatePriceSymbols(1000, -1)
+    print("Price List: {}".format(priceList))
     #untested function that should check if there are command line arguments
     #setVals()
+    resetParameters(PARAMETERS)
+
+
 
     #store the multiple processes
     for i in range(NUM_CLASSES):
@@ -259,8 +364,9 @@ def main():
         current_Max = 0.0
         procs = []
         count = 0
-        variationNum = 0
-        minInDay = 1440
+        variationNum = 0.0
+        minInDay = 1440.0
+
 
         #if this is the second class you need to reopen the file because it has been closed to commit the changes of the first class
         if i > 0:
@@ -280,8 +386,9 @@ def main():
 
             #randomize parameters and send the bot their class and variation num
             randomizeParams(PARAMETERS, typeOfRandom)
-            PARAMETERS['CLASS_NUM'] = i + 1
+            PARAMETERS['CLASS_NUM'] = i
             PARAMETERS['VARIATION_NUMBER'] = variationNum
+
             #make the max cycles equal to the number of days of the interval in hours
             PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
 
@@ -292,10 +399,12 @@ def main():
                 typeOfRandom = 0
 
             #passing the parameters to the processes
-            out = proc.communicate(input = str(PARAMETERS))
+            out = proc.communicate(input = str(PARAMETERS) + ' RunTime ' + str(runTime) + ' Mode ' + str(running))
             timestamp = int(time.time() * 1000)
             print(str(timestamp))
-            print(out)
+            print("CLASS NUM " + str(PARAMETERS['CLASS_NUM']) + " VARIATION NUMBER " + str(PARAMETERS['VARIATION_NUMBER']))
+            print("OUTPUT" + str(out))
+
             #walks through the output from the instance of tester and strips it of the parameters used
             #then stores the parameters if they netted a larger % change than the previous max
             for line in out:
@@ -307,7 +416,9 @@ def main():
 
                 if(val == ''):
                     break
-                reform = reformatLine(val)
+                reform = reformatLine(val, attributeDict)
+
+                print("REFORM" + str(reform))
 
                 substring = reform.split("\'CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
 
@@ -316,16 +427,16 @@ def main():
                 print("THIS" + str(cumulativePerentChangeStore))
                 cumulativePerentChangeStore = float(cumulativePerentChangeStore)
 
-                print(str(cumulativePerentChangeStore))
+                #print(str(cumulativePerentChangeStore))
 
                 #if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
-                if cumulativePerentChangeStore >= current_Max or count == 0:
+                if (cumulativePerentChangeStore >= current_Max and 20 > (PARAMETERS['MAX_CYCLES'])/2) or count == 0 :
                     current_Max = cumulativePerentChangeStore
                     stored_output = reform
                 count += 1
             #reset the parameters dictionary to the original "best" one from the file
             resetParameters(PARAMETERS)
-
+            variationNum += 1
         #convert the stored, parsed string into a dictionary
         final_Dict = stringToDict(stored_output)
 
