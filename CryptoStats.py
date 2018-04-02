@@ -23,11 +23,11 @@ cryptoLowData = {}
 stepsize = {}
 
 #path to save the different text files in
-#cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
-cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
+cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
+#cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
 
-logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
-#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
 
 
 file = open(logPath, "w")
@@ -74,6 +74,8 @@ def getData(numDays):
 
   #closing all the files once we're done
   oprice.close()
+  highPrice.close()
+  lowPrice.close()
   cprice.close()
   volume.close()
 
@@ -293,7 +295,7 @@ def getLowPrice(interval, minutesBack):
 
 
 def main():
-    getData(2)
+    getData(21)
 
 
 
