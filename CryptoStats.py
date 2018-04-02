@@ -23,11 +23,11 @@ cryptoLowData = {}
 stepsize = {}
 
 #path to save the different text files in
-cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
-#cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
+#cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
+cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
 
-#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
-logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
 
 
 file = open(logPath, "w")
@@ -38,7 +38,6 @@ ONE_THIRD_DAY = 28800000
 COUNT = 21
 
 def getData(numDays):
-
 
   #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
   for key, value in priceSymbols.items():
@@ -95,7 +94,6 @@ def binStepSize():
 
 def getOpenPrice(interval, minutesBack):
     if(cryptoOpenPriceData == {}):
-        reversedDict = {}
         #iterating through all the crypto symbols
         for key, value in priceSymbols.items():
             #the number of number of minutes we have gone back so far
@@ -127,6 +125,7 @@ def getOpenPrice(interval, minutesBack):
         #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
+
         for key, value in priceSymbols.items():
             reversedData = []
             for i in reversed(cryptoOpenPriceData[value]):
@@ -165,6 +164,7 @@ def getClosePrice(interval, minutesBack):
         #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
+
         for key, value in priceSymbols.items():
             reversedData = []
             for i in reversed(cryptoClosePriceData[value]):
@@ -203,10 +203,12 @@ def getVolume(interval, minutesBack):
         #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
+
         for key, value in priceSymbols.items():
             reversedData = []
             for i in reversed(cryptoVolumeData[value]):
                 reversedData.append(i)
+
             cryptoVolumeData.update({value: reversedData})
 
     return cryptoVolumeData
@@ -292,6 +294,7 @@ def getLowPrice(interval, minutesBack):
 
 def main():
     getData(2)
+
 
 
 

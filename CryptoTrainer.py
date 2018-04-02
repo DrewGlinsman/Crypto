@@ -55,7 +55,6 @@ from PrivateData import api_key, secret_key
 PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': .9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24.0, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
 
 
-
 UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW', 'VARIATION_NUMBER', 'CLASS_NUM', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST']
 
 
@@ -81,7 +80,6 @@ PARAMETER_VARIATIONS = []
 #number of iterations of bot
 NUM_ITERATIONS = 4
 
-
 #number of classes of bots to run
 NUM_CLASSES = 300
 
@@ -93,8 +91,8 @@ minInDay = 1440
 final_Dict = {}
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
 
 #param file name + path
@@ -350,8 +348,10 @@ def main():
 
     runTime = int(time.time() * 1000)
     buildLogs()
+
     priceList = generatePriceSymbols(1000, -1)
     print("Price List: {}".format(priceList))
+
     #untested function that should check if there are command line arguments
     #setVals()
     resetParameters(PARAMETERS)

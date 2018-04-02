@@ -149,8 +149,6 @@ maxValues = {'PERCENT_BY_HOUR': 0.0, 'VOLUME_BY_HOUR': 0.0, 'TIME_INCREASING': 0
 #todo remember that the wait parameters for this one should be different from the ones in auto trader where they are in seconds not minutes
 PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
 
-
-
 #number of minutes we want to iterate backwards
 startMinute = 0
 endMinute = 60
@@ -208,6 +206,7 @@ def buildLogs(timestamp):
     logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
     # logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
+
     #concatenates with the mode this is running in (solo, training in a class with other variations)
     withMode = logPaths + '\\Mode-' + running
 
@@ -215,7 +214,6 @@ def buildLogs(timestamp):
     day = date.day
     month = date.month
     year = date.year
-
 
     # concatenates the logpath with a date so each analysis log set is in its own file by day
     withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
@@ -852,8 +850,6 @@ def createStatsDict():
 
 #sets all the list of how the cryptos were seperated back to being empty
 def resetDecisionsStored(dict):
-
-
     for key, value in dict.items():
 
         value[:] = []
@@ -904,8 +900,6 @@ def main():
     closePriceData = getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
     volumeData = CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
 
-
-    
     #creates a statistic object to record the different decisions and then analyze them
     cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], running , startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData, runTime)
 
@@ -1129,9 +1123,6 @@ def main():
     print("LINEBEGIN" + str(PARAMETERS) + "DONEEND")
     print("ABSTAIN" + str(totalAbstain) + 'ENDABSTAIN')
 
-
-
     file.close()
-
 if __name__ == "__main__":
     main()
