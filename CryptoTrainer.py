@@ -15,6 +15,7 @@ import time
 import datetime
 import os
 import pathlib
+import pickle
 
 from Websockets import generatePriceSymbols
 import calendar
@@ -91,8 +92,8 @@ minInDay = 1440
 final_Dict = {}
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
 
 #param file name + path
@@ -129,8 +130,8 @@ def buildLogs():
 
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-    # logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+    #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+    logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
     withMode = logPaths + '\\Mode-' + running
@@ -336,6 +337,7 @@ def reformatLine(line, attDict):
 
 
 def main():
+    print("STARTED")
     global NUM_ITERATIONS
     global PARAMETERS
     global file
@@ -350,7 +352,7 @@ def main():
     buildLogs()
 
     priceList = generatePriceSymbols(1000, -1)
-    print("Price List: {}".format(priceList))
+    strPriceList = str(priceList)
 
     #untested function that should check if there are command line arguments
     #setVals()
@@ -398,7 +400,17 @@ def main():
             if(count % 50 != 0):
                 typeOfRandom = 0
 
-            #passing the parameters to the processes
+            #passing the parameters to the processes by pickling!
+            '''
+            with open ("PARAMETERS.pkl", "wb") as pickle_file:
+                pickle.dump(PARAMETERS, pickle_file)
+            with open("RunTime.pkl", "wb") as pickle_file:
+                pickle.dump(runTime, pickle_file)
+            with open("Mode.pkl","wb") as pickle_file:
+                pickle.dump(running, pickle_file)
+            with open("priceList.pkl", "wb") as pickle_file:
+                pickle.dump(priceList, pickle_file)
+            '''
             out = proc.communicate(input = str(PARAMETERS) + ' RunTime ' + str(runTime) + ' Mode ' + str(running))
             timestamp = int(time.time() * 1000)
             print(str(timestamp))

@@ -2,6 +2,7 @@ import time
 import requests
 import os
 import datetime
+import pickle
 
 # dictionary that contains all the symbols for the binance API calls
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",

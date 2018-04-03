@@ -10,6 +10,8 @@ import time
 import pathlib
 import CryptoStats
 import calendar
+import ast
+import pickle
 
 from CryptoTrainer import PARAMETERS, minInDay
 from CryptoStats import getOpenPrice, getClosePrice, getVolume
@@ -50,7 +52,7 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
                 'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 
-
+priceList = []
 #percent changes of the prices for each crypto with an interval size over a specified period of time
 percentChanges = {'BTCUSDT': [], 'XRPBTC': [],
                 'ETHBTC': [], 'BCCBTC': [],
@@ -202,9 +204,8 @@ def buildLogs(timestamp):
     global mode
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 
-    # logPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-    # logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+    #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+    logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
@@ -249,6 +250,7 @@ def readTheInput():
     global modes
     global YES
     global NO
+    global priceList
 
     #TODO IMPORTANT change variable to 1 anytime you are doing anything other than running just a single evaluator
     noinput = 1
@@ -293,7 +295,6 @@ def readTheInput():
                     mode = modes[running]['value']
                     halt = YES
                     continue
-
 
                 # if the string is from an even position split it into a future key
                 if (counter % 2 == 0):
@@ -459,8 +460,6 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         openPriceData = CryptoStats.getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[value]
         closePriceData = CryptoStats.getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])[value]
         volumeData = getVolume(value, currentMinute)
-
-        print("Open Price {}: {}".format(value, openPriceData))
 
 
         #todo figure out why this and the one below always starts at 0
@@ -879,6 +878,11 @@ def main():
     global running
     global mode
     global ownCrypto
+    '''
+    with open("PARAMETERS.pkl", "rb") as pickle_file:
+        PARAMETERS = pickle.load(pickle_file)
+    print("{}".format(PARAMETERS))
+    '''
     #number of times that the bot chooses not to buy
     totalAbstain = 0
 

@@ -129,11 +129,6 @@ async def getDepth(symbol, desiredVolume, maxLoss):
                             ##multiply the quantity by the dollar price of crypto to add to the $$ volume we could sell of this crypto
                             currSellVolume += float(value[0]) * float(bitcoinPrice) * float(value[1])
 
-                print("{}".format(symbol))
-                print("Dollar Price: {}".format(dollarPrice))
-                print("Current Buy Percent: {} Current Buy Gain: {}".format(currBuyLoss, currBuyVolume))
-                print("Current Sell Percent: {} Current Sell Gain: {}".format(currSellLoss, currSellVolume))
-
                 #count how many times you've searched for bids and asks to break if we're stuck on a bad coin that isn't being traded
                 depthNum += 1
                 if (depthNum >= 20):
@@ -183,6 +178,7 @@ def generatePriceSymbols(desiredVolume, maxLoss):
     return possibleCryptos
 
 
+generatePriceSymbols(1000, -1)
 #Parallel(n_jobs=-1)(delayed(asyncio.get_event_loop().run_until_complete(getDepth(value, 10000, -1))(value, 10000, -1) for key, value in priceSymbols.items()))
 
 #for key, value in priceSymbols.items():

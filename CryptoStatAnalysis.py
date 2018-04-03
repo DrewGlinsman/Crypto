@@ -61,9 +61,8 @@ class CryptoStatsAnalysis:
         self.training = training
 
         # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-        #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\'
-        logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-        #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+        #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+        logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
         #concatenates the logpath with a autotrader vs crypto evalutor distinction
         withMode = logPaths + '\\Mode-' + training
