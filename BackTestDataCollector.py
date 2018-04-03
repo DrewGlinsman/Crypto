@@ -53,8 +53,8 @@ def getData(numDays):
         oprice = open(openPriceCryptoPath, "a+")
         cprice = open(closePriceCryptoPath, "a+")
         volume = open(volumeCryptoPath, "a+")
-        highPrice = open(highCryptoPath, "w")
-        lowPrice = open(lowCryptoPath, "w")
+        highPrice = open(highCryptoPath, "a+")
+        lowPrice = open(lowCryptoPath, "a+")
 
         # while loop with a counter to make sure that the start and endtime stay one day apart but go backwards in time, numdays amount of days
         timeBackwards = numDays * ONE_DAY
