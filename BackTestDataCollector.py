@@ -50,22 +50,35 @@ def getData(numDays):
         highCryptoPath = os.path.join(cryptoPaths, value + "High" + ".txt")
         lowCryptoPath = os.path.join(cryptoPaths, value + "Low" + ".txt")
 
-        oprice = open(openPriceCryptoPath, "a+")
-        cprice = open(closePriceCryptoPath, "a+")
-        volume = open(volumeCryptoPath, "a+")
-        highPrice = open(highCryptoPath, "a+")
-        lowPrice = open(lowCryptoPath, "a+")
+        oprice = open(openPriceCryptoPath, "w")
+        cprice = open(closePriceCryptoPath, "w")
+        volume = open(volumeCryptoPath, "w")
+        highPrice = open(highCryptoPath, "w")
+        lowPrice = open(lowCryptoPath, "w")
+
+        endTime = requests.get("https://api.binance.com/api/v1/time")
+        endTime = endTime.json()
+        endTime = endTime['serverTime']
+        print("Time object: {} Type: {}".format(endTime, type(endTime)))
 
         # while loop with a counter to make sure that the start and endtime stay one day apart but go backwards in time, numdays amount of days
         timeBackwards = numDays * ONE_DAY
+        endTime = endTime - timeBackwards
+
+        time.sleep(1)
+
         while (timeBackwards > 0):
-            endTime = requests.get("https://api.binance.com/api/v1/time")
-            endTime = endTime.json()
-            endTime = endTime['serverTime'] - timeBackwards + ONE_THIRD_DAY
+            endTime += ONE_THIRD_DAY
             startTime = endTime - ONE_THIRD_DAY
             parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
+            print("Start Time: {} End Time: {}".format(startTime, endTime))
+            endTimeDate = datetime.datetime.fromtimestamp(endTime/1000.0)
+            startTimeDate = datetime.datetime.fromtimestamp(startTime/1000.0)
+            print("Start Time: {} End Time: {}".format(startTimeDate, endTimeDate))
             data = data.json()
+            print("Data: {}".format(data))
+            print("Type: {}".format(type(data)))
             for i in data:
                 if (i[1] != '[]'):
                     oprice.write("{},".format(i[1]))

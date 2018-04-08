@@ -296,6 +296,7 @@ def readTheInput():
                     halt = YES
                     continue
 
+                '''
                 # if the string is from an even position split it into a future key
                 if (counter % 2 == 0):
                     stringKeySplit = i.split('\'')[1]
@@ -307,7 +308,7 @@ def readTheInput():
                     if ("}" in i):
                         stringValSplit = i.split('}')[0]
                         PARAMETERS.update({stringKeySplit: float(stringValSplit)})
-
+                '''
                 counter += 1
 
 
@@ -878,11 +879,13 @@ def main():
     global running
     global mode
     global ownCrypto
-    '''
+
+
     with open("PARAMETERS.pkl", "rb") as pickle_file:
         PARAMETERS = pickle.load(pickle_file)
     print("{}".format(PARAMETERS))
-    '''
+
+
     #number of times that the bot chooses not to buy
     totalAbstain = 0
 

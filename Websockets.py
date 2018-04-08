@@ -135,15 +135,11 @@ async def getDepth(symbol, desiredVolume, maxLoss):
                     currBuyVolume = desiredVolume + 1
                     break
 
-
             #if it exited the loop with a greater $$$ amount tradable and buyable than we wanted
             if(currBuyVolume > desiredVolume and currSellVolume > desiredVolume):
                 global possibleCryptos
                 with lock:
                     possibleCryptos.append(symbol)
-
-
-
 
 
 # just calculates the percent change between two values
@@ -178,7 +174,6 @@ def generatePriceSymbols(desiredVolume, maxLoss):
     return possibleCryptos
 
 
-generatePriceSymbols(1000, -1)
 #Parallel(n_jobs=-1)(delayed(asyncio.get_event_loop().run_until_complete(getDepth(value, 10000, -1))(value, 10000, -1) for key, value in priceSymbols.items()))
 
 #for key, value in priceSymbols.items():

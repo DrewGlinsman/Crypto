@@ -79,10 +79,10 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS = []
 
 #number of iterations of bot
-NUM_ITERATIONS = 4
+NUM_ITERATIONS = 2
 
 #number of classes of bots to run
-NUM_CLASSES = 300
+NUM_CLASSES = 7
 
 #number of minutes in a day
 minInDay = 1440
@@ -337,7 +337,6 @@ def reformatLine(line, attDict):
 
 
 def main():
-    print("STARTED")
     global NUM_ITERATIONS
     global PARAMETERS
     global file
@@ -352,7 +351,7 @@ def main():
     buildLogs()
 
     priceList = generatePriceSymbols(1000, -1)
-    strPriceList = str(priceList)
+    #strPriceList = str(priceList)
 
     #untested function that should check if there are command line arguments
     #setVals()
@@ -401,7 +400,6 @@ def main():
                 typeOfRandom = 0
 
             #passing the parameters to the processes by pickling!
-            '''
             with open ("PARAMETERS.pkl", "wb") as pickle_file:
                 pickle.dump(PARAMETERS, pickle_file)
             with open("RunTime.pkl", "wb") as pickle_file:
@@ -410,7 +408,8 @@ def main():
                 pickle.dump(running, pickle_file)
             with open("priceList.pkl", "wb") as pickle_file:
                 pickle.dump(priceList, pickle_file)
-            '''
+
+
             out = proc.communicate(input = str(PARAMETERS) + ' RunTime ' + str(runTime) + ' Mode ' + str(running))
             timestamp = int(time.time() * 1000)
             print(str(timestamp))
@@ -455,12 +454,12 @@ def main():
         print('Stored : {}'.format(stored_output))
         print('Current Max: {}'.format(current_Max))
 
-
+        for z in procs:
+            z.wait()
 
         #rewrite the parameter file with the final Dict
         reWriteParameters(final_Dict)
-        for z in procs:
-            z.wait()
+
 
         file.close()
 
