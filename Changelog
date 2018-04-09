@@ -120,3 +120,6 @@ updated log system so the files are sepearted by the run of crypto trainer then 
 overhauled automated log system so they are all under a common set of headings
 fixed the error with indexes causing zero calculations
 potentially fixed no cryptos picked crash error (not sure because it can still pick no crypto and not have crashed)
+
+3/26/18
+added a system to randomly choose which parameters to change

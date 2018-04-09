@@ -436,7 +436,7 @@ def getbinanceprice(currency, currentMinute):
     try:
         binPrice = priceDict[currency][currentMinute]
     except KeyError:
-        file.write("price dict of " + str(currency) + str(priceDict))
+        file.write("price dict of " + str(currency) + str(priceDict)  + '\n')
         binPrice = 0.0
     return binPrice
 
@@ -648,7 +648,7 @@ def getScore(symbol):
     try:
         values['MODIFIED_VOLUME'].append((modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']))
     except ZeroDivisionError:
-        file.write("Whoopsie zero by division error!" + str(maxValues))
+        file.write("Whoopsie zero by division error!" + str(maxValues)  + '\n')
         for i in values:
             file.write(str(i) + '\n')
 
@@ -665,7 +665,7 @@ def getScore(symbol):
     try:
         new_score += (modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']) * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
     except ZeroDivisionError:
-        file.write("Whoopsie this other zero by division error!" + str(maxValues))
+        file.write("Whoopsie this other zero by division error!" + str(maxValues)  + '\n')
         for i in values:
             file.write(str(i) + '\n')
 
@@ -690,7 +690,7 @@ def priceChecker():
                 currencyToBuy = key
 
         except KeyError:
-            file.write(" LINE 550 key error " + str(key) + " scores[key] " + weightedMovingAverage[key])
+            file.write(" LINE 550 key error " + str(key) + " scores[key] " + weightedMovingAverage[key]  + '\n')
 
     #file.write('Coin with the highest score is ' + str(currencyToBuy) + ' which is ' + str(maxScore) + '\n' )
 
@@ -916,7 +916,7 @@ def main():
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = 0.0
 
     #set the date and time at the top of the log file
-    file.write("Date and Time of Run " + str(datetime.datetime.now()))
+    file.write("Date and Time of Run " + str(datetime.datetime.now())  + '\n')
 
 
     #runs the bot for a set number of cycles or unless the EXIT condition is met (read the function checkExitCondition)
@@ -1057,8 +1057,8 @@ def main():
 
 
         if oldCurrency == ownCrypto and oldCurrency != '':
-            file.write("OLD CURR " + str(oldCurrency) + '\n')
-            file.write("OWN CRYPTO " + str(ownCrypto) + '\n')
+            #file.write("OLD CURR " + str(oldCurrency) + '\n')
+            #file.write("OWN CRYPTO " + str(ownCrypto) + '\n')
             numAbstain = 1
             totalAbstain += 1
 
@@ -1082,12 +1082,12 @@ def main():
         #make a new crypto stats snapshot for analysis of the decision making process
         # startMinute is misleading here. it will be equal to the start of the next cycle not the one that we just walked through
         #file.write("CRYPTOS SEPEARTED " + str(cryptosSeperated))
-        file.write("NUM ABSTAIN "  + str(numAbstain) + '\n')
-        file.write('Did buy ' + str(didBuy) + '\n')
-        file.write('Did sell ' + str(didSell) + '\n')
-        file.write('Bought '+ str(currentCurrency) + '\n')
-        file.write('Sold ' + str(oldCurrency) + '\n')
-        file.write('Own ' + str(ownCrypto) + '\n')
+        #file.write("NUM ABSTAIN "  + str(numAbstain) + '\n')
+        #file.write('Did buy ' + str(didBuy) + '\n')
+        #file.write('Did sell ' + str(didSell) + '\n')
+        #file.write('Bought '+ str(currentCurrency) + '\n')
+        #file.write('Sold ' + str(oldCurrency) + '\n')
+        #file.write('Own ' + str(ownCrypto) + '\n')
         cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeOfDecision, numAbstain)
         resetDecisionsStored(cryptosSeperated)
 
@@ -1105,14 +1105,14 @@ def main():
     #file.write('Sold ' + str(numSells) + 'times\n')
 
     if (numBuys + numSells) < 10:
-        file.write('PARAMS ' + str(PARAMETERS))
+        file.write('PARAMS ' + str(PARAMETERS)  + '\n')
         #file.write('Open' + str(getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
         #file.write('Close ' + str(getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
         #file.write('Volume ' + str(CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
     #set variables of the crypto stat analysis object
     cryptoRunStats.setVal(numBuys, 0)
     cryptoRunStats.setVal(numSells, 1)
-    file.write("NUM SELLS  " + str(numSells)+ '\n')
+    #file.write("NUM SELLS  " + str(numSells)+ '\n')
     cryptoRunStats.setVal(allOwnedCryptoPercentChanges, 2)
 
     #write the analysis to the file

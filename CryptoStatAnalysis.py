@@ -134,8 +134,6 @@ class CryptoStatsAnalysis:
             posCryptos = 0.0
 
 
-
-
             if len(value) == 0 or  value[0] == '' :
                 self.file.write("HEY CHECK THIS" + '\n')
                 self.file.write('Did buy ' + str(didBuy)  + '\n')
@@ -146,7 +144,6 @@ class CryptoStatsAnalysis:
                 self.file.write('VALUE ' + str(value)  + '\n')
                 continue
             for i in value:
-
                 change = self.caclulatePercentChange(minute, timeHeld, i)
 
 
@@ -197,7 +194,7 @@ class CryptoStatsAnalysis:
     def writeToFile(self):
         self.basicInfo()
         self.buysAndSales()
-        self.posCorrelations()
+        self.diferentDecisions()
 
         self.file.close()
 
@@ -211,25 +208,42 @@ class CryptoStatsAnalysis:
         for key, value in self.params.items():
             self.file.write(str(key) + ':' + str(value) +'\n')
 
-
-
     #writes the buys and sale numbers to the analysis file
     def buysAndSales(self):
         self.file.write('----------------------------------------- \n')
         self.file.write('Number of buys ' + str(self.numBuys) + '\n')
         self.file.write('Number of sales ' + str(self.numSells) + '\n')
+        self.file.write('Crypto chose not to buy ' + str(self.numAbstain) + '\n')
 
-    #print out the positive correlation for each crypto for every decision made
-    def posCorrelations(self):
+    #print out different information for each decision made
+    def diferentDecisions(self):
         count = 0
         self.file.write('----------------------------------------- \n')
         for i in self.runsInfo:
             self.file.write('\n')
             self.file.write('Decision ' + str(count) + ': \n')
-
-            for key, value in i[count].posOverInterval.items():
-                self.file.write(str(key) + ': ' + str(value) + '\n')
+            self.transactionInfo(i, count)
+            self.printPosCorrelations(i, count)
             count += 1
+
+    #prints the transaction information
+    def transactionInfo(self, i, count):
+        self.file.write("Held crypto " + str(i[count].timeHeld) + '\n')
+        self.file.write("Start minute " + str(i[count].minute - i[count].timeHeld) + '\n')
+        self.file.write("End minute " + str(i[count].minute) + '\n')
+        if i[count].didBuy == 1:
+            self.file.write("Bought " + str(i[count].bought) + '\n')
+        else:
+            self.file.write("Bought nothing" + '\n')
+        if i[count].didSell == 1:
+            self.file.write("Sold " + str(i[count].sold) + '\n')
+        else:
+            self.file.write("Sold nothing" + '\n')
+
+    #prints the positive correlations between each of the decision groups and the % that gained money
+    def printPosCorrelations(self, i, count):
+        for key, value in i[count].posOverInterval.items():
+            self.file.write(str(key) + ': ' + str(value) + '\n')
 
 #stores the information calculated for each cryptocurrency at each decision point
 class CryptoHolder():
