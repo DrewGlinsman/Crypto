@@ -3,6 +3,7 @@ import requests
 import os
 import pickle
 import sys
+import pathlib
 
 #todo figure out if it is better to insert items at front of the lists or to just remake the lists in reverse order
 
@@ -24,11 +25,14 @@ cryptoLowData = {}
 stepsize = {}
 
 #path to save the different text files in
-cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
-#cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
+#cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
+cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
+#makes the directorys in the path variable if they do not exist
+pathlib.Path(cryptoPaths).mkdir(parents=True, exist_ok=True)
 
-#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
-logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+
+logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+#logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
 
 
 file = open(logPath, "w")
@@ -296,7 +300,7 @@ def getLowPrice(interval, minutesBack):
 
 
 def main():
-
+    getData(COUNT)
     with open("Mode.pkl", "rb") as pickle_file:
         test = pickle.load(pickle_file)
     print("Mode: {}".format(test))

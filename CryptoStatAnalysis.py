@@ -19,8 +19,6 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
 modes = {'SoloEvaluator': {'string': 'SoloEvaluator', 'value': 0}, 'SoloTrainer': {'string': 'SoloTrainer', 'value': 1}, 'MultiTrainer': {'string': 'MultiTrainer', 'value': 2}}
 
 class CryptoStatsAnalysis:
-
-
     #place data attributes in here that you do not want stored by different instances of the bot
     #or redefine them using the parameter list passed
     def __init__(self, variationNum, classNum,  training, startMinute, endMinute, PARAMS, timestamp, openPrices, closePrices, volumes, runTime):
@@ -61,8 +59,8 @@ class CryptoStatsAnalysis:
         self.training = training
 
         # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-        #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-        logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+        logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+        #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
         #concatenates the logpath with a autotrader vs crypto evalutor distinction
         withMode = logPaths + '\\Mode-' + training
@@ -117,7 +115,7 @@ class CryptoStatsAnalysis:
 
     #adds a dictionary where every crypto has a special holder object assigned to it with all important information to it from that moment when the dictionary was made
     # this method is called each time a crypto has been bought, as well as when the cryptos decide to keep the same crypto currency, and when they choose not to buy one
-    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld, didNotBuy):
+    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld , didNotBuy):
         self.runStats.append({decisionNum: self.newCryptoDict()})
         self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld)})
 
@@ -126,7 +124,7 @@ class CryptoStatsAnalysis:
         if didNotBuy == 1:
             self.addDidNotBuy()
 
-        self.addMin(minute - timeHeld)
+        self.addMin(timeHeld)
 
 
         for key, value in decisions.items():

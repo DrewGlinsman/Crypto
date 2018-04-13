@@ -123,3 +123,11 @@ potentially fixed no cryptos picked crash error (not sure because it can still p
 
 3/26/18
 added a system to randomly choose which parameters to change
+
+4/9/18
+fixed timeHeld bug where it actually held the total amount of time that had gone by
+implemented a dictionary to store input passed to crypto evaluator
+crypto evaluator now reads and returns the parameters through pickle files
+crypto trainer now reads and writes to pickles files
+all legacy reading and writing to the parameter files and passed parameters in input stream removed from crypto trainer and evaluator
+runtime, mode, pickle param path, classnum, and variation num are passed through an input stream to evaluator

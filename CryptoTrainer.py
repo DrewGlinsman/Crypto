@@ -16,12 +16,34 @@ import datetime
 import os
 import pathlib
 import pickle
-
-from Websockets import generatePriceSymbols
 import calendar
 
+#from CryptoEvaluator import strToFloat
+from Websockets import generatePriceSymbols
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
+
+
+#Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
+paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+
+
+#param file name + path
+
+#todo change to "BEST_PARAMETERS" when actually running
+paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
+
+#open a file for appending (a). + creates file if does not exist
+file = open(paramCompletePath, "r+")
+
+#param file name + path
+paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#makes the directorys in the path variable if they do not exist
+pathlib.Path(paramPaths).mkdir(parents=True, exist_ok=True)
+
+#joining path for the param pickle file
+paramCompletePath = os.path.join(paramPaths, "param.pickle")
 
 # EXPLANATION OF THE PARAMETERS
 
@@ -79,30 +101,18 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS = []
 
 #number of iterations of bot
-NUM_ITERATIONS = 2
+NUM_ITERATIONS = 1
 
 #number of classes of bots to run
-NUM_CLASSES = 100
+NUM_CLASSES = 1
 
 #number of minutes in a day
 minInDay = 1440
 
-
 #final dictionary returned to be rewritten to file
 final_Dict = {}
 
-#Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
-
-#param file name + path
-
-#todo change to "BEST_PARAMETERS" when actually running
-paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
-
-#open a file for appending (a). + creates file if does not exist
-file = open(paramCompletePath, "r+")
 
 #the timestamp for the run
 runTime = 0
@@ -125,19 +135,30 @@ changed = {}
 #the return each run of the crypto currency got
 returns = []
 
+
+#reads pickle from a file into the passed parameter dictionary
+def readParamPickle(path):
+    with open(path + "\\param.pkl", "rb") as pickle_in:
+        paramDict = pickle.load(pickle_in)
+
+    return paramDict
+
+#write pickle to a file
+def writeParamPickle(paramDict, path):
+    with open(path + "\\param.pkl", "wb") as pickle_out:
+        pickle.dump(paramDict, pickle_out)
+
+
 #makes a log file for this instance of the trainer that is sorted into a folder by the date it was run
 # and its name is just its timestamp
 def buildLogs():
     global file2
     global runTime
     global running
-
-
-
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 
-    #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-    logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+    #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
     withMode = logPaths + '\\Mode-' + running
@@ -216,58 +237,30 @@ def randomizeParams(paramDict, typeOfRandom):
     #todo add a special kind of randomization
 
 
-#function just resets parameters to the defaults
-def resetParameters(paramDict):
-    valList = []
-    count = 0
 
-    file.seek(0)
+#if there is input on the command line it will assign the NUM_CLASSES and NUM_ITERATIONS based on the flags passed
+# the flag -cl5 will set the classes to 5. the flag -it6 will set the iterations to 6
+def setVals():
 
-    #loop over the file and split the lines by space and , meaning you only get the value
-    for line in file:
-        val = line.split(' ')[1]
-        trueVal = val.split(',')[0]
-        trueVal = float(trueVal)
-        valList.append(trueVal)
+    global NUM_CLASSES
+    global NUM_ITERATIONS
 
-    #parameter dictionary that will loop over params and rewrite them
-    for key, value in paramDict.items():
+    argv_len = len(sys.argv)
+    stringargs = str(sys.argv)
+    stringarglist = stringargs.split()
 
-        paramDict[key] = valList[count]
-        count+=1
-
-
-#write paramDict to a file that will be read from to reset parameters at the start of each test and after each randomization
-def reWriteParameters(paramDict):
-
-    file.seek(0)
-    foundLast = 0
-    line = 0
-
-    lenParam = len(paramDict)
-    #file2.write("PARAMETER DICTIONARY " + str(paramDict) + '\n')
-    #file2.write("LENGTH OF PARAMETER DICT " + str(lenParam)  + '\n')
-    count = 1
-    for key, value in paramDict.items():
-        if count == lenParam:
-            lastParam = key
-        count+=1
-
-    #file2.write("LAST PARAM " + str(lastParam)  + '\n')
-
-    for key, value in paramDict.items():
-        #if we are at the very last parameter do not print a new line
-        if key == lastParam:
-            foundLast = 1
-            #print('\'%s\': %s,' % (key, value))
-            file.write('\'%s\': %s,' % (key, value))
-            #file2.write('HEY LOOK AT THIS \'%s\': %s,' % (key, value) + '\n')
-
-        if key != lastParam and foundLast == 0:
-            #print('\'%s\': %s,\n' % (key, value))
-            file.write('\'%s\': %s,\n' % (key, value))
-            #file2.write('HEY LOOK HERE \'%s\': %s,' % (key, value) + '\n')
-
+    #if there is more than one arguement (the py file name) than it will loop for the flags in the string
+    # of arguments passed, then it splits the string up based on the flags if found
+    # flags must be seperated by whitespaces
+    if argv_len > 1:
+        if '-c1' in stringargs:
+            for i in stringarglist:
+                if '-cl' in i:
+                    NUM_CLASSES = int(i.split('-c1', 1)[1])
+        if '-it' in stringargs:
+            for j in stringarglist:
+                if '-it' in j:
+                    NUM_ITERATIONS = int(j.split('-it', 1)[1])
 
 
 #converts the given string to a Dict. Used to parse the returned string from the bots being trained
@@ -299,33 +292,6 @@ def stringToDict(stringToChange):
 
     return newDict
 
-#if there is input on the command line it will assign the NUM_CLASSES and NUM_ITERATIONS based on the flags passed
-# the flag -cl5 will set the classes to 5. the flag -it6 will set the iterations to 6
-def setVals():
-
-    global NUM_CLASSES
-    global NUM_ITERATIONS
-
-    argv_len = len(sys.argv)
-    stringargs = str(sys.argv)
-    stringarglist = stringargs.split()
-
-    #if there is more than one arguement (the py file name) than it will loop for the flags in the string
-    # of arguments passed, then it splits the string up based on the flags if found
-    # flags must be seperated by whitespaces
-    if argv_len > 1:
-        if '-c1' in stringargs:
-            for i in stringarglist:
-                if '-cl' in i:
-                    NUM_CLASSES = int(i.split('-c1', 1)[1])
-        if '-it' in stringargs:
-            for j in stringarglist:
-                if '-it' in j:
-                    NUM_ITERATIONS = int(j.split('-it', 1)[1])
-
-
-
-
 #makes the string line exclusively consist of the correct string of parameters
 def reformatLine(line, attDict):
 
@@ -333,20 +299,64 @@ def reformatLine(line, attDict):
    firstFormat = line.split('LINEBEGIN')[1]
    reformat = firstFormat.split('DONEEND')[0]
    attributes = firstFormat.split('DONEEND')[1]
-   num = attributes.split('ABSTAIN')[1]
-   realnum = attributes.split('ENDABSTAIN')[0]
-   #print(str(attributes))
-   attDict.update({'NumAbstain': realnum})
 
    return reformat
 
-#function to print to file the parameter file line by line for bug checking
-def checkFileofParams():
-    file.seek(0)
-    line = 0
-    for i in file:
-        file2.write('LINE '+ str(line) + ' : ' + str(i) + '\n')
-        line += 1
+
+#setup pickle directory
+def createPickleDirect(classNum, varNum):
+    global runTime
+    global running
+    global mode
+
+    # path for directory of pickle files passed from the trainer
+    picklePath = r'C:\Users\katso\Documents\GitHub\Crypto\O-IO'
+
+    # concatenates with the mode this is running in (solo, training in a class with other variations)
+    modePickleDirec = picklePath + '\\Mode-' + running
+
+    date = datetime.date.today()
+    day = date.day
+    month = date.month
+    year = date.year
+
+    # concatenates the logpath with a date so each analysis log set is in its own file by day
+    datePickleDirec = modePickleDirec + '\\Year-' + str(year) + '\\Month-' + str(
+            calendar.month_name[month] + '\\Day-' + str(day))
+
+    runTimePickleDirec = datePickleDirec + '\\RunTime-' + str(runTime)
+
+    classPickleDirec = runTimePickleDirec + '\\Class-' + str(int(classNum))
+
+    # concatenates with the variation number
+    varNumPickleDirec = classPickleDirec + '\\Variation-' + str(int(varNum))
+
+    # creates a directory if one does not exist
+    pathlib.Path(varNumPickleDirec).mkdir(parents=True, exist_ok=True)
+
+    return varNumPickleDirec + '\\'
+
+#pickles the different input files for each bot run
+def pickleInput(paramDict, pickleDirect):
+
+    # passing the parameters to the processes by pickling!
+    with open(pickleDirect + "param.pkl", "wb") as pickle_file:
+        pickle.dump(paramDict, pickle_file)
+    with open(pickleDirect + "RunTime.pkl", "wb") as pickle_file:
+        pickle.dump(runTime, pickle_file)
+    with open(pickleDirect + "Mode.pkl", "wb") as pickle_file:
+        pickle.dump(running, pickle_file)
+    # with open("priceList.pkl", "wb") as pickle_file:
+    # pickle.dump(priceList, pickle_file)
+
+#set the parameter dictionary to use string not float by casting the passed dictionary from pickle file
+def strToFloat(paramDict):
+    newDict = PARAMETERS
+
+    for key, value in paramDict.items():
+        newDict[key] = float(value)
+
+    return newDict
 
 def main():
     global NUM_ITERATIONS
@@ -365,14 +375,14 @@ def main():
     runTime = int(time.time() * 1000)
     buildLogs()
 
-    priceList = generatePriceSymbols(1000, -1)
+
+    #priceList = generatePriceSymbols(1000, -1)
     #strPriceList = str(priceList)
 
     #untested function that should check if there are command line arguments
     #setVals()
-    resetParameters(PARAMETERS)
 
-
+    PARAMETERS = readParamPickle(paramPaths)
 
     #store the multiple processes
     for i in range(NUM_CLASSES):
@@ -392,8 +402,6 @@ def main():
 
         #creates NUM_ITERATIONS amounts of bots
         for j in range(NUM_ITERATIONS):
-
-
             proc = Popen([sys.executable, 'CryptoEvaluator.py', '{}in.txt'.format(i), '{}out.txt'.format(i)], stdout=PIPE, stdin = PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
             procs.append(proc)
 
@@ -406,6 +414,9 @@ def main():
             PARAMETERS['CLASS_NUM'] = i
             PARAMETERS['VARIATION_NUMBER'] = variationNum
 
+            #creates the needed pickleDirectory before the pickles are stored
+            picklePath = createPickleDirect(i, variationNum)
+
             #make the max cycles equal to the number of days of the interval in hours
             PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
 
@@ -415,61 +426,34 @@ def main():
             if(count % 50 != 0):
                 typeOfRandom = 0
 
-            #passing the parameters to the processes by pickling!
-            with open ("PARAMETERS.pkl", "wb") as pickle_file:
-                pickle.dump(PARAMETERS, pickle_file)
-            with open("RunTime.pkl", "wb") as pickle_file:
-                pickle.dump(runTime, pickle_file)
-            with open("Mode.pkl","wb") as pickle_file:
-                pickle.dump(running, pickle_file)
-            with open("priceList.pkl", "wb") as pickle_file:
-                pickle.dump(priceList, pickle_file)
+            #store parameters and other variables in pickle files for this bot
+            pickleInput(PARAMETERS, picklePath)
 
-
-            out = proc.communicate(input = str(PARAMETERS) + ' RunTime ' + str(runTime) + ' Mode ' + str(running))
+            #make one bot run with the input stream of runtime, mode, directory path, classnum, and variationum
+            out = proc.communicate(input = str(runTime) + ' ' + str(running) + ' ' + str(picklePath) + ' ' + str(int(i)) + ' ' + str(int(variationNum)))
+            print(str(out))
             proc.wait()
+
+            params = readParamPickle(picklePath)
             timestamp = int(time.time() * 1000)
             print(str(timestamp))
             print("CLASS NUM " + str(PARAMETERS['CLASS_NUM']) + " VARIATION NUMBER " + str(PARAMETERS['VARIATION_NUMBER']))
-            print("OUTPUT" + str(out))
+            cumulativePerentChangeStore = float(params['CUMULATIVE_PERCENT_CHANGE_STORE'])
+            print("THIS" + str(cumulativePerentChangeStore))
+            returns.append(cumulativePerentChangeStore)
 
-            #walks through the output from the instance of tester and strips it of the parameters used
-            #then stores the parameters if they netted a larger % change than the previous max
-            for line in out:
-                print(line)
-                #to avoid parsing a line that does not contain this special word indicator
-                if "LINEBEGIN" not in line:
-                    break
-                val = line
+            #if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
+            if (cumulativePerentChangeStore >= current_Max and 20 > (PARAMETERS['MAX_CYCLES'])/2) or count == 0:
+                current_Max = cumulativePerentChangeStore
+                stored_output = params
+                newParamCount += 1
 
-                if(val == ''):
-                    break
-                reform = reformatLine(val, attributeDict)
-
-                print("REFORM" + str(reform))
-
-                substring = reform.split("\'CUMULATIVE_PERCENT_CHANGE_STORE\':", 1)[1]
-
-                cumulativePerentChangeStore = substring.split(',', 1)[0]
-
-                print("THIS" + str(cumulativePerentChangeStore))
-                cumulativePerentChangeStore = float(cumulativePerentChangeStore)
-                returns.append(cumulativePerentChangeStore)
-                #print(str(cumulativePerentChangeStore))
-
-                #if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
-                if (cumulativePerentChangeStore >= current_Max and 20 > (PARAMETERS['MAX_CYCLES'])/2) or count == 0 :
-                    current_Max = cumulativePerentChangeStore
-                    stored_output = reform
-                    newParamCount += 1
-                count += 1
             #reset the parameters dictionary to the original "best" one from the file
             file2.write('Class ' + str(i) + ' variation ' + str(variationNum) + '\n')
-            checkFileofParams()
-            resetParameters(PARAMETERS)
+            PARAMETERS = readParamPickle(paramPaths)
             variationNum += 1
         #convert the stored, parsed string into a dictionary
-        final_Dict = stringToDict(stored_output)
+        final_Dict = strToFloat(stored_output)
 
         print('Stored : {}'.format(stored_output))
         print('Current Max: {}'.format(current_Max))
@@ -478,15 +462,15 @@ def main():
             z.wait()
 
         #rewrite the parameter file with the final Dict
-        reWriteParameters(final_Dict)
+        writeParamPickle(final_Dict, paramPaths)
 
 
         file.close()
 
     #information about all the classes and such
     file2.write('Number of changes of parameters ' + str(newParamCount))
-    for cla in NUM_CLASSES:
-        for var in NUM_ITERATIONS:
+    for cla in range(NUM_CLASSES):
+        for var in range(NUM_ITERATIONS):
             file2.write("Class " + str(cla) + " Variation " + str(var) + ' Return ' + str(returns[cla * var + var]) + '\n')
 
     file2.close()

@@ -176,10 +176,9 @@ allOwnedCryptoPercentChanges = []
 #cryptos seperated by decision into those disregarded, those chosen but not making final cut because of their mean, those selected that have the appropriate mean, and the crypto that is chosen, has the right mean, and is the max
 cryptosSeperated = {'Disregarded': [], 'Chosen': [], 'chosenButCut': [], 'chosenNotCut': [], 'theMax': []}
 
-#the timestamp for the entire run of crypro trainer (For logs)
-runTime = -1000
 
 file = ''
+picklefile = ''
 
 #todo finish implementing this system of tracking the crypto we currently own
 #the crypto we currently own
@@ -188,28 +187,30 @@ ownCrypto = 'BTCUDST'
 #dictionaires for the modes this can be run in
 modes = {'SoloEvaluator': {'string': 'SoloEvaluator', 'value': 0}, 'SoloTrainer': {'string': 'SoloTrainer', 'value': 1}, 'MultiTrainer': {'string': 'MultiTrainer', 'value': 2}}
 
-#what is running this evaluator
-running = modes['SoloEvaluator']['string']
-
 #the number for the mode  (default = 0)
 mode = modes['SoloEvaluator']['value']
 
+#you can use the words instead of these values
 YES = 1
 NO = 0
 
+#input values that are stored (other than parameters)
+storedInput = {'runTime': -1, 'running': modes['SoloEvaluator']['string'], 'pickleDirec': '', 'classNum': -1, 'variationNum': -1}
+
 def buildLogs(timestamp):
     global file
-    global runTime
-    global running
-    global mode
+    global storedInput
+
+
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 
-    #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-    logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+    #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+
 
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
-    withMode = logPaths + '\\Mode-' + running
+    withMode = logPaths + '\\Mode-' + storedInput['running']
 
     date = datetime.date.today()
     day = date.day
@@ -219,14 +220,13 @@ def buildLogs(timestamp):
     # concatenates the logpath with a date so each analysis log set is in its own file by day
     withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
 
-    withRunTime = withDate + '\\RunTime-' + str(runTime)
 
-    withClass = withRunTime + '\\Class-' + str(int(PARAMETERS['CLASS_NUM']))
+    withRunTime = withDate + '\\RunTime-' + str(storedInput['runTime'])
+
+    withClass = withRunTime + '\\Class-' + str(storedInput['classNum'])
 
     # concatenates with the variation number
-    withVarNum = withClass + '\\Variation-' + str(int((PARAMETERS['VARIATION_NUMBER'])))
-
-
+    withVarNum = withClass + '\\Variation-' + str(int(storedInput['variationNum']))
 
     # creates a directory if one does not exist
     pathlib.Path(withVarNum).mkdir(parents=True, exist_ok=True)
@@ -242,30 +242,49 @@ def buildLogs(timestamp):
     file = open(logCompletePath, "a+")
 
 
+#reads pickle from a file into the passed parameter dictionary
+def readParamPickle(paramDict):
+
+    pickleFileName = "param.pkl"
+    picklefile = storedInput['pickleDirec'] + pickleFileName
+
+    with open(picklefile, "rb") as pickle_in:
+       paramDict = pickle.load(pickle_in)
+
+
+
+    return paramDict
+
+#write pickle to a file
+def writeParamPickle(paramDict):
+
+    pickleFileName = "param.pkl"
+    picklefile = storedInput['pickleDirec'] + pickleFileName
+
+    with open(picklefile, "wb") as pickle_out:
+        pickle.dump(paramDict, pickle_out)
+
+    return paramDict
+
+
 #todo add a way to read in the runNumber from the crypto trainer
 def readTheInput():
-    global runTime
-    global running
-    global mode
     global modes
-    global YES
-    global NO
     global priceList
+    global storedInput
+    global mode
 
     #TODO IMPORTANT change variable to 1 anytime you are doing anything other than running just a single evaluator
     noinput = 1
 
-    #variable to skip an item of list of input strings because it has already been stored
-    halt = NO
 
-    stringKeySplit = ''
     counter = 0
 
     if noinput == 0:
         # make the max cycles equal to the number of days of the interval in hours
         PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
         print(str(PARAMETERS['MAX_CYCLES']))
-        return
+        return PARAMETERS
 
     for line in sys.stdin:
 
@@ -273,43 +292,19 @@ def readTheInput():
             # split the passed string into a list seperated by spaces
             listSplits = line.split(' ')
 
-            # loops through each string seperated out into listSplits
-            for i in listSplits:
+            #loops through the different values split from the input and stores them in a dictionary
+            count = 0
+            for key, value in storedInput.items():
+                #when the string for the mode is passed its name is stored in the stored input dictionary and the value is stored as a variable
+                if count == 1:
+                    storedInput[key] = modes[listSplits[count]]['string']
+                    mode = modes[storedInput[key]]['value']
+                #todo replace this line with an else and then figure out why the evaluators are only buying once
+                    storedInput[key] = listSplits[count]
 
-                if halt == YES:
-                    halt = NO
-                    counter += 1
-                    continue
+                count += 1
 
-                #if the chracter in the stream is the string runtime then grab the next string and store it as the run time
-                if i == 'RunTime':
-                    counter += 1
-                    runTime = listSplits[counter]
-                    halt = YES
-                    continue
 
-                #if the character in the stream is the string mode then grab the next string and store it as the mode
-                if i == 'Mode':
-                    counter += 1
-                    running = modes[listSplits[counter]]['string']
-                    mode = modes[running]['value']
-                    halt = YES
-                    continue
-
-                '''
-                # if the string is from an even position split it into a future key
-                if (counter % 2 == 0):
-                    stringKeySplit = i.split('\'')[1]
-                # if the string is from an odd position split it to be a future value and update newDict to contain it
-                if (counter % 2 != 0):
-                    if ("," in i):
-                        stringValSplit = i.split(',')[0]
-                        PARAMETERS.update({stringKeySplit: float(stringValSplit)})
-                    if ("}" in i):
-                        stringValSplit = i.split('}')[0]
-                        PARAMETERS.update({stringKeySplit: float(stringValSplit)})
-                '''
-                counter += 1
 
 
 #get the balance in bitcoins
@@ -854,6 +849,14 @@ def resetDecisionsStored(dict):
 
         value[:] = []
 
+#set the parameter dictionary to use string not float by casting the passed dictionary from pickle file
+def strToFloat(paramDict):
+    newDict = PARAMETERS
+
+    for key, value in paramDict.items():
+        newDict[key] = float(value)
+
+    return newDict
 
 #todo add in a parser to read the stdin that will be passed with the parameters from cryptotrainer
 
@@ -875,15 +878,10 @@ def main():
     global endMinNum
     global truePriceBought
     global cryptosSeperated
-    global runTime
-    global running
-    global mode
     global ownCrypto
+    global PARAMETERS
+    global storedInput
 
-
-    with open("PARAMETERS.pkl", "rb") as pickle_file:
-        PARAMETERS = pickle.load(pickle_file)
-    print("{}".format(PARAMETERS))
 
 
     #number of times that the bot chooses not to buy
@@ -892,23 +890,32 @@ def main():
     #reads in the input, usually from the cryptotrainer
     readTheInput()
 
+
     #get the timestamp for the files for the log and analysis files
     timestamp = int(time.time() * 1000)
 
     #builds a series of log files using the timestamp
     buildLogs(timestamp)
 
+    #read the pickle parameter file and convert all to float and store in the real param dict
+    strPARAMS = readParamPickle(PARAMETERS)
+    PARAMETERS = strToFloat(strPARAMS)
+
+
     #initialize the minutes that will define the period
     startMinute = startMinNum
     endMinute = endMinNum
     currentMinute = startMinute
 
+
     openPriceData = getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
     closePriceData = getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
     volumeData = CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
 
+
+    print('AGHGHHH ' + str(storedInput['running']))
     #creates a statistic object to record the different decisions and then analyze them
-    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], running , startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData, runTime)
+    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], storedInput['running'], startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData, storedInput['runTime'])
 
     #intitialize the starting currency and the number of cycles the program has run through
     # a cycle is either a period where a crypto was held or where one was bought/sold
@@ -924,7 +931,7 @@ def main():
     PARAMETERS['CUMULATIVE_PERCENT_CHANGE'] = 0.0
 
     #set the date and time at the top of the log file
-    file.write("Date and Time of Run " + str(datetime.datetime.now())  + '\n')
+    file.write("Date and Time of Run " + str(datetime.datetime.now()) + '\n')
 
 
     #runs the bot for a set number of cycles or unless the EXIT condition is met (read the function checkExitCondition)
@@ -951,7 +958,7 @@ def main():
         #run update crypto to assign scores and sort through all the cryptos and advance a minute because of how long it takes to run
         updateCrypto(startMinute, endMinute, currentMinute)
         currentMinute += 1
-        timeOfDecision = currentMinute
+
 
         #reset the old currency to be equal to whatever the current crypto currency is
         if currentCurrency == '':
@@ -1063,10 +1070,8 @@ def main():
             #set the price bought to the new price found for the interval
             priceBought = newPrice
 
-
+        #keeps tally of the number of times we have not bought total and whether we did or did not buy now
         if oldCurrency == ownCrypto and oldCurrency != '':
-            #file.write("OLD CURR " + str(oldCurrency) + '\n')
-            #file.write("OWN CRYPTO " + str(ownCrypto) + '\n')
             numAbstain = 1
             totalAbstain += 1
 
@@ -1077,12 +1082,14 @@ def main():
 
         #if no crypto was chosen you wait 5 minutes and start again
         if currentCurrency == '':
+            timeHeld = currentMinute - startMinute
             temp = startMinute
             startMinute += 5 + (currentMinute - startMinute)
             endMinute += 5 + (currentMinute - temp)
 
         #otherwise you reset the current minute and endminute
         else:
+            timeHeld = currentMinute - startMinute
             temp = startMinute
             startMinute += (currentMinute - startMinute)
             endMinute += (currentMinute - temp)
@@ -1096,7 +1103,7 @@ def main():
         #file.write('Bought '+ str(currentCurrency) + '\n')
         #file.write('Sold ' + str(oldCurrency) + '\n')
         #file.write('Own ' + str(ownCrypto) + '\n')
-        cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeOfDecision, numAbstain)
+        cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeHeld, numAbstain)
         resetDecisionsStored(cryptosSeperated)
 
         cycles += 1
@@ -1112,11 +1119,7 @@ def main():
     #file.write('Bought ' + str(numBuys) + 'times \n')
     #file.write('Sold ' + str(numSells) + 'times\n')
 
-    if (numBuys + numSells) < 10:
-        file.write('PARAMS ' + str(PARAMETERS)  + '\n')
-        #file.write('Open' + str(getOpenPrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
-        #file.write('Close ' + str(getClosePrice(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
-        #file.write('Volume ' + str(CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])))
+
     #set variables of the crypto stat analysis object
     cryptoRunStats.setVal(numBuys, 0)
     cryptoRunStats.setVal(numSells, 1)
@@ -1126,9 +1129,12 @@ def main():
     #write the analysis to the file
     cryptoRunStats.writeToFile()
 
+    #write back to the param pickle file
+    writeParamPickle(PARAMETERS)
+
     #special print statement used to get the parameters back
     print("LINEBEGIN" + str(PARAMETERS) + "DONEEND")
-    print("ABSTAIN" + str(totalAbstain) + 'ENDABSTAIN')
+
 
     file.close()
 if __name__ == "__main__":
