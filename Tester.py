@@ -6,7 +6,7 @@ import os
 import pickle
 import pathlib
 from AutoTrader import getbinanceprice
-from CryptoTrainer import PARAMETERS
+from CryptoEvaluator import PARAMETERS
 
 
 #dictionary that contains all the symbols for the binance API calls
@@ -35,7 +35,7 @@ def main():
 
 #reads pickle from a file
 def testReadParamPickle():
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\test'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
     pickle_in = open(logPaths + '\\' + "param.pkl", "rb")
     testDict = pickle.load(pickle_in)
 
@@ -45,7 +45,7 @@ def testReadParamPickle():
 #write pickle to a file
 def testWriteParamPickle():
     testDict = PARAMETERS
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\test'
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
     pickle_out = open(logPaths + '\\' + "param.pkl", "wb")
     pickle.dump(testDict, pickle_out)
     pickle_out.close()

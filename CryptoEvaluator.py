@@ -149,7 +149,7 @@ values = {'PERCENT_BY_HOUR': [], 'VOLUME_BY_HOUR': [], 'TIME_INCREASING': [], 'W
 maxValues = {'PERCENT_BY_HOUR': 0.0, 'VOLUME_BY_HOUR': 0.0, 'TIME_INCREASING': 0.0, 'WEIGHTED_TIME_INCREASING': 0.0, 'VOLUME_TIME_INCREASING': 0.0, 'WEIGHTED_VOLUME_TIME_INCREASING': 0.0, 'MODIFIED_VOLUME': 0.0, 'SCORE': 0.0}
 
 #todo remember that the wait parameters for this one should be different from the ones in auto trader where they are in seconds not minutes
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
 
 #number of minutes we want to iterate backwards
 startMinute = 0
@@ -195,7 +195,9 @@ YES = 1
 NO = 0
 
 #input values that are stored (other than parameters)
-storedInput = {'runTime': -1, 'running': modes['SoloEvaluator']['string'], 'pickleDirec': '', 'classNum': -1, 'variationNum': -1}
+storedInput = {'runTime': -1, 'running': modes['SoloEvaluator']['string'], 'pickleDirec': r'C:\Users\katso\Documents\GitHub\Crypto\\', 'classNum': -1, 'variationNum': -1}
+
+
 
 def buildLogs(timestamp):
     global file
@@ -206,7 +208,6 @@ def buildLogs(timestamp):
 
     logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
     #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
-
 
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
@@ -268,22 +269,24 @@ def writeParamPickle(paramDict):
 
 
 #todo add a way to read in the runNumber from the crypto trainer
-def readTheInput():
+def readTheInput(timestamp):
     global modes
     global priceList
     global storedInput
     global mode
+    global PARAMETERS
+
 
     #TODO IMPORTANT change variable to 1 anytime you are doing anything other than running just a single evaluator
-    noinput = 1
+    noinput = 0
 
-
-    counter = 0
 
     if noinput == 0:
         # make the max cycles equal to the number of days of the interval in hours
         PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
-        print(str(PARAMETERS['MAX_CYCLES']))
+        PARAMETERS['CLASS_NUM'] = -1
+        storedInput['runTime'] = timestamp
+
         return PARAMETERS
 
     for line in sys.stdin:
@@ -764,13 +767,25 @@ def checkExitCondition(currency, currentMinute):
 
     percentChange = calcPercentChange(priceBought, currentPrice)
 
-    if(percentChange >= PARAMETERS['MAX_PERCENT_CHANGE']):
+    maxPC = PARAMETERS['MAX_PERCENT_CHANGE']
+
+    #chaeck if the max percent change is negative so that the if statements work correctly
+    if maxPC < 0:
+        multiplyBy = -1
+        multiplyBy2 = 1
+    if maxPC >= 0:
+        multiplyBy = 1
+        multiplyBy2 = -1
+
+
+    if(percentChange > multiplyBy * PARAMETERS['MAX_PERCENT_CHANGE']):
         #file.write("HIT MAX PERCENT CHANGE")
         return 1
 
-    if(percentChange <= -1 * PARAMETERS['MAX_PERCENT_CHANGE']):
+    if(percentChange < multiplyBy2 * PARAMETERS['MAX_PERCENT_CHANGE']):
         #file.write("HIT MINIMUM PERCENT CHANGE")
         return 1
+
 
     return 0
 
@@ -887,12 +902,13 @@ def main():
     #number of times that the bot chooses not to buy
     totalAbstain = 0
 
-    #reads in the input, usually from the cryptotrainer
-    readTheInput()
-
-
     #get the timestamp for the files for the log and analysis files
     timestamp = int(time.time() * 1000)
+
+    #reads in the input, usually from the cryptotrainer
+    readTheInput(timestamp)
+
+    print(storedInput['runTime'])
 
     #builds a series of log files using the timestamp
     buildLogs(timestamp)
@@ -913,9 +929,9 @@ def main():
     volumeData = CryptoStats.getVolume(PARAMETERS['INTERVAL_TO_TEST'], PARAMETERS['MINUTES_IN_PAST'])
 
 
-    print('AGHGHHH ' + str(storedInput['running']))
+
     #creates a statistic object to record the different decisions and then analyze them
-    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(PARAMETERS['VARIATION_NUMBER'], PARAMETERS['CLASS_NUM'], storedInput['running'], startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData, storedInput['runTime'])
+    cryptoRunStats = CryptoStatAnalysis.CryptoStatsAnalysis(storedInput['variationNum'], PARAMETERS['CLASS_NUM'], storedInput['running'], startMinute, endMinute, PARAMETERS, timestamp, openPriceData, closePriceData, volumeData, storedInput['runTime'])
 
     #intitialize the starting currency and the number of cycles the program has run through
     # a cycle is either a period where a crypto was held or where one was bought/sold
@@ -933,7 +949,6 @@ def main():
     #set the date and time at the top of the log file
     file.write("Date and Time of Run " + str(datetime.datetime.now()) + '\n')
 
-
     #runs the bot for a set number of cycles or unless the EXIT condition is met (read the function checkExitCondition)
     # cycles is either a period where a crypto is held and ones where they are bought/sold
     while(cycles < PARAMETERS['MAX_CYCLES'] and EXIT == 0):
@@ -943,7 +958,6 @@ def main():
         numAbstain = 0
 
 
-        #intialize three exit conditions that are checked periodically while a crypto is held
         RESTART = 0
         RESTART_LOW = 0
         RESTART_TN = 0
@@ -1046,6 +1060,7 @@ def main():
             currentMinute += 1
 
 
+
         #if you kept the same crypto as the last cycle stole the percent chnage you have gotten from the last cycle of holding the crypto or from when it was bought
         if(oldCurrency == currentCurrency and currentCurrency != ''):
 
@@ -1134,6 +1149,7 @@ def main():
 
     #special print statement used to get the parameters back
     print("LINEBEGIN" + str(PARAMETERS) + "DONEEND")
+
 
 
     file.close()

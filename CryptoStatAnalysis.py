@@ -105,11 +105,12 @@ class CryptoStatsAnalysis:
         #Each cycle has its own set of basic information
         self.runsInfo = []
 
+        #a list of all the minutes each crypto was held for
+        self.timeHeld = []
 
         #overall interval the bot trained on
         self.startMinute = startMinute
         self.endMinute = endMinute
-
 
 
 
@@ -119,47 +120,52 @@ class CryptoStatsAnalysis:
         self.runStats.append({decisionNum: self.newCryptoDict()})
         self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld)})
 
-
+        indexOf = len(self.runsInfo)
 
         if didNotBuy == 1:
             self.addDidNotBuy()
 
         self.addMin(timeHeld)
+        self.calcPosCorrelations(timeHeld, decisions, decisionNum, minute, indexOf)
 
+
+
+    # calculating the positive correlation for the different decision groups
+    def calcPosCorrelations(self, timeHeld, decisions, decisionNum, minute, indexOf):
 
         for key, value in decisions.items():
             count = 0.0
             posCryptos = 0.0
+            totalChange = 0
 
-
-            if len(value) == 0 or  value[0] == '' :
-                self.file.write("HEY CHECK THIS" + '\n')
-                self.file.write('Did buy ' + str(didBuy)  + '\n')
-                self.file.write('Did sell ' + str(didSell)  + '\n')
-                self.file.write('Bought ' + str(bought)  + '\n')
-                self.file.write('Sold ' + str(sold)  + '\n')
-                self.file.write('KEY' + str(key)  + '\n')
-                self.file.write('VALUE ' + str(value)  + '\n')
-                continue
             for i in value:
+
                 change = self.caclulatePercentChange(minute, timeHeld, i)
-
-
                 if change > 0.0:
                     posCryptos += 1.0
+                self.storePosCorrelations(change, key, decisionNum)
+                totalChange += change
                 count += 1.0
-
 
             if count == 0.0:
                 self.runsInfo[decisionNum][decisionNum].setPosOverInterval(0.0, key)
+
             else:
                 average = posCryptos / count
                 self.runsInfo[decisionNum][decisionNum].setPosOverInterval(average, key)
+
+            averageChange = totalChange / count
+            self.runsInfo[decisionNum][decisionNum].setAveragePercentChange(averageChange, key)
+
+    #stores the positive correlations for each crypto
+    def storePosCorrelations(self, percentChange, key, decisionNum):
+       self.runsInfo[decisionNum][decisionNum].percentChanges.update({key: percentChange})
 
 
     #adds more minutes to the minutes counter
     def addMin(self, min):
         self.minPast += min
+        self.timeHeld.append(min)
 
     #add one to the number of times the program did not buy
     def addDidNotBuy(self):
@@ -173,6 +179,18 @@ class CryptoStatsAnalysis:
 
         return newDict
 
+    #gets the average minutes held
+    def getAverageMin (self, timeHeld):
+        lenList = len(timeHeld)
+        sumMin = 0
+
+        for i in range(lenList):
+            sumMin += self.timeHeld[i]
+
+        averageMin = sumMin / lenList
+
+        return averageMin
+
     #sets the value passed to be whatever value num is specified
     def setVal(self, value, valueNum):
         if valueNum == 0:
@@ -184,8 +202,8 @@ class CryptoStatsAnalysis:
 
     #calculates the percentage change over the interval for the currency
     def caclulatePercentChange(self, minute, timeHeld, currency):
-        change = calcPercentChange(self.openPriceData[currency][minute - timeHeld], self.closePriceData[currency][minute])
 
+        change = calcPercentChange(self.openPriceData[currency][minute - timeHeld], self.closePriceData[currency][minute])
         return change
 
     #calls the functions in order to format the analysis file correctly
@@ -202,6 +220,7 @@ class CryptoStatsAnalysis:
         self.file.write('Run was at ' + str(self.timestamp) + '\n')
         self.file.write('Number of times chose not to buy ' + str(self.numAbstain))
         self.file.write('Time Simulated ' + str(self.minPast) + '\n')
+        self.file.write('Average Time Held ' + str(self.getAverageMin(self.timeHeld)) + '\n')
         self.file.write('The Parameters \n')
         for key, value in self.params.items():
             self.file.write(str(key) + ':' + str(value) +'\n')
@@ -221,7 +240,10 @@ class CryptoStatsAnalysis:
             self.file.write('\n')
             self.file.write('Decision ' + str(count) + ': \n')
             self.transactionInfo(i, count)
+            self.file.write('Percent that Gained Over the Interval \n')
             self.printPosCorrelations(i, count)
+            self.file.write('Average Percent Change  \n')
+            self.printAveragePercentChange(i, count)
             count += 1
 
     #prints the transaction information
@@ -242,6 +264,14 @@ class CryptoStatsAnalysis:
     def printPosCorrelations(self, i, count):
         for key, value in i[count].posOverInterval.items():
             self.file.write(str(key) + ': ' + str(value) + '\n')
+
+
+    #prints out all the average percent Changes
+    def printAveragePercentChange(self, i, count):
+        for key, value in i[count].averagePercent.items():
+            self.file.write(str(key) + ': ' + str(value) + '\n')
+
+    #prints out the list of percent Changes with each crypto
 
 #stores the information calculated for each cryptocurrency at each decision point
 class CryptoHolder():
@@ -267,5 +297,11 @@ class cyrptoRunInfo():
         self.timeHeld = timeHeld
         self.posOverInterval = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0, 'chosenNotCut': 0.0, 'theMax': 0.0}
 
+        self.percentChanges = {}
+        self.averagePercent = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0, 'chosenNotCut': 0.0, 'theMax': 0.0}
+
     def setPosOverInterval(self, average, key):
         self.posOverInterval[key] = average * 100
+
+    def setAveragePercentChange(self, averageChange, key):
+        self.averagePercent[key] = averageChange

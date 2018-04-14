@@ -135,6 +135,9 @@ changed = {}
 #the return each run of the crypto currency got
 returns = []
 
+#teh minimum number of times the saved bot is allowed to trade
+MIN_CYCLES = 0.0
+
 
 #reads pickle from a file into the passed parameter dictionary
 def readParamPickle(path):
@@ -368,6 +371,7 @@ def main():
     global runTime
     global mode
     global running
+    global MIN_CYCLES
 
     #keeps track of how many times the parameters are changed
     newParamCount = 0
@@ -443,7 +447,7 @@ def main():
             returns.append(cumulativePerentChangeStore)
 
             #if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
-            if (cumulativePerentChangeStore >= current_Max and 20 > (PARAMETERS['MAX_CYCLES'])/2) or count == 0:
+            if (cumulativePerentChangeStore >= current_Max and MIN_CYCLES > ((PARAMETERS['MAX_CYCLES'])/2) and cumulativePerentChangeStore != 0.0 or count == 0):
                 current_Max = cumulativePerentChangeStore
                 stored_output = params
                 newParamCount += 1

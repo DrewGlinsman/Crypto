@@ -131,3 +131,8 @@ crypto evaluator now reads and returns the parameters through pickle files
 crypto trainer now reads and writes to pickles files
 all legacy reading and writing to the parameter files and passed parameters in input stream removed from crypto trainer and evaluator
 runtime, mode, pickle param path, classnum, and variation num are passed through an input stream to evaluator
+
+4/14/18
+fixed log path errors for classnum, variationnum, and runtime for solo evaluator
+added percent changes and average percent change by group to the crypto stat analysis decisions list
+fixed exit condition to treat the max percent increase parameter differently if it is negative or positive
