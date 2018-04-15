@@ -120,6 +120,7 @@ def getOpenPrice(interval, minutesBack):
                 for i in words:
                     #check to see that the datapoint is between the endpoint and startpoint of the interval to train on
                     if mins > minutesBack and mins <= (minutesBack + interval):
+
                         # if there is not already a dictionary created for the value create one and put the first value in it
                         if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
                             temp = {value: [i]}
@@ -140,6 +141,7 @@ def getOpenPrice(interval, minutesBack):
             cryptoOpenPriceData.update({value: reversedData})
 
     return cryptoOpenPriceData
+
 
 def getClosePrice(interval, minutesBack):
     if(cryptoClosePriceData == {}):

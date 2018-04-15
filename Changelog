@@ -136,3 +136,6 @@ runtime, mode, pickle param path, classnum, and variation num are passed through
 fixed log path errors for classnum, variationnum, and runtime for solo evaluator
 added percent changes and average percent change by group to the crypto stat analysis decisions list
 fixed exit condition to treat the max percent increase parameter differently if it is negative or positive
+fixed crypto stats. now the dictionaries face the right way (0 is the oldest data)
+added a new parameter that measures how much data before the interval you want
+fixed modified volume's index issue where the percent changes and volume changes were not lined up
