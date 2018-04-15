@@ -10,11 +10,10 @@ import time
 import pathlib
 import CryptoStats
 import calendar
-import ast
 import pickle
 
 from CryptoTrainer import PARAMETERS, minInDay
-from CryptoStats import getOpenPrice, getClosePrice, getVolume, getLowPrice, getHighPrice
+
 try:
     from urlib import urlencode
 
@@ -148,7 +147,7 @@ values = {'PERCENT_BY_HOUR': [], 'VOLUME_BY_HOUR': [], 'TIME_INCREASING': [], 'W
 maxValues = {'PERCENT_BY_HOUR': 0.0, 'VOLUME_BY_HOUR': 0.0, 'TIME_INCREASING': 0.0, 'WEIGHTED_TIME_INCREASING': 0.0, 'VOLUME_TIME_INCREASING': 0.0, 'WEIGHTED_VOLUME_TIME_INCREASING': 0.0, 'MODIFIED_VOLUME': 0.0, 'SCORE': 0.0}
 
 #todo remember that the wait parameters for this one should be different from the ones in auto trader where they are in seconds not minutes
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 100.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 1440.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 100.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0, 'START_MONEY': 100, 'END_MONEY': 0}
 
 #number of minutes we want to iterate backwards
 startMinute = 0
@@ -159,6 +158,9 @@ currentMinute = 0
 
 #true price for the crrpto being bought
 truePriceBought = 0.0
+
+#the currently owned crypto
+owned = 'BTCUSDT'
 
 #the number of buys
 numBuys = 0
@@ -279,7 +281,7 @@ def readTheInput(timestamp):
 
 
     #TODO IMPORTANT change variable to 1 anytime you are doing anything other than running just a single evaluator
-    noinput = 0
+    noinput = 1
 
 
     if noinput == 0:
@@ -318,10 +320,13 @@ def buyBin(symbol, currentMinute):
 
     global priceBought
     global truePriceBought
+    global owned
 
     ratio = getbinanceprice(symbol, currentMinute)
     priceBought = ratio
     truePriceBought = ratio
+    owned = symbol
+
     #mark item as the current crypto being traded and save the buy price at for failure condition
     entry = {symbol:{'buyPrice': ratio, 'timestamp': 0}}
     currencyToTrade.clear()
@@ -478,7 +483,7 @@ def updateCrypto(startMinute, endMinute, currentMinute):
         percentChanges[value][:] = []
 
         for i in range(startMinute, endMinute - 1):
-            percentChanges[value].append(calcPercentChange(openPriceData[i], closePriceData[i + 1]))
+            percentChanges[value].append(calcPercentChange(openPriceData[i + 1], closePriceData[i]))
             i += 1
 
         pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
@@ -490,7 +495,7 @@ def updateCrypto(startMinute, endMinute, currentMinute):
 
         # calculate and store the percent time increasing for volume and price percent changes
         for w in range(startMinute, endMinute - 1):
-            volumePercentChanges[value].append(calcPercentChange(volumeData[w], volumeData[w + 1]))
+            volumePercentChanges[value].append(calcPercentChange(volumeData[w - 1], volumeData[w]))
             volumeAmounts[value].append(volumeData[w])
             w += 1
 
@@ -909,11 +914,12 @@ def main():
     strPARAMS = readParamPickle(PARAMETERS)
     PARAMETERS = strToFloat(strPARAMS)
 
+    #set the real interval to be used for all the data
     realInterval = PARAMETERS['INTERVAL_TO_TEST'] + PARAMETERS['MIN_OFFSET']
 
-    PARAMETERS['MAX_PERCENT_CHANGE'] = 200.0
-    openPriceData = getOpenPrice(realInterval , PARAMETERS['MINUTES_IN_PAST'])
-    closePriceData = getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
+    #store the different kinds of data for the interval
+    openPriceData = CryptoStats.getOpenPrice(realInterval , PARAMETERS['MINUTES_IN_PAST'])
+    closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
     volumeData = CryptoStats.getVolume(realInterval, PARAMETERS['MINUTES_IN_PAST'])
     highPriceData = CryptoStats.getHighPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
     lowPriceData = CryptoStats.getLowPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
@@ -931,9 +937,6 @@ def main():
     # a cycle is either a period where a crypto was held or where one was bought/sold
     currentCurrency = ''
     cycles = 0
-
-    #the time a crypto was held for in minutes
-    timeHeld = 0
 
 
     #initialize the percent change over the whole test and the percent change over the lifetime of owning a crypto
@@ -1117,7 +1120,7 @@ def main():
         #file.write('Bought '+ str(currentCurrency) + '\n')
         #file.write('Sold ' + str(oldCurrency) + '\n')
         #file.write('Own ' + str(ownCrypto) + '\n')
-        cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeHeld, numAbstain)
+        cryptoRunStats.newStats(statDict, startMinute, didBuy, didSell, currentCurrency, oldCurrency, cryptosSeperated, cycles, timeHeld, numAbstain, owned)
         resetDecisionsStored(cryptosSeperated)
 
 
@@ -1138,6 +1141,9 @@ def main():
     #file.write("NUM SELLS  " + str(numSells)+ '\n')
     cryptoRunStats.setVal(allOwnedCryptoPercentChanges, 2)
 
+    #has the bot do any final calculations
+    PARAMETERS['END_MONEY'] = cryptoRunStats.finalCalculations()
+    print("FINAL MONEY " + str(PARAMETERS['END_MONEY']))
     #write the analysis to the file
     cryptoRunStats.writeToFile()
 

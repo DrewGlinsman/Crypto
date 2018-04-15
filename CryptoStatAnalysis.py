@@ -116,9 +116,9 @@ class CryptoStatsAnalysis:
 
     #adds a dictionary where every crypto has a special holder object assigned to it with all important information to it from that moment when the dictionary was made
     # this method is called each time a crypto has been bought, as well as when the cryptos decide to keep the same crypto currency, and when they choose not to buy one
-    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld , didNotBuy):
+    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld , didNotBuy, owned):
         self.runStats.append({decisionNum: self.newCryptoDict()})
-        self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld)})
+        self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld, owned)})
 
         indexOf = len(self.runsInfo)
 
@@ -128,22 +128,63 @@ class CryptoStatsAnalysis:
         self.addMin(timeHeld)
         self.calcPosCorrelations(timeHeld, decisions, decisionNum, minute, indexOf)
 
+    #calculates and returns the true change in the money
+    def calcMoneyChange(self):
 
+        startMoney = self.params['START_MONEY']
+        newEndMoney = startMoney
+
+        totalDecisions = len(self.runsInfo)
+
+        numDecision = 0
+
+        for i in range(totalDecisions):
+            currentDecision = self.runsInfo[numDecision][numDecision]
+
+            currentCrypto = currentDecision.owned
+
+            addMoney = newEndMoney * (float(currentDecision.percentChanges[currentCrypto]) / 100)
+
+            newEndMoney += addMoney
+            numDecision += 1
+
+
+        return newEndMoney
+
+    #calcualtes and stores all the positive percent changes
+    def calcPercentChanges(self, decisionNum, minute, timeHeld):
+
+        for key, value in priceSymbols.items():
+            change = self.caclulatePercentChange(minute, timeHeld, value)
+            # store the percent changes
+            self.storePosCorrelations(change, value, decisionNum)
 
     # calculating the positive correlation for the different decision groups
     def calcPosCorrelations(self, timeHeld, decisions, decisionNum, minute, indexOf):
 
+        self.calcPercentChanges(decisionNum, minute, timeHeld)
+
+        #iterate through different segments of the cryptos
         for key, value in decisions.items():
+            #initialize the count of cryptos
             count = 0.0
+
+            #initialzise the count of the number of cryptos that had a positive change
             posCryptos = 0.0
+
+            #initialize the total percentage change in the price
             totalChange = 0
 
+            #iterate through each crypto in that segement
             for i in value:
 
                 change = self.caclulatePercentChange(minute, timeHeld, i)
+
+                #if the percent change was negative increment our count of poisitve cryptos
                 if change > 0.0:
                     posCryptos += 1.0
-                self.storePosCorrelations(change, key, decisionNum)
+
+
                 totalChange += change
                 count += 1.0
 
@@ -153,8 +194,12 @@ class CryptoStatsAnalysis:
             else:
                 average = posCryptos / count
                 self.runsInfo[decisionNum][decisionNum].setPosOverInterval(average, key)
+            
+            if count != 0.0:
+                averageChange = totalChange / count
 
-            averageChange = totalChange / count
+            else:
+                averageChange = totalChange
             self.runsInfo[decisionNum][decisionNum].setAveragePercentChange(averageChange, key)
 
     #stores the positive correlations for each crypto
@@ -205,6 +250,14 @@ class CryptoStatsAnalysis:
 
         change = calcPercentChange(self.openPriceData[currency][minute - timeHeld], self.closePriceData[currency][minute])
         return change
+
+    #works through all calculations that cover changes over the whole bot
+    def finalCalculations(self):
+        endMoney = self.calcMoneyChange()
+
+
+
+        return endMoney
 
     #calls the functions in order to format the analysis file correctly
     def writeToFile(self):
@@ -286,7 +339,7 @@ class CryptoHolder():
 #stores the basic information about the period being evaluated
 class cyrptoRunInfo():
 
-    def __init__(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld):
+    def __init__(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld, owned):
         self.statsDict = statsDict
         self.minute = minute
         self.didBuy = didBuy
@@ -295,6 +348,7 @@ class cyrptoRunInfo():
         self.sold = sold
         self.decisions = decisions
         self.timeHeld = timeHeld
+        self.owned = owned
         self.posOverInterval = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0, 'chosenNotCut': 0.0, 'theMax': 0.0}
 
         self.percentChanges = {}

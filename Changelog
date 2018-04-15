@@ -139,3 +139,7 @@ fixed exit condition to treat the max percent increase parameter differently if 
 fixed crypto stats. now the dictionaries face the right way (0 is the oldest data)
 added a new parameter that measures how much data before the interval you want
 fixed modified volume's index issue where the percent changes and volume changes were not lined up
+
+4/15/18
+added a new file CryptoGraphs that will make graphs of the basic data collected over the interval being used
+added Start money and End money parameters to track the balance as it would change in reality

@@ -75,10 +75,12 @@ paramCompletePath = os.path.join(paramPaths, "param.pickle")
 #MINOFFSET: the number of minutes before the beginning of the interval of data that the bot can look back to
 #INTERVAL_TO_TEST: the interval over which the bot will be tested (think hour, day, week etc...); used with the crypto evaluator
 #MINUTES_IN_PAST: how far back you want the end point of the test to be
+#START_MONEY: the amount of money in $ the bot starts with
+#END_MONEY: the amount of money in $ the bot ends with
 
-PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 15.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 0.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0}
+PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0, 'MINIMUM_SCORE': 0.01, 'MINIMUM_MOVING_AVERAGE': .001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'MAX_PERCENT_CHANGE': 100.0, 'NEGATIVE_WEIGHT': 1.0, 'CUMULATIVE_PERCENT_CHANGE': 0.0, 'CUMULATIVE_PERCENT_CHANGE_STORE': 0.0, 'SLOT_WEIGHT': 1.0, 'TIME_INCREASING_MODIFIER': 1.0, 'VOLUME_INCREASING_MODIFIER': 1.0, 'PERCENT_BY_HOUR_MODIFIER': 1.0, 'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0, 'START_MONEY': 100, 'END_MONEY': 0}
 
-UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW', 'VARIATION_NUMBER', 'CLASS_NUM', 'MIN_OFFSET', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST']
+UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_TIME_CYCLE', 'MAX_CYCLES', 'CUMULATIVE_PERCENT_CHANGE', 'CUMULATIVE_PERCENT_CHANGE_STORE', 'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW', 'VARIATION_NUMBER', 'CLASS_NUM', 'MIN_OFFSET', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'START_MONEY', 'END_MONEY']
 
 
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -101,10 +103,10 @@ PARAM_CHOSEN = {}
 PARAMETER_VARIATIONS = []
 
 #number of iterations of bot
-NUM_ITERATIONS = 1
+NUM_ITERATIONS = 3
 
 #number of classes of bots to run
-NUM_CLASSES = 1
+NUM_CLASSES = 2
 
 #number of minutes in a day
 minInDay = 1440
@@ -352,6 +354,13 @@ def pickleInput(paramDict, pickleDirect):
     # with open("priceList.pkl", "wb") as pickle_file:
     # pickle.dump(priceList, pickle_file)
 
+#just calculates the percent change between two values
+def calcPercentChange(startVal, endVal):
+    if(float(startVal) == 0.0):
+        return float(endVal) * 100.0
+
+    return (((float(endVal) - float(startVal))/float(startVal) ) * 100)
+
 #set the parameter dictionary to use string not float by casting the passed dictionary from pickle file
 def strToFloat(paramDict):
     newDict = PARAMETERS
@@ -442,7 +451,7 @@ def main():
             timestamp = int(time.time() * 1000)
             print(str(timestamp))
             print("CLASS NUM " + str(PARAMETERS['CLASS_NUM']) + " VARIATION NUMBER " + str(PARAMETERS['VARIATION_NUMBER']))
-            cumulativePerentChangeStore = float(params['CUMULATIVE_PERCENT_CHANGE_STORE'])
+            cumulativePerentChangeStore =  calcPercentChange(params['START_MONEY'], params['END_MONEY'])
             print("THIS" + str(cumulativePerentChangeStore))
             returns.append(cumulativePerentChangeStore)
 
