@@ -71,7 +71,7 @@ def getstatistics(stats, symbols, typed):
     return newdf
 
 #sets up all the differnet dictionary data
-def initializeData(realInterval, minutesinpast, typesofdata = typesData, overridemakenew = False):
+def initializeData(realInterval, minutesinpast, typesofdata = typesData):
 
     #go thorugh all the kinds of data that can be chosen, if the datatype was chosen then call the appropriate statsfunction
     listofdata = {}
@@ -181,7 +181,7 @@ def andrewProject(runTime, direc):
 
 
     #initialize our data for line guessed over the next 80 min of one crypto
-    alldataguess = initializeData(guessInterval,secondminsinpast, datatypechosen, overridemakenew = True)
+    alldataguess = initializeData(guessInterval,secondminsinpast, datatypechosen)
     print(alldataguess['OpenPrice'])
     #a second run time to distinguish the filename within the folder for the two picture files
     graphname = 'GuessOPPC'
