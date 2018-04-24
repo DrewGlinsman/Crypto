@@ -130,6 +130,45 @@ def getCols(symbolDict, typelist, compliment=False):
 
     return cols
 
+#returns a line to fit for each column of the passed datafraame
+#returned dictionary is of the form  {symbol: {b0: b0value, b1: b1value}}
+#if alldata = true then each symbol dict includes sumx, sumx^2, n, sumy, sumxy, sumy^2, meanx, stdx, meany, stdy, p(Called correlation coefficient),
+def estimatefiteline(data, allData = False):
+    #the list of the different normally stored equation data
+    listofequations = {}
+    #the list of different equation data plus the extra data if allData = True
+    allequations = {}
+
+    #list of columns in the passed dataframe
+    collist = data.columns
+
+    #the number of columns
+    colnum = len(collist)
+
+    #the stored x and y values for all data
+    #all xs are the same!
+    dataxs = range(len(data.index.values))
+    datays = {}
+    for colname in collist:
+        datays.update({colname: []})
+
+
+    print(data)
+    #iterate through each row and index
+    for index, row in data.iterrows():
+        currentcol = 0
+        for val in row:
+            datays[collist[currentcol]].append(val)
+            currentcol+=1
+
+
+    print(datays)
+
+    if allData:
+        return allequations
+
+    return listofequations
+
 #the main file for my math project
 def andrewProject(runTime, direc):
     #the symbols I chose for statistics on the mean
@@ -163,7 +202,6 @@ def andrewProject(runTime, direc):
 
     graphname = 'realOPPC'
 
-    print(alldatadict['OpenPrice'])
     #setup a dataframe
     data = constructDataFrame(alldatadict, symbolforlines, firstInterval, datatypechosen)
 
@@ -176,13 +214,16 @@ def andrewProject(runTime, direc):
     #plots the one crypto open price based on percent change from the starting index
     plotData(graphname, plots, data, symbolforlines, typesData[openpriceindex], firstInterval, runTime, linetype, showlegend = True, figsize=(10,10))
 
+    #getting a list with the variable values calculated for the line of fit
+    estimatedlinedata = estimatefiteline(data, symbolforlines)
+
 
     #this block below is for the guessing using the estimated line from part one to guess 80 min in part 2
 
 
     #initialize our data for line guessed over the next 80 min of one crypto
     alldataguess = initializeData(guessInterval,secondminsinpast, datatypechosen)
-    print(alldataguess['OpenPrice'])
+
     #a second run time to distinguish the filename within the folder for the two picture files
     graphname = 'GuessOPPC'
     #second dataframe
@@ -197,12 +238,12 @@ def andrewProject(runTime, direc):
 
     #all data for 9 cryptos for the mean
     #setup a dataframe
-    alldata = constructDataFrame(alldatadict, symbolsformean, firstInterval, datatypechosen)
+    dataforstats = constructDataFrame(alldatadict, symbolsformean, firstInterval, datatypechosen)
 
     graphname = 'MeanOPB'
     stats = {}
     #this block below is to do bar charts using the mean of the nine cryptos
-    statsformeandataframe = getstatistics(alldata, symbolsformean, [typesData[openpriceindex]])
+    statsformeandataframe = getstatistics(dataforstats, symbolsformean, [typesData[openpriceindex]])
     statisticsformean = {typesData[openpriceindex]: statsformeandataframe}
     #optimization to grab the statistics for the open price of the data
     stats.update(statisticsformean)
@@ -210,7 +251,13 @@ def andrewProject(runTime, direc):
     bardf = stats[typesData[openpriceindex]]
     plotData(graphname, plots, bardf, symbolsformean , chosentype=typesData[openpriceindex], showlegend=False, graphtype='bar', figsize=(10,10))
 
-    print(alldatadict['OpenPrice'])
+    print(dataforstats)
+    allstatsofcorrelation = dataforstats.corr()
+    print(allstatsofcorrelation)
+    allstatsofcorrelation = allstatsofcorrelation.describe()
+
+    print(allstatsofcorrelation)
+
 def main():
     runTime = time.time() * 1000
 

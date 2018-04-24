@@ -158,3 +158,8 @@ added the ability to select what kinds of data you want for the initializedata a
 fleshed out andrewsproj function so that it use the plotdata function in a few different ways
 added a default param to each get data function in CryptoStats so that you can get new dicts of data even if you have already made one and it wont
 interfere with the currently existing one
+
+4/24/18
+updated cryptoevaluator to use global data variables and not rely on the global variables for cryptostat
+made sure all the logic gates with decrease or increase are treated as the positive or negative as intended in cryptoevaluator
+replaced value with more descriptive name in iterations of priceSymbols in all files

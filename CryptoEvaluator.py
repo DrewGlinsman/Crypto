@@ -201,6 +201,13 @@ storedInput = {'runTime': -1, 'running': modes['SoloEvaluator']['string'], 'pick
 #the interval size plus the offset
 realInterval = 0
 
+#the different dictionaries used to store the data for the interval
+openPriceData = {}
+closePriceData = {}
+volumeData = {}
+highPriceData = {}
+lowPriceData = {}
+
 
 def buildLogs(timestamp):
     global file
@@ -281,7 +288,7 @@ def readTheInput(timestamp):
 
 
     #TODO IMPORTANT change variable to 1 anytime you are doing anything other than running just a single evaluator
-    noinput = 1
+    noinput = 0
 
 
     if noinput == 0:
@@ -343,11 +350,13 @@ def sellBin(symbol):
 
 def setWeightedMovingAverage(currency, startMinute, endMinute):
     global realInterval
+    global openPriceData
+    global closePriceData
 
     cumulativePrice = 0.0
 
-    openPriceData = CryptoStats.getOpenPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[currency]
-    closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[currency]
+    openPriceDataLocal = openPriceData[currency]
+    closePriceDataLocal = closePriceData[currency]
 
     slots = endMinute - startMinute - 1
 
@@ -356,8 +365,8 @@ def setWeightedMovingAverage(currency, startMinute, endMinute):
 
     #adds up the cumulative price changes using each interval
     for x in range (startMinute, endMinute):
-       startPrice = openPriceData[x]
-       endPrice = closePriceData[x]
+       startPrice = openPriceDataLocal[x]
+       endPrice = closePriceDataLocal[x]
        change = calcPercentChange(startPrice, endPrice)
 
        cumulativePrice += change
@@ -376,11 +385,13 @@ def setWeightedMovingAverage(currency, startMinute, endMinute):
 #gets the cumulative volume over a period and scales it based on the currency's price
 def getVolume(currency, currentMinute):
     global realInterval
+    global volumeData
+
     volume = []
     #building the request
-    data = CryptoStats.getVolume(realInterval, PARAMETERS['MINUTES_IN_PAST'])[currency]
+    volumeDataLocal = volumeData[currency]
     #adds up all the volumes over the interval
-    for x in data:
+    for x in volumeDataLocal:
         if(x != ''):
             x = float(x)
             x *= float(getbinanceprice(currency, currentMinute))
@@ -432,7 +443,9 @@ def getModifiedVolume(currency):
 #get the binance price of the specified currency
 def getbinanceprice(currency, currentMinute):
     global realInterval
-    priceDict = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
+    global closePriceData
+
+    priceDict = closePriceData
     if priceDict == {} or currency == '':
         return 0.0
 
@@ -452,91 +465,98 @@ def getbinanceprice(currency, currentMinute):
 
 def updateCrypto(startMinute, endMinute, currentMinute):
     global realInterval
-    for key,value in priceSymbols.items():
+    global openPriceData
+    global closePriceData
+    global volumeData
+
+    for key,  currency in priceSymbols.items():
+
+
         # Pulling the three dictionaries from the cryptostats class and getting the specific list associated with the current symbol
-        openPriceData = CryptoStats.getOpenPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[value]
-        closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[value]
-        volumeData = getVolume(value, currentMinute)
+        openPriceDataLocal = openPriceData[currency]
+        closePriceDataLocal = closePriceData[currency]
+        volumeDataLocal = getVolume(currency, currentMinute)
 
 
         #todo figure out why this and the one below always starts at 0
         # calculate the percent change over the whole hour and store
-        openPrice = openPriceData[startMinute]
+        openPrice = openPriceDataLocal [startMinute]
         closePriceIndex = endMinute - 1
-        closePrice = closePriceData[closePriceIndex]
-        pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
+        closePrice = closePriceDataLocal[closePriceIndex]
+        pricePercentData[currency]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
 
-        values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
+        values['PERCENT_BY_HOUR'].append(pricePercentData[currency]['percentbyhour'])
 
         #todo figure out if it should have been endMinute - startMinute - 1 or just endMinute - 1
         # calculate the percent change in volume over the whole hour and store
-        openVolume = volumeData[startMinute]
+        openVolume = volumeDataLocal[startMinute]
         closeVolumeIndex = endMinute - 1
-        closeVolume = volumeData[closeVolumeIndex]
-        volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
+        closeVolume = volumeDataLocal[closeVolumeIndex]
+        volumePercentData[currency]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
 
         # test.write("Currency: {} Open Price: {} Close Price: {} Open Volume: {} Close Volume: {} \n".format(value, openPrice, closePrice, openVolume, closeVolume))
 
-        values['VOLUME_BY_HOUR'].append(volumePercentData[value]['percentbyhour'])
+        values['VOLUME_BY_HOUR'].append(volumePercentData[currency]['percentbyhour'])
 
         # iterate through all the open and close prices for the given interval
-        percentChanges[value][:] = []
+        percentChanges[currency][:] = []
 
         for i in range(startMinute, endMinute - 1):
-            percentChanges[value].append(calcPercentChange(openPriceData[i + 1], closePriceData[i]))
+            percentChanges[currency].append(calcPercentChange(openPriceDataLocal[i + 1], closePriceDataLocal[i]))
             i += 1
 
-        pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
-        pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
+        pricePercentData[currency]['timeIncreasing'] = getTimeIncreasing(0, currency)
+        pricePercentData[currency]['weightedtimeIncreasing'] = getTimeIncreasing(1, currency)
 
         # reset the lists of the volume amounts and volume percent changes
-        volumeAmounts[value][:] = []
-        volumePercentChanges[value][:] = []
+        volumeAmounts[currency][:] = []
+        volumePercentChanges[currency][:] = []
 
         # calculate and store the percent time increasing for volume and price percent changes
         for w in range(startMinute, endMinute - 1):
-            volumePercentChanges[value].append(calcPercentChange(volumeData[w - 1], volumeData[w]))
-            volumeAmounts[value].append(volumeData[w])
+            volumePercentChanges[currency].append(calcPercentChange(volumeDataLocal[w - 1], volumeDataLocal[w]))
+            volumeAmounts[currency].append(volumeDataLocal[w])
+
             w += 1
 
-        volumePercentData[value]['timeIncreasing'] = getVolumeTimeIncreasing(0, value)
-        volumePercentData[value]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, value)
+        volumePercentData[currency]['timeIncreasing'] = getVolumeTimeIncreasing(0, currency)
+        volumePercentData[currency]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, currency)
 
         # store the time increasing and weighted time increasing for price data to be used for scaling
-        values['TIME_INCREASING'].append(pricePercentData[value]['timeIncreasing'])
-        values['WEIGHTED_TIME_INCREASING'].append(pricePercentData[value]['weightedtimeIncreasing'])
+        values['TIME_INCREASING'].append(pricePercentData[currency]['timeIncreasing'])
+        values['WEIGHTED_TIME_INCREASING'].append(pricePercentData[currency]['weightedtimeIncreasing'])
 
 
 
         # store the time increasing and weighted time increasing for volume data to be used for scaling
-        values['VOLUME_TIME_INCREASING'].append(volumePercentData[value]['timeIncreasing'])
-        values['WEIGHTED_VOLUME_TIME_INCREASING'].append(volumePercentData[value]['weightedtimeIncreasing'])
+        values['VOLUME_TIME_INCREASING'].append(volumePercentData[currency]['timeIncreasing'])
+        values['WEIGHTED_VOLUME_TIME_INCREASING'].append(volumePercentData[currency]['weightedtimeIncreasing'])
 
 
-        modifiedVolume[value] = 0
+        modifiedVolume[currency] = 0
         # get the modified volume changes
-        modifiedVolume[value] = getModifiedVolume(value)
+        modifiedVolume[currency] = getModifiedVolume(currency)
 
-        values['MODIFIED_VOLUME'].append(modifiedVolume[value])
+        values['MODIFIED_VOLUME'].append(modifiedVolume[currency])
 
         # calcualte a weightedMovingAverage
-        weightedMovingAverage[value] = setWeightedMovingAverage(value, startMinute, endMinute)
+        weightedMovingAverage[currency] = setWeightedMovingAverage(currency, startMinute, endMinute)
 
     setMaxValue()
     resetValues()
 
     # gets the score for each crypto
     # moved to its own loop so all the values can be properly scaled by the largest value
-    for key, value in priceSymbols.items():
+    for key, currencyname in priceSymbols.items():
 
         # use the calculations to get a score
-        calc_score = getScore(value)
-        new_score = {value: calc_score}
+        calc_score = getScore(currencyname)
+        new_score = {currencyname: calc_score}
         scores.update(new_score)
         storedScores.update({key: new_score})
 
         # calculate a weightedMovingAverage
-        weightedMovingAverage[value] = setWeightedMovingAverage(value, startMinute, endMinute)
+        weightedMovingAverage[currencyname] = setWeightedMovingAverage(currencyname, startMinute, endMinute)
 
 
     #add cryptos and their scores to dictionary of currencies to trade if they are above the minimum score
@@ -709,19 +729,20 @@ def calcPercentChange(startVal, endVal):
 #if yes it forces a new check to see if there is a better crypto
 def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
     global realInterval
-    #print("New Interval")
+    global openPriceData
+    global closePriceData
 
-    openPriceData = CryptoStats.getOpenPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[currency]
-    closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[currency]
+    openPriceDataLocal = openPriceData[currency]
+    closePriceDataLocal = closePriceData[currency]
 
     #get the starting price of the interval
-    startPriceInterval = openPriceData[startMinute]
+    startPriceInterval = openPriceDataLocal[startMinute]
     timeIncreasingCounter = 0
 
     #iterate through the list of percent changes and add up when the percent change was positive
     for x in range(startMinute, endMinute):
-        startPrice = openPriceData[x]
-        endPrice = closePriceData[x]
+        startPrice = openPriceDataLocal[x]
+        endPrice = closePriceDataLocal[x]
         #file.write("Current Crypto: " + str(currency) + ' Start Price: ' +str(startPrice) + ' End Price: ' + str(endPrice))
         percentChange = calcPercentChange(startPrice, endPrice)
         if(percentChange > 0):
@@ -741,14 +762,20 @@ def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
 #checks whether the function has caused too large of negative decrease the specified interval
 def checkTooNegative(symbol, currentMinute):
     global realInterval
-    openPriceData = CryptoStats.getOpenPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[symbol]
-    closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[symbol]
+    global openPriceData
+    global closePriceData
 
-    startPrice = openPriceData[currentMinute]
-    endPrice = closePriceData[currentMinute]
+
+    openPriceDataLocal = openPriceData[symbol]
+    closePriceDataLcoal = closePriceData[symbol]
+
+    startPrice = openPriceDataLocal[currentMinute]
+    endPrice = closePriceDataLcoal[currentMinute]
     percentChange = calcPercentChange(startPrice, endPrice)
 
-    if(percentChange < PARAMETERS['MAX_DECREASE']):
+
+    #if the percent change is less than the negation of the absolute value of max decrease (ensures it is treated as negative
+    if(percentChange < (-1 * abs((PARAMETERS['MAX_DECREASE'])))):
         #file.write("TOO NEGATIVE. RESTART")
         return 1
 
@@ -809,12 +836,15 @@ def checkTooLow(currency, timesIncreasing, startMinute, endMinute):
 # 0 means decreasing, 1 means stable or increasing
 def increasingOrDecreasing(currency, startMinute, endMinute):
     global realInterval
-    openPriceData = CryptoStats.getOpenPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[currency]
-    closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])[currency]
+    global openPriceData
+    global closePriceData
+
+    openPriceDataLocal = openPriceData[currency]
+    closePriceDataLocal = closePriceData[currency]
 
 
-    startPrice = openPriceData[startMinute]
-    endPrice = closePriceData[endMinute]
+    startPrice = openPriceDataLocal[startMinute]
+    endPrice = closePriceDataLocal[endMinute]
 
     calcPChange = calcPercentChange(startPrice, endPrice)
 
@@ -894,6 +924,11 @@ def main():
     global PARAMETERS
     global storedInput
     global realInterval
+    global openPriceData
+    global closePriceData
+    global volumeData
+    global highPriceData
+    global lowPriceData
 
 
     #number of times that the bot chooses not to buy
@@ -918,12 +953,11 @@ def main():
     realInterval = PARAMETERS['INTERVAL_TO_TEST'] + PARAMETERS['MIN_OFFSET']
 
     #store the different kinds of data for the interval
-    openPriceData = CryptoStats.getOpenPrice(realInterval , PARAMETERS['MINUTES_IN_PAST'])
-    closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
-    volumeData = CryptoStats.getVolume(realInterval, PARAMETERS['MINUTES_IN_PAST'])
-    highPriceData = CryptoStats.getHighPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
-    lowPriceData = CryptoStats.getLowPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'])
-
+    openPriceData = CryptoStats.getOpenPrice(realInterval , PARAMETERS['MINUTES_IN_PAST'], {})
+    closePriceData = CryptoStats.getClosePrice(realInterval, PARAMETERS['MINUTES_IN_PAST'], {})
+    volumeData = CryptoStats.getVolume(realInterval, PARAMETERS['MINUTES_IN_PAST'], {})
+    highPriceData = CryptoStats.getHighPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'], {})
+    lowPriceData = CryptoStats.getLowPrice(realInterval, PARAMETERS['MINUTES_IN_PAST'], {})
 
     #initialize the minutes that will define the period
     startMinute = int(startMinNum + PARAMETERS['MIN_OFFSET'])

@@ -63,8 +63,8 @@ def testCalcMinBidandAsk(acceptedLossPercentage,levelsToAccess):
     minAsk = 0.0
     global basesource
 
-    for key, value in priceSymbols.items():
-        source = basesource + '/ws/' + str(value) + '@depth' + str(levelsToAccess)
+    for key, currencyname in priceSymbols.items():
+        source = basesource + '/ws/' + str(currencyname) + '@depth' + str(levelsToAccess)
         # try to open with urllib (if source is http, ftp, or file URL)
         try:
             print(source)

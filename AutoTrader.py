@@ -487,9 +487,9 @@ def updateCrypto(interval, starttime, endtime):
 
     resetValues()
 
-    for key,value in priceSymbols.items():
+    for key,currencyname in priceSymbols.items():
         print(key)
-        parameter = {'symbol': value, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
+        parameter = {'symbol': currencyname, 'interval': interval, 'startTime': starttime, 'endTime': endtime}
         percentChange = requests.get("https://api.binance.com/api/v1/klines", params=parameter)
         percentChange = percentChange.json()
         percentChange.reverse()
@@ -503,70 +503,70 @@ def updateCrypto(interval, starttime, endtime):
         openPrice = percentChange[0][1]
         closePrice = percentChange[int(lastSlot)][4]
 
-        pricePercentData[value]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
+        pricePercentData[currencyname]['percentbyhour'] = calcPercentChange(openPrice, closePrice)
 
         # store percent by hour changes to be used later for scaling
-        values['PERCENT_BY_HOUR'].append(pricePercentData[value]['percentbyhour'])
+        values['PERCENT_BY_HOUR'].append(pricePercentData[currencyname]['percentbyhour'])
 
         #used to scale the volume
-        priceScale = float(getbinanceprice(value))
+        priceScale = float(getbinanceprice(currencyname))
 
         #calcualte the percent change in volume over the whole hour and store
         openVolume = float(percentChange[0][5]) * priceScale
         closeVolume = float(percentChange[int(lastSlot)][5]) * priceScale
-        volumePercentData[value]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
+        volumePercentData[currencyname]['percentbyhour'] = calcPercentChange(openVolume, closeVolume)
 
         # store the volume change by hour to be used later for scaling
-        values['VOLUME_BY_HOUR'].append(volumePercentData[value]['percentbyhour'])
+        values['VOLUME_BY_HOUR'].append(volumePercentData[currencyname]['percentbyhour'])
 
         #calculate the percentage change between the minute intervals and store
         #reset the list of stored percentages so a fresh list is stored
-        percentChanges[value][:] = []
+        percentChanges[currencyname][:] = []
         for i in percentChange:
-            percentChanges[value].append(calcPercentChange(i[1], i[4]))
+            percentChanges[currencyname].append(calcPercentChange(i[1], i[4]))
 
 
 
         #reset the lists of the volume amounts and volume percent changes
-        volumeAmounts[value][:] = []
-        volumePercentChanges[value][:] = []
+        volumeAmounts[currencyname][:] = []
+        volumePercentChanges[currencyname][:] = []
 
         #grabs and stores the volume from the first two intervals that are skipped in the for loop below
-        volumeAmounts[value].append(float(percentChange[0][5]) * priceScale)
-        volumeAmounts[value].append(float(percentChange[1][5]) * priceScale)
+        volumeAmounts[currencyname].append(float(percentChange[0][5]) * priceScale)
+        volumeAmounts[currencyname].append(float(percentChange[1][5]) * priceScale)
 
 
 
         #stores the volume percent changes and the volume amounts
         for i in range(2, len(percentChange)):
-           volumePercentChanges[value].append(calcPercentChange(float(percentChange[i-1][5]) * priceScale, float(percentChange[i][5]) * priceScale))
-           volumeAmounts[value].append(float(percentChange[i][5]) * priceScale)
+           volumePercentChanges[currencyname].append(calcPercentChange(float(percentChange[i-1][5]) * priceScale, float(percentChange[i][5]) * priceScale))
+           volumeAmounts[currencyname].append(float(percentChange[i][5]) * priceScale)
 
         #calculate and store the percent time increasing for volume and price percent changes
-        pricePercentData[value]['timeIncreasing'] = getTimeIncreasing(0, value)
-        pricePercentData[value]['weightedtimeIncreasing'] = getTimeIncreasing(1, value)
+        pricePercentData[currencyname]['timeIncreasing'] = getTimeIncreasing(0, currencyname)
+        pricePercentData[currencyname]['weightedtimeIncreasing'] = getTimeIncreasing(1, currencyname)
 
         # store the time increasing and weighted time increasing for price data to be used for scaling
-        values['TIME_INCREASING'].append(pricePercentData[value]['timeIncreasing'])
-        values['WEIGHTED_TIME_INCREASING'].append(pricePercentData[value]['weightedtimeIncreasing'])
+        values['TIME_INCREASING'].append(pricePercentData[currencyname]['timeIncreasing'])
+        values['WEIGHTED_TIME_INCREASING'].append(pricePercentData[currencyname]['weightedtimeIncreasing'])
 
         # calcualte and store time increasing for volume and price percent changes
-        volumePercentData[value]['timeIncreasing'] = getVolumeTimeIncreasing(0, value)
-        volumePercentData[value]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, value)
+        volumePercentData[currencyname]['timeIncreasing'] = getVolumeTimeIncreasing(0, currencyname)
+        volumePercentData[currencyname]['weightedtimeIncreasing'] = getVolumeTimeIncreasing(1, currencyname)
 
         # store the time increasing and weighted time increasing for volume data to be used for scaling
-        values['VOLUME_TIME_INCREASING'].append(volumePercentData[value]['timeIncreasing'])
-        values['WEIGHTED_VOLUME_TIME_INCREASING'].append(volumePercentData[value]['weightedtimeIncreasing'])
+        values['VOLUME_TIME_INCREASING'].append(volumePercentData[currencyname]['timeIncreasing'])
+        values['WEIGHTED_VOLUME_TIME_INCREASING'].append(volumePercentData[currencyname]['weightedtimeIncreasing'])
 
-        modifiedVolume[value] = 0.0
+        modifiedVolume[currencyname] = 0.0
         #get the modified volume changes
-        modifiedVolume[value] = getModifiedVolume(value)
-        values['MODIFIED_VOLUME'].append(modifiedVolume[value])
+        modifiedVolume[currencyname] = getModifiedVolume(currencyname)
+        values['MODIFIED_VOLUME'].append(modifiedVolume[currencyname])
 
         #calcualte a weightedMovingAverage
         endtt = int(time.time() * 1000)
         startt = endtt - intervalTypes['4h']['inMS']
-        weightedMovingAverage[value] = setWeightedMovingAverage(value, intervalTypes['1m']['symbol'], startt, endtt)
+        weightedMovingAverage[currencyname] = setWeightedMovingAverage(currencyname, intervalTypes['1m']['symbol'], startt, endtt)
 
     setMaxValue()
 
@@ -575,10 +575,10 @@ def updateCrypto(interval, starttime, endtime):
 
     #gets the score for each crypto
     #moved to its own loop so all the values can be properly scaled by the largest value
-    for key, value in priceSymbols.items():
+    for key, currencyname in priceSymbols.items():
         # use the calculations to get a score
-        calc_score = getScore(value)
-        new_score = {value: calc_score}
+        calc_score = getScore(currencyname)
+        new_score = {currencyname: calc_score}
         scores.update(new_score)
         values['SCORE'].append(calc_score)
 

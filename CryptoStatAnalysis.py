@@ -154,10 +154,10 @@ class CryptoStatsAnalysis:
     #calcualtes and stores all the positive percent changes
     def calcPercentChanges(self, decisionNum, minute, timeHeld):
 
-        for key, value in priceSymbols.items():
-            change = self.caclulatePercentChange(minute, timeHeld, value)
+        for key, currencyname in priceSymbols.items():
+            change = self.caclulatePercentChange(minute, timeHeld, currencyname)
             # store the percent changes
-            self.storePosCorrelations(change, value, decisionNum)
+            self.storePosCorrelations(change, currencyname, decisionNum)
 
     # calculating the positive correlation for the different decision groups
     def calcPosCorrelations(self, timeHeld, decisions, decisionNum, minute, indexOf):
@@ -219,8 +219,8 @@ class CryptoStatsAnalysis:
     #returns a dictionary with one holder object for each crypto
     def newCryptoDict(self):
         newDict = {}
-        for key, value in priceSymbols.items():
-            newDict.update({value: CryptoHolder(value)})
+        for key, currencyname in priceSymbols.items():
+            newDict.update({currencyname: CryptoHolder(currencyname)})
 
         return newDict
 

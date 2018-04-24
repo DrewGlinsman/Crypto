@@ -19,7 +19,7 @@ class plot():
 
 
     # plots a graph with the type of data, for the specified symbols over the whole time
-    def plotlines(self, stats, symbols, type, mins, linetype = 'percentchanges', showlegend = False, figsize = (5,5)):
+    def plotlines(self, graphname, stats, symbols, type, mins, linetype = 'percentchanges', showlegend = False, figsize = (5,5)):
         #make a new figure and add it to the list of figures
         fig = plt.figure(figsize=figsize)
 
@@ -39,7 +39,7 @@ class plot():
         stats.plot(ax= ax)
 
         plt.legend().remove()
-        plt.savefig(self.direc + type + linetype + '.png')
+        plt.savefig(self.direc + graphname + '.png')
 
 
 
@@ -72,7 +72,7 @@ class plot():
         return cols
 
     #makes a bar chart displaying the different statistics gathered on each crypto, can isolate one kind
-    def plotbar(self, stats, symbols, chosentype, showlegend = False, statistic = 'mean', barwidth = 0.35, figsize = (5,5)):
+    def plotbar(self, graphname, stats, symbols, chosentype, showlegend = False, statistic = 'mean', barwidth = 0.35, figsize = (5,5)):
         statisticchoices = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
 
         #makes sure that the stats given are only those with the right symbol and type and statistic row
@@ -102,7 +102,7 @@ class plot():
         title = statistic + ' of ' + str(len(stats.columns)) + ' cryptos'
         ax.set_title(title)
 
-        plt.savefig(self.direc + chosentype + statistic + str(len(stats.columns)) + 'bar' + '.png')
+        plt.savefig(self.direc + graphname + '.png')
 
 
     #returns a list of the names of the cryptos
