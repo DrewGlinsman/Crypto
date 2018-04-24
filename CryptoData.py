@@ -29,15 +29,15 @@ cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
 
 def main():
 
-    for key, value in priceSymbols.items():
-        cryptoPath = os.path.join(cryptoPaths, value + ".txt")
+    for key, currencyname in priceSymbols.items():
+        cryptoPath = os.path.join(cryptoPaths, currencyname + ".txt")
         file = open(cryptoPath, "a+")
         timeBackwards = 86400000
         j = 0
         while (timeBackwards <= 1209600000):
             endTime = int(time.time() * 1000) - timeBackwards * j
             startTime = endTime - timeBackwards
-            parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
+            parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
             for i in data:
@@ -47,10 +47,10 @@ def main():
             j += 1
             timeBackwards += 86400000
 
-    for key, value in priceSymbols.items():
+    for key, currencyname in priceSymbols.items():
         endTime = int(time.time() * 1000)
         startTime = endTime - 1210000000
-        parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '4h'}
+        parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '4h'}
         data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
         data = data.json()
         print(str(data))

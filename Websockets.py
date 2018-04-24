@@ -155,8 +155,8 @@ def generatePriceSymbols(desiredVolume, maxLoss):
     threads = []
 
     #iterate through the price symbols dictionary and create a thread to find the the depth of that crypto then append the thread to the list of threads
-    for key, value in priceSymbols.items():
-        thread = depthThread(value, desiredVolume, maxLoss)
+    for key, currencyname in priceSymbols.items():
+        thread = depthThread(currencyname, desiredVolume, maxLoss)
         thread.start()
         threads.append(thread)
         #asyncio.get_event_loop().run_until_complete(getDepth(value, 10000, -1))

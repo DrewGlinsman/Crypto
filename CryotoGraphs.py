@@ -6,7 +6,9 @@ import pickle
 from CryptoStats import getOpenPrice, getClosePrice, getVolume, getLowPrice, getHighPrice
 import plotClass
 import time
-from math import *
+import statistics
+
+from scipy.stats.stats import pearsonr
 
 #the name of each crypto as the key and the value is the Binance ticker symbol
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -137,7 +139,7 @@ def estimatefiteline(data, allData = False):
     #the list of the different normally stored equation data
     listofequations = {}
     #the list of different equation data plus the extra data if allData = True
-    allequations = {}
+    equationsandintermediatedata = {}
 
     #list of columns in the passed dataframe
     collist = data.columns
@@ -149,25 +151,125 @@ def estimatefiteline(data, allData = False):
     #all xs are the same!
     dataxs = range(len(data.index.values))
     datays = {}
+
+    #setting up a dictionary entry for each column of data from the dataframe passed in the y data dict, the basic data
+    # stored dictionary and the dictionary of all the data calculated
     for colname in collist:
         datays.update({colname: []})
+        listofequations.update({colname: {'b0': 0, 'b1':0}})
+        equationsandintermediatedata.update({colname: {'b0': 0, 'b1':0, 'sumx':0, 'sumx^2': 0, 'n': 0, 'sumy': 0, 'sumxy': 0, 'sumy^2': 0,
+                                                       'meanx': 0 , 'stdx': 0, 'meany': 0, 'stdy': 0, 'correlationcoefficient': 0 , 'pvalue': 0}})
 
-
-    print(data)
     #iterate through each row and index
     for index, row in data.iterrows():
         currentcol = 0
+        #iterate through the values in the row
         for val in row:
+            #add the values as y data to each of the y data list of the columns they corresponded to
             datays[collist[currentcol]].append(val)
             currentcol+=1
 
 
-    print(datays)
+    #calculate and populate the dictionary with all intermediate data
+    populatecalculatedvaluesdict(equationsandintermediatedata, datays, dataxs)
+
+    #calculate and make the b0 and b1 values for the systems of equations
+    calculateb0andb1(listofequations, equationsandintermediatedata)
 
     if allData:
-        return allequations
+        return equationsandintermediatedata
 
     return listofequations
+
+#calcualates and stores b0 and b1 for each estimated line
+# of the form y = b0 + b1x for the data
+def calculateb0andb1(equationcoeffcients, allcalculateddata):
+
+    for currencyname, dicofdata in equationcoeffcients.items():
+        #set local variables equal to the corresponding variables in allcalculateddata for clarity
+        correlationcoefficient = allcalculateddata[currencyname]['correlationcoefficient']
+        standarddeviationx = allcalculateddata[currencyname]['stdx']
+        standarddeviationy = allcalculateddata[currencyname]['stdy']
+        meanx = allcalculateddata[currencyname]['meanx']
+        meany = allcalculateddata[currencyname]['meany']
+
+        #calculate b0 and b1
+        b1 =((correlationcoefficient) * (standarddeviationy / standarddeviationx))
+        b0 = meany - b1 * meanx
+
+        #store b0 and b1 in both dicitonariesthat have been passed
+        equationcoeffcients[currencyname]['b0'] = b0
+        allcalculateddata[currencyname]['b0'] = b0
+
+        equationcoeffcients[currencyname]['b1'] = b1
+        allcalculateddata[currencyname]['b1'] = b1
+
+#populates the dictionaries of calculated equation values with the correct calulations
+def populatecalculatedvaluesdict(dictofalldata, yvalues, xvalues):
+
+    #iterate through the dictionary that contains all the calculated stats for the estimation of a line
+    for currencyname, dictofdata in dictofalldata.items():
+
+        #get sum of x values
+        dictofdata['sumx'] = getsumlist(xvalues)
+
+        #get sum of y values
+        dictofdata['sumy'] = getsumlist(yvalues[currencyname])
+
+        #get sum of xyvalues
+        xyvalues = getproductlist(yvalues[currencyname], xvalues)
+        dictofdata['sumxy'] = getsumlist(xyvalues)
+
+        #get sum of x^2 values
+        xsqdvalues = getproductlist(xyvalues, xyvalues)
+        dictofdata['sumx^2']  = getsumlist(xsqdvalues)
+
+        #get sum of y^2 values
+        ysqdvalues = getproductlist(yvalues[currencyname], yvalues[currencyname])
+        dictofdata['sumy^2'] = getsumlist(ysqdvalues)
+
+        #get the number of datapoints
+        dictofdata['n'] = len(xvalues)
+
+        #get the mean of the x values
+        dictofdata['meanx']  = (dictofdata['sumx'] / dictofdata['n'])
+
+        #get the mean of the y values
+        dictofdata['meany'] = (dictofdata['sumy'] / dictofdata['n'])
+
+        #get standard deviation of the x values
+        dictofdata['stdx'] = statistics.stdev(xvalues, xbar=dictofdata['meanx'])
+
+        #get standard deviation of the y values
+        dictofdata['stdy'] = statistics.stdev(yvalues[currencyname], xbar=dictofdata['meany'])
+
+        #get the correlation coefficient
+        dictofdata['correlationcoefficient'], dictofdata['pvalue'] = pearsonr(xvalues, yvalues[currencyname])
+
+
+#get product of two lists past and return
+def getproductlist(list1, list2):
+    productlist = []
+
+    if(len(list1) != len(list2)):
+        print('Cannot get the product of two lists with different amount of elements')
+        exit(1)
+
+    for i in range(len(list1)):
+        productlist.append(list1[i] * list2[i])
+
+    return productlist
+
+
+#the sum of the values in the passed list
+def getsumlist(list):
+    sum = 0
+
+    for value in list:
+        sum+=value
+
+    return sum
+
 
 #the main file for my math project
 def andrewProject(runTime, direc):
@@ -251,12 +353,6 @@ def andrewProject(runTime, direc):
     bardf = stats[typesData[openpriceindex]]
     plotData(graphname, plots, bardf, symbolsformean , chosentype=typesData[openpriceindex], showlegend=False, graphtype='bar', figsize=(10,10))
 
-    print(dataforstats)
-    allstatsofcorrelation = dataforstats.corr()
-    print(allstatsofcorrelation)
-    allstatsofcorrelation = allstatsofcorrelation.describe()
-
-    print(allstatsofcorrelation)
 
 def main():
     runTime = time.time() * 1000
