@@ -156,3 +156,5 @@ added ability to plot volume over each of the five data types!
 added a bar charting function to plotclass
 added the ability to select what kinds of data you want for the initializedata and constructdataframes functions in cryptographs
 fleshed out andrewsproj function so that it use the plotdata function in a few different ways
+added a default param to each get data function in CryptoStats so that you can get new dicts of data even if you have already made one and it wont
+interfere with the currently existing one

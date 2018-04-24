@@ -36,7 +36,7 @@ def readParamPickle(path):
 #builds a graph for the symbols passed using the specified kind of data
 #plot object is class plot from plotClass.py
 #graphtype options are 'lines', 'bar' (look the params statements to see which ones they each need)
-def plotData(plotobject, stats, symbols, chosentype, mins = PARAMETERS['INTERVAL_TO_TEST'] + PARAMETERS['MIN_OFFSET'], runTime = -1, linetype = 'percentchanges', showlegend = False, graphtype = 'lines', statistic = 'mean', barwidth = 0.35, figsize = (5,5)):
+def plotData(graphname, plotobject, stats, symbols, chosentype, mins = PARAMETERS['INTERVAL_TO_TEST'] + PARAMETERS['MIN_OFFSET'], runTime = -1, linetype = 'percentchanges', showlegend = False, graphtype = 'lines', statistic = 'mean', barwidth = 0.35, figsize = (5,5)):
     params = []
 
     if type(chosentype) != type(''):
@@ -56,9 +56,9 @@ def plotData(plotobject, stats, symbols, chosentype, mins = PARAMETERS['INTERVAL
         stats = stats[stats.columns.drop(list(stats.filter(regex=missingtype)))]
 
     if graphtype == 'lines':
-        params = [stats, symbols, chosentype, mins, linetype, showlegend, figsize]
+        params = [graphname, stats, symbols, chosentype, mins, linetype, showlegend, figsize]
     elif graphtype == 'bar':
-        params = [stats, symbols, chosentype, showlegend, statistic, barwidth,figsize]
+        params = [graphname, stats, symbols, chosentype, showlegend, statistic, barwidth,figsize]
 
     #make and call the method using the class, function name, and the list of parameters
     method = getattr(plotobject, func)(*params)
@@ -71,7 +71,7 @@ def getstatistics(stats, symbols, typed):
     return newdf
 
 #sets up all the differnet dictionary data
-def initializeData(realInterval, minutesinpast, typesofdata = typesData):
+def initializeData(realInterval, minutesinpast, typesofdata = typesData, overridemakenew = False):
 
     #go thorugh all the kinds of data that can be chosen, if the datatype was chosen then call the appropriate statsfunction
     listofdata = {}
@@ -81,8 +81,7 @@ def initializeData(realInterval, minutesinpast, typesofdata = typesData):
         #of return data
         if typesData[i] in typesofdata:
             callname = 'get' + typesData[i]
-
-            newdata = globals()[callname](realInterval, minutesinpast)
+            newdata = globals()[callname](realInterval, minutesinpast, {})
             listofdata.update({typesData[i]: newdata})
 
     return listofdata
@@ -162,6 +161,9 @@ def andrewProject(runTime, direc):
     #initialize our data for the mean calculations and for lines used to estimate a line
     alldatadict = initializeData(firstInterval, firstminsinpast, datatypechosen)
 
+    graphname = 'realOPPC'
+
+    print(alldatadict['OpenPrice'])
     #setup a dataframe
     data = constructDataFrame(alldatadict, symbolforlines, firstInterval, datatypechosen)
 
@@ -172,17 +174,17 @@ def andrewProject(runTime, direc):
     #sets a variable that will make the line graph reflect the open price's change from
     linetype = 'percentchanges'
     #plots the one crypto open price based on percent change from the starting index
-    plotData(plots, data, symbolforlines, typesData[openpriceindex], firstInterval, runTime, linetype, showlegend = True, figsize=(10,10))
+    plotData(graphname, plots, data, symbolforlines, typesData[openpriceindex], firstInterval, runTime, linetype, showlegend = True, figsize=(10,10))
 
 
     #this block below is for the guessing using the estimated line from part one to guess 80 min in part 2
 
 
     #initialize our data for line guessed over the next 80 min of one crypto
-    alldataguess = initializeData(firstInterval,secondminsinpast, datatypechosen)
-
+    alldataguess = initializeData(guessInterval,secondminsinpast, datatypechosen, overridemakenew = True)
+    print(alldataguess['OpenPrice'])
     #a second run time to distinguish the filename within the folder for the two picture files
-    runtimadjusted = runTime + 1000
+    graphname = 'GuessOPPC'
     #second dataframe
     guessdata = constructDataFrame(alldataguess, symbolforlines, guessInterval, datatypechosen)
 
@@ -190,14 +192,14 @@ def andrewProject(runTime, direc):
     #sets a variable that will make the line graph reflect the open price's change from
     linetypeguess = 'percentchanges'
     #plots the one crypto open price based on percent change from the starting index
-    plotData(plots, guessdata, symbolforlines, typesData[openpriceindex], guessInterval, runTime, linetypeguess, showlegend = True, figsize=(10,10))
+    plotData(graphname, plots, guessdata, symbolforlines, typesData[openpriceindex], guessInterval, runTime, linetypeguess, showlegend = True, figsize=(10,10))
 
 
     #all data for 9 cryptos for the mean
     #setup a dataframe
     alldata = constructDataFrame(alldatadict, symbolsformean, firstInterval, datatypechosen)
 
-
+    graphname = 'MeanOPB'
     stats = {}
     #this block below is to do bar charts using the mean of the nine cryptos
     statsformeandataframe = getstatistics(alldata, symbolsformean, [typesData[openpriceindex]])
@@ -206,9 +208,9 @@ def andrewProject(runTime, direc):
     stats.update(statisticsformean)
     #setup bar charts for open price of the data (only using means and uses multiple cryptos)
     bardf = stats[typesData[openpriceindex]]
-    plotData(plots, bardf, symbolsformean , chosentype=typesData[openpriceindex], showlegend=False, graphtype='bar', figsize=(10,10))
+    plotData(graphname, plots, bardf, symbolsformean , chosentype=typesData[openpriceindex], showlegend=False, graphtype='bar', figsize=(10,10))
 
-
+    print(alldatadict['OpenPrice'])
 def main():
     runTime = time.time() * 1000
 
