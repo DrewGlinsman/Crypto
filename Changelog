@@ -143,3 +143,16 @@ fixed modified volume's index issue where the percent changes and volume changes
 4/15/18
 added a new file CryptoGraphs that will make graphs of the basic data collected over the interval being used
 added Start money and End money parameters to track the balance as it would change in reality
+
+4/22/18
+made a new script that holds all the different kinds of plots that can be made using the data
+added functions to create a dataframe of all the data passed to cryptographs for analysis
+added function to crypto graph that initializes all the data into dictionaries
+added function to plot data in crypto graph that uses the classes in plotClass
+added function to plotlines in plot class, is capable of doing it by the percent change or the correlation each crypto has or by price
+added ability to plot volume over each of the five data types!
+
+4/23/18
+added a bar charting function to plotclass
+added the ability to select what kinds of data you want for the initializedata and constructdataframes functions in cryptographs
+fleshed out andrewsproj function so that it use the plotdata function in a few different ways

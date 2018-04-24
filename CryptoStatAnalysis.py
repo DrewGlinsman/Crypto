@@ -194,7 +194,7 @@ class CryptoStatsAnalysis:
             else:
                 average = posCryptos / count
                 self.runsInfo[decisionNum][decisionNum].setPosOverInterval(average, key)
-            
+
             if count != 0.0:
                 averageChange = totalChange / count
 
