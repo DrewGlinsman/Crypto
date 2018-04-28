@@ -3,12 +3,16 @@
 
 import pandas as pd
 import pickle
-from CryptoStats import getOpenPrice, getClosePrice, getVolume, getLowPrice, getHighPrice
 import plotClass
 import time
 import statistics
 
+from scipy.stats import chisquare
+from CryptoStats import getOpenPrice, getClosePrice, getVolume, getLowPrice, getHighPrice
+from math import exp, sqrt
 from scipy.stats.stats import pearsonr
+from scipy.stats import ttest_1samp, ttest_ind
+from numpy import array_split
 
 #the name of each crypto as the key and the value is the Binance ticker symbol
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -26,6 +30,12 @@ addOnPath = 'Crypto\\'
 #the different kinds of stored
 typesData = ['OpenPrice', 'ClosePrice', 'Volume', 'HighPrice', 'LowPrice']
 
+#the ttable alphas for single tail
+alphaonetail = [0.1, 0.05, 0.025, 0.01, 0.005, 0.001, 0.0005]
+
+#the ttable alphas for double tail
+alphatwotail = [0.2, 0.1, 0.05, 0.02, 0.01, 0.002, 0.001]
+
 
 #reads pickle from a file
 def readParamPickle(path):
@@ -35,17 +45,27 @@ def readParamPickle(path):
 
     return testDict
 
-#builds a graph for the symbols passed using the specified kind of data
-#plot object is class plot from plotClass.py
-#graphtype options are 'lines', 'bar' (look the params statements to see which ones they each need)
-def plotData(graphname, plotobject, stats, symbols, chosentype, mins = PARAMETERS['INTERVAL_TO_TEST'] + PARAMETERS['MIN_OFFSET'], runTime = -1, linetype = 'percentchanges', showlegend = False, graphtype = 'lines', statistic = 'mean', barwidth = 0.35, figsize = (5,5)):
-    params = []
+
+#reads the pickle file for the tcritical value
+def readttable(name='ttablesingle'):
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
+
+    picklefile = logPaths + name + '.pkl'
+
+    with open(picklefile, "rb") as pickle_in:
+       ttabledict = pickle.load(pickle_in)
+
+
+    return ttabledict
+
+#builds a line graph for the symbols passed using the specified kind of data
+#plot object is class plot from plotClass.py,
+def plotgraphlines(graphname, plotobject, stats, symbols, chosentype, mins = PARAMETERS['INTERVAL_TO_TEST'] +
+            PARAMETERS['MIN_OFFSET'], runTime = -1, linetype = 'percentchanges', showlegend = False,
+            figsize = (5,5), fitline = False, storedlinefitname = '', calcerrorvalues = False):
 
     if type(chosentype) != type(''):
         print('Chosen type needs to be a single type string')
-
-    #setting up the name of the
-    func = 'plot' + graphtype
 
     typesData = ['OpenPrice', 'ClosePrice', 'Volume', 'HighPrice', 'LowPrice']
 
@@ -57,13 +77,30 @@ def plotData(graphname, plotobject, stats, symbols, chosentype, mins = PARAMETER
             missingtype = i
         stats = stats[stats.columns.drop(list(stats.filter(regex=missingtype)))]
 
-    if graphtype == 'lines':
-        params = [graphname, stats, symbols, chosentype, mins, linetype, showlegend, figsize]
-    elif graphtype == 'bar':
-        params = [graphname, stats, symbols, chosentype, showlegend, statistic, barwidth,figsize]
+    method = plotobject.plotlines(graphname, stats, symbols, chosentype, mins, linetype , showlegend , figsize, fitline,
+                                  storedlinefitname, calcerrorvalues )
+    return method
 
-    #make and call the method using the class, function name, and the list of parameters
-    method = getattr(plotobject, func)(*params)
+#plots a bar chart
+def plotbarchart(graphname, plotobject, stats, symbols, chosentype, showlegend=False, statistic = 'mean', barwidth=0.35,figsize=(5,5), organizebars = 'no', histogram=False):
+    if type(chosentype) != type(''):
+        print('Chosen type needs to be a single type string')
+
+    typesData = ['OpenPrice', 'ClosePrice', 'Volume', 'HighPrice', 'LowPrice']
+
+    #shaping the stats dictionary to only hold the requisite type of data
+    for i in typesData:
+        if i == chosentype:
+            continue
+        else:
+            missingtype = i
+        stats = stats[stats.columns.drop(list(stats.filter(regex=missingtype)))]
+
+
+    method = plotobject.plotbar(graphname, stats, symbols, chosentype, showlegend, statistic, barwidth,figsize, organizebars, histogram)
+
+    return method
+
 
 #gets a dataframe with the statistics for each symbol
 def getstatistics(stats, symbols, typed):
@@ -88,11 +125,12 @@ def initializeData(realInterval, minutesinpast, typesofdata = typesData):
 
     return listofdata
 #creates dataframe only for the dataframe that is passed
-def constructDataFrame(alldata, symbols, minutes, types = typesData):
+def constructDataFrame(alldata, symbols, minutes, types = typesData, startmin = 0, minpast = 0):
 
     cols = getCols(symbols, types)
     df = pd.DataFrame(columns=cols)
     rowlist = []
+
 
     #getting each row of data and appending it to the bottom of the dataframe
     for i in range(int(minutes)):
@@ -107,6 +145,11 @@ def constructDataFrame(alldata, symbols, minutes, types = typesData):
 
         newrow = pd.Series(data=rowlist, index=cols)
         df = df.append(newrow, ignore_index=True)
+
+    #set the index of the passed values to account for this data starting earlier than other data
+    df = df.set_index(keys=[list(range(startmin, minutes + startmin))])
+
+
 
     #make sure that the data is stored as floats
     df = df.astype('float')
@@ -149,7 +192,7 @@ def estimatefiteline(data, allData = False):
 
     #the stored x and y values for all data
     #all xs are the same!
-    dataxs = range(len(data.index.values))
+    dataxs = list(data.index.values)
     datays = {}
 
     #setting up a dictionary entry for each column of data from the dataframe passed in the y data dict, the basic data
@@ -221,7 +264,7 @@ def populatecalculatedvaluesdict(dictofalldata, yvalues, xvalues):
         dictofdata['sumxy'] = getsumlist(xyvalues)
 
         #get sum of x^2 values
-        xsqdvalues = getproductlist(xyvalues, xyvalues)
+        xsqdvalues = getproductlist(xvalues, xvalues)
         dictofdata['sumx^2']  = getsumlist(xsqdvalues)
 
         #get sum of y^2 values
@@ -266,13 +309,275 @@ def getsumlist(list):
     sum = 0
 
     for value in list:
-        sum+=value
+        sum+=float(value)
 
     return sum
 
+#returns a list with the difference between each value in the passed lists
+def getdifferencelist(list1, list2):
+    if(len(list1) != len(list2)):
+        print('Pass two lists of the same size')
+        exit(1)
+
+    listdiffs = []
+    for index in range(len(list1)):
+        listdiffs.append(list1[index] - list2[index])
+
+    return listdiffs
+
+#returns a list with the difference between each memember of the list and the passed value
+def getdifferencelistval(list, val):
+
+    listdiffs = []
+
+    for value in list:
+        listdiffs.append(value - val)
+
+    return listdiffs
+
+#gets the mean of the values in the list
+def getmean(list):
+
+   sum = getsumlist(list)
+
+   return sum / len(list)
+
+def getrelativeerror(listoferror, realyvalueslist):
+    relativepercenterror = []
+    for index in range(len(listoferror)):
+        if realyvalueslist[index] != 0:
+            relativepercenterror.append((abs(listoferror[index]) / realyvalueslist[index]) * 100)
+        else:
+            relativepercenterror.append((abs(listoferror[index])) * 100)
+
+    return relativepercenterror
+
+#estimates the yvalues for all xvalues using the lines of best fit
+def estimatevalues(lineequationdict, xvaluelist):
+
+    ydata = {}
+
+    #loop through the dict of the equation information for the line equation
+    for datacol, dictofdata in lineequationdict.items():
+        ydata.update({datacol: []})
+        #calculate a y value for each x value and store in a list corresponding to each column of data
+        for xval in xvaluelist:
+            estimatedyvalue = dictofdata['b1'] * xval + dictofdata['b0']
+            ydata[datacol].append(estimatedyvalue)
+
+    newdataframe = pd.DataFrame(data=ydata, index=xvaluelist)
+
+    return newdataframe
+
+#gets the chi-square of the passed distribution and the p value
+def getchisquare(actualvalueslist, expectedvalueslist):
+
+    if len(expectedvalueslist) == 0:
+        chi2, p = chisquare(f_obs=actualvalueslist)
+    else:
+        chi2, p = chisquare(f_obs=actualvalueslist, f_exp=expectedvalueslist)
+
+    return chi2, p
+
+#returns a dictionary with the calculated error values for the estimatedlinedata and the dataset it estimatedfor
+def errorofestimatedline(estimateddata, realdata):
+    cols = estimateddata.columns
+    dictoferrorvalues = {}
+
+    #go through each column of the dataframe and calculate and store each error value
+    for colname in cols:
+        dictoferrorvalues.update({colname: {'SSE': 0, 'SSR': 0, 'SST': 0, 'fstat': 0, 'MSE': 0, 'MSR': 0, 'R^2': 0, 'percentrelativeerror': [], 'error': []}})
+
+        #store the y values for this column from both the real data and the estimated data
+        yvalsestimated = estimateddata[colname].values
+        yvaluesreal =  realdata[colname].values
+
+        #get a list of the difference between each value in the lists
+        differenceyyhatlist = getdifferencelist(yvaluesreal, yvalsestimated)
+        dictoferrorvalues[colname]['error'] = differenceyyhatlist
+
+        #square the difference
+        sqddifferenceyyhat = getproductlist(differenceyyhatlist,differenceyyhatlist)
+
+        #get the sum of the values in the list of squared differences between real y values and the estimated y values
+        dictoferrorvalues[colname]['SSE'] = getsumlist(sqddifferenceyyhat)
+
+        #get the mean
+        realmean = getmean(yvaluesreal)
+
+        #get the list of the differences between each real y value and the mean
+        differenceyymean = getdifferencelistval(yvaluesreal, realmean)
+
+        #square the difference
+        sqddifferencyymean = getproductlist(differenceyymean, differenceyymean)
+
+        #sum the squared difference between each real y value and the mean for y
+        dictoferrorvalues[colname]['SST'] = getsumlist(sqddifferencyymean)
+
+        #calculate and store the Sum of Square Regression
+        dictoferrorvalues[colname]['SSR'] = dictoferrorvalues[colname]['SST'] - dictoferrorvalues[colname]['SSE']
+
+        #calculate the relative percent error and store
+        relerror = getrelativeerror(differenceyyhatlist, yvaluesreal)
+        dictoferrorvalues[colname]['percentrelativeerror'] = relerror
+
+        #calculate and store the mean sqyare error
+        dictoferrorvalues[colname]['MSE'] = dictoferrorvalues[colname]['SSE'] / (len(yvaluesreal) - 2)
+
+        #calculate and store the mean square  regression error
+        dictoferrorvalues[colname]['MSR'] = dictoferrorvalues[colname]['SSR']
+
+        #caculate the F-statistic
+        dictoferrorvalues[colname]['fstat'] = dictoferrorvalues[colname]['MSR'] / dictoferrorvalues[colname]['MSE']
+
+        #store coefficient of determination
+        dictoferrorvalues[colname]['R^2'] = 1 - (dictoferrorvalues[colname]['SSE'] / dictoferrorvalues[colname]['SST'] )
+
+    return dictoferrorvalues
+
+#gets the lambda value
+def getlambda(value):
+    return 1/value
+
+
+#get the expected values for the exponential distribution considering the given lamba
+def getexpectedexponentialpdf(lenlistofvalues, lambdavalue):
+    newpdf = []
+
+    for x in range(lenlistofvalues):
+
+        newpdf.append(lambdavalue * exp(-1 * lambdavalue * x))
+
+    return newpdf
+
+#get the expected value for the cumulative expondnetial distribution given lambda
+def getexpectedexponentialcdf(listofintervals, lambdavalue):
+    newcdf = []
+    highend = len(listofintervals) - 1
+    for x in range(1, highend):
+        newcdf.append((1-exp(-1 * lambdavalue * listofintervals[x]))  - (1-exp(-1 * lambdavalue * listofintervals[x - 1])))
+
+    return newcdf
+
+#gets the actual expected values for an exponential distribution
+def getexponentialvalues(exponentialprobabilities, samplesize):
+    exponentiallist = []
+    for val in exponentialprobabilities:
+        exponentiallist.append(val * samplesize)
+
+    return exponentiallist
+
+#get the frequency of each value in the list
+def getfreq(list):
+    sum = getsumlist(list)
+    freqlist = []
+
+    for val in list:
+        freqlist.append(val/sum)
+
+    return freqlist
+
+#check if the x values are both equal to the valuespassed for two sets of data with the same sample size
+def twosampleproportiontest(x1, x2, v1, v2, samplesize):
+    #the means are converted to a p (not same thing as a p-value)
+    p1 = x1/samplesize
+    p2 = x2/samplesize
+
+    #all 4 checks need to hold to continue
+    if (checksforequalitytesting(p1,p2, samplesize)) == False:
+        print('Did not pass the checks')
+        exit(1)
+
+    # special p0 value calculated for use in the z-stat calculation
+    p0 = (x1, x2)/(samplesize*2)
+
+
+    #calculation of z-stat
+    zstat = ((p1 - p2) * (v1-v2)) /sqrt((p0) * (1-p0) * ((1/samplesize) + (1/samplesize)))
+
+    return zstat
+
+#the checks required to be passed when checking if two means are equal
+def checksforequalitytesting(p1, p2, samplesize):
+    firstcheck = (samplesize * p1) >= 5
+    secondcheck = (samplesize * (1-p1)) >= 5
+    thirdcheck = (samplesize * p2) >= 5
+    fourthcheck = (samplesize * (1-p2)) >=5
+
+    return (firstcheck and secondcheck and thirdcheck and fourthcheck)
+
+#paired t-test, see if the two means are equal
+def pairedttest(dataset1, dataset2, expectedmean1=0, expectedmean2=0, alpha = 0.05, diffpopulationmeans = 0, tails='ttablesingle'):
+
+    if tails == 'ttablesingle':
+        return ttest_1samp(a=dataset1, popmean=expectedmean1)
+    else:
+        return ttest_ind(a=dataset1, b=dataset2)
+
+    #everything below is a work in progress to better understand the math!
+
+    if(len(dataset1) != len(dataset2)):
+        print('The two sets must be of equal length')
+        exit(1)
+
+    #get the list with the difference between each value
+    differencelist = getdifferencelist(dataset1, dataset2)
+
+
+    #get the degrees of freedom and number of elements
+    numelements = len(dataset1)
+    degreesoffreedom = numelements - 1
+
+    #get the mean of the differences
+    mean = getmean(differencelist)
+
+    #get the standard deviation of the differences
+    std = statistics.stdev(differencelist, mean)
+
+    #get the t stat
+    tstat = (mean - diffpopulationmeans) / (std * sqrt(numelements))
+
+    #get the ttable from the picklefile
+    ttable = readttable(tails)
+
+    #get index of the alpha
+    alphacolumn = getalphacol(tails, alpha)
+
+    #in case the degreesof freedom are not in table
+    if degreesoffreedom not in ttable:
+        if tails == 'ttablesingle':
+            return ttest_1samp(a=dataset1, popmean=expected1)
+        else:
+            return ttest_ind(a=dataset1, b=dataset2)
+
+
+    #get the t critical for the signficance
+    tcrit = ttable[degreesoffreedom][alphacolumn]
+
+    #the boolean whether the tstat is significant
+    #if t stat is significant then we fail to reject our hypothesis
+    if tstat < tcrit and tstat > (-1) * tcrit:
+        return True, 0.05
+    else:
+        return False, None
+
+#gets the index of the alpha for the specific kind of t distribution
+def getalphacol(tails='ttablesingle', alpha=0.05):
+
+    if tails == 'ttablesingle':
+        for i in range(len(alphaonetail)):
+            if alpha == alphaonetail[i]:
+                return i
+    else:
+        for i in range(len(alphatwotail)):
+            if alpha == alphatwotail[i]:
+                return i
+
+    return -1
 
 #the main file for my math project
 def andrewProject(runTime, direc):
+
     #the symbols I chose for statistics on the mean
     symbolsformean = {'ripple': "XRPBTC",
                 'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
@@ -289,8 +594,8 @@ def andrewProject(runTime, direc):
     PARAMETERS = readParamPickle(addOnPath)
     firstInterval = 100
     guessInterval = 80
-    firstminsinpast, openpriceindex = 0, 0
-    secondminsinpast = 100
+    firstminsinpast, openpriceindex = 80, 0
+    secondminsinpast = 0
 
     # all the different types of data
     typesData = ['OpenPrice', 'ClosePrice', 'Volume', 'HighPrice', 'LowPrice']
@@ -298,14 +603,43 @@ def andrewProject(runTime, direc):
     #the list with the string for the open price which is the kind of data that I want each type
     datatypechosen = [typesData[0]]
 
-
     #initialize our data for the mean calculations and for lines used to estimate a line
     alldatadict = initializeData(firstInterval, firstminsinpast, datatypechosen)
 
-    graphname = 'realOPPC'
+    graphname = symbolforlines['ripple'] + ' 0-99'
 
     #setup a dataframe
-    data = constructDataFrame(alldatadict, symbolforlines, firstInterval, datatypechosen)
+    data = constructDataFrame(alldatadict, symbolforlines, firstInterval, datatypechosen, minpast=secondminsinpast)
+
+
+    #split the data into two halves
+    firsthalfdata = array_split(data, 2)[0]
+    secondhalfdata = array_split(data, 2)[1]
+
+    #make the splits into lists
+    firsthalflist = list(firsthalfdata[symbolforlines['ripple'] + datatypechosen[0]].values)
+    secondhalflist = list(secondhalfdata[symbolforlines['ripple'] + datatypechosen[0]].values)
+
+    #get the means of the two halves
+    firsthalfmean = getmean(firsthalfdata.values)
+    secondhalfmean = getmean(secondhalfdata.values)
+
+    #our threshold of significance
+    alpha = 0.05
+
+    #a ttest to see if the means are equal
+    tstat, pvalue = pairedttest(firsthalflist, secondhalflist, tails='ttablepair')
+
+    #checking if the pvalue is above the significance (if it is then
+    equal =  (pvalue > alpha)
+
+    #print the means and whether they are the same
+    print('Mean first half ' + str(firsthalfmean))
+    print('Mean second half ' + str(secondhalfmean))
+    print('Calculated t statisitc ' + str(tstat))
+    print('Are they equal? ' + str(equal))
+    print('P-value ' + str(pvalue))
+    print('The difference between them ' + str(abs(firsthalfmean - secondhalfmean)))
 
     #intialize a plot class item
     plots = plotClass.plot(runTime, direc=direc)
@@ -314,10 +648,13 @@ def andrewProject(runTime, direc):
     #sets a variable that will make the line graph reflect the open price's change from
     linetype = 'percentchanges'
     #plots the one crypto open price based on percent change from the starting index
-    plotData(graphname, plots, data, symbolforlines, typesData[openpriceindex], firstInterval, runTime, linetype, showlegend = True, figsize=(10,10))
+    plotgraphlines(graphname, plots, data, symbolforlines, typesData[openpriceindex], firstInterval, runTime, linetype, showlegend = True, figsize=(10,10), fitline=True)
 
     #getting a list with the variable values calculated for the line of fit
-    estimatedlinedata = estimatefiteline(data, symbolforlines)
+    estimatedlinedata = estimatefiteline(data, allData=True)
+
+    print("The data for the estimated line of fit " + str(estimatedlinedata))
+
 
 
     #this block below is for the guessing using the estimated line from part one to guess 80 min in part 2
@@ -327,20 +664,28 @@ def andrewProject(runTime, direc):
     alldataguess = initializeData(guessInterval,secondminsinpast, datatypechosen)
 
     #a second run time to distinguish the filename within the folder for the two picture files
-    graphname = 'GuessOPPC'
+    graphnameguess = symbolforlines['ripple'] + ' 100-179'
     #second dataframe
-    guessdata = constructDataFrame(alldataguess, symbolforlines, guessInterval, datatypechosen)
+    guessdata = constructDataFrame(alldataguess, symbolforlines, guessInterval, datatypechosen, firstInterval, minpast=firstminsinpast)
 
 
     #sets a variable that will make the line graph reflect the open price's change from
     linetypeguess = 'percentchanges'
-    #plots the one crypto open price based on percent change from the starting index
-    plotData(graphname, plots, guessdata, symbolforlines, typesData[openpriceindex], guessInterval, runTime, linetypeguess, showlegend = True, figsize=(10,10))
+    #plots the one crypto open price based on percent change from the starting index (and get a dictionary with the calculated error values from the estimation using the first interval)
+    errorofestimation = plotgraphlines(graphnameguess, plots, guessdata, symbolforlines, typesData[openpriceindex], guessInterval, runTime, linetypeguess, showlegend = True, figsize=(10,10), fitline=True, storedlinefitname=graphname, calcerrorvalues=True)
 
+    print("The error information " + str(errorofestimation[symbolforlines['ripple'] + datatypechosen[0]]))
+
+    print('The mean of the relative percent error ' + str(
+        getmean(errorofestimation[symbolforlines['ripple'] + datatypechosen[0]]['percentrelativeerror'])))
 
     #all data for 9 cryptos for the mean
     #setup a dataframe
     dataforstats = constructDataFrame(alldatadict, symbolsformean, firstInterval, datatypechosen)
+
+    cols = dataforstats.columns
+    for col in cols:
+        print(getmean(dataforstats[col]))
 
     graphname = 'MeanOPB'
     stats = {}
@@ -351,11 +696,53 @@ def andrewProject(runTime, direc):
     stats.update(statisticsformean)
     #setup bar charts for open price of the data (only using means and uses multiple cryptos)
     bardf = stats[typesData[openpriceindex]]
-    plotData(graphname, plots, bardf, symbolsformean , chosentype=typesData[openpriceindex], showlegend=False, graphtype='bar', figsize=(10,10))
+    plotbarchart(graphname, plots, bardf, symbolsformean , chosentype=typesData[openpriceindex], showlegend=False, figsize=(20,10), organizebars= 'highest-lowest', histogram=True)
+    plotbarchart(graphname + '2', plots, bardf, symbolsformean, chosentype=typesData[openpriceindex], showlegend=False,
+                 figsize=(20, 10), histogram=True)
+
+    #data frame of the means
+    meandf = bardf.loc['mean']
+
+    #get the row with the means from the dataframe
+    listmeans = list(meandf.values)
+
+    #sort list of means
+    listmeans.sort(reverse=True)
+
+    #get frequency
+    meanfreqs = getfreq(listmeans)
+
+    #get the mean of all the means in the list
+    meanofallmeans = getmean(listmeans)
+
+    #get the lambda value for the exponential distribution
+    lamba = getlambda(meanofallmeans)
+
+    #use lambda to get the expected value probability if the distribution were exponential
+    expectedvaluesprob = getexpectedexponentialpdf(len(meanfreqs), lamba)
+
+    #get the expected values
+    expectedvalues = getexponentialvalues(expectedvaluesprob, len(meanfreqs))
+
+    print('All the means ' + str(listmeans))
+
+    print('Mean of means ' + str(meanofallmeans))
+
+
+
+
+#function used for homework
+def homeworktest():
+    rubberdata = pd.DataFrame({'col1': [20, 20.75, 45.5, 42.5, 58, 56]}, index=[135, 135, 150, 150, 165, 165])
+    pingpongdata = pd.DataFrame({'col1': [16, 13, 33, 34, 44.75, 40]}, index=[135,135,150,150,165,165])
+
+    rubberdatacalc = estimatefiteline(rubberdata, True)
+    pingpongdatacalc = estimatefiteline(pingpongdata, True)
 
 
 def main():
     runTime = time.time() * 1000
+
 
     andrewProject(runTime, direc = r'C:\Users\katso\Documents\GitHub\Crypto\Andrewproj\\')
 

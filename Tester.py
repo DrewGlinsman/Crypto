@@ -35,8 +35,8 @@ def main():
     testWriteParamPickle()
     testReadParamPickle()
 
-    print(len(priceSymbols))
-    print(len(colors))
+    readttable()
+    readttable('ttablepair')
 
 #reads pickle from a file
 def testReadParamPickle():
@@ -83,6 +83,35 @@ def testCalcPercentChange():
     result = (((float(endVal) - float(startVal)) / float(startVal)) * 100)
 
     print(str(result))
+
+
+#reads in the ttable stored and places it in a pickle file
+def readttable(name='ttablesingle'):
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
+
+    ttabledict = {}
+
+    with open(name, 'r') as infile:
+        for line in infile:
+            listsplit = line.split()
+            degreefreedom = listsplit[0]
+            for index in range(len(listsplit)):
+                if index == 0:
+                    ttabledict.update({listsplit[index]: []})
+                else:
+                    ttabledict[degreefreedom].append(listsplit[index])
+
+    writedicttopickle(ttabledict, name)
+
+#writes the dict to a pickle file
+def writedicttopickle(dict, name):
+    pickleFileName = name + ".pkl"
+    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
+    picklefile = logPaths + pickleFileName
+
+    with open(picklefile, "wb") as pickle_out:
+        pickle.dump(dict, pickle_out)
+
 
 if __name__ == "__main__":
     main()

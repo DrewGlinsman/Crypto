@@ -163,3 +163,21 @@ interfere with the currently existing one
 updated cryptoevaluator to use global data variables and not rely on the global variables for cryptostat
 made sure all the logic gates with decrease or increase are treated as the positive or negative as intended in cryptoevaluator
 replaced value with more descriptive name in iterations of priceSymbols in all files
+
+4/25/18
+fixed some line estimation calculations in cryptographs
+added estimation of yvalues for a dataframe using the estimated lines calculated for the data
+can now plot an estimated line fit on a piece of data or use another one that has already been calculated
+serparated the plotting functions in cryptographs so that they only need parameters relevant to them
+
+4/26/18
+added functions to calculate the estimated probabilities for an exponentially distributed set of data
+added functions to calculate the exponential cdf and pdf
+added a function to calculate chisquare and the p-value
+bar charts now show all the bar names
+plotbar will now do histograms
+
+4/27/18
+added equality testing for means of samples
+added in ttest for pairs
+fixed label rearranging issue for the bar charts
