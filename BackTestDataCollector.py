@@ -12,7 +12,7 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION': 'AIONBTC', 'AMB': 'AMBBTC',
                 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC',
                 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC',
-                'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR': 'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC',
+                'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC',
                 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC',
                 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC',
                 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC',
@@ -25,8 +25,13 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC',
                 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC',
                 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
+
+#setup the relative file path
+dirname = os.path.dirname(__file__)
+filename = os.path.join(dirname + '/', '')
+
 # path to save the different text files in
-cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\BackTestData'
+cryptoPaths = os.path.join(dirname + '/', 'BackTestData')
 
 # one day in ms
 ONE_DAY = 86400000
@@ -42,13 +47,13 @@ cryptoVolumeData = {}
 
 def getData(numDays):
     # code for writing the values into three text files for each crypto: an open price, close price, and volume file.
-    for key, value in priceSymbols.items():
+    for key, currencyname in priceSymbols.items():
         # creating the file path lengths and opening them
-        openPriceCryptoPath = os.path.join(cryptoPaths, value + "OpenPrice" + ".txt")
-        closePriceCryptoPath = os.path.join(cryptoPaths, value + "ClosePrice" + ".txt")
-        volumeCryptoPath = os.path.join(cryptoPaths, value + "Volume" + ".txt")
-        highCryptoPath = os.path.join(cryptoPaths, value + "High" + ".txt")
-        lowCryptoPath = os.path.join(cryptoPaths, value + "Low" + ".txt")
+        openPriceCryptoPath = os.path.join(cryptoPaths, currencyname + "OpenPrice" + ".txt")
+        closePriceCryptoPath = os.path.join(cryptoPaths, currencyname + "ClosePrice" + ".txt")
+        volumeCryptoPath = os.path.join(cryptoPaths, currencyname + "Volume" + ".txt")
+        highCryptoPath = os.path.join(cryptoPaths, currencyname + "High" + ".txt")
+        lowCryptoPath = os.path.join(cryptoPaths, currencyname + "Low" + ".txt")
 
         oprice = open(openPriceCryptoPath, "w")
         cprice = open(closePriceCryptoPath, "w")
@@ -70,7 +75,7 @@ def getData(numDays):
         while (timeBackwards > 0):
             endTime += ONE_THIRD_DAY
             startTime = endTime - ONE_THIRD_DAY
-            parameters = {'symbol': value, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
+            parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             print("Start Time: {} End Time: {}".format(startTime, endTime))
             endTimeDate = datetime.datetime.fromtimestamp(endTime/1000.0)
@@ -102,12 +107,12 @@ def getData(numDays):
 def getOpenPrice(interval, minutesBack):
     if(cryptoOpenPriceData == {}):
         #iterating through all the crypto symbols
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             #the number of number of minutes we have gone back so far
             mins = 0
 
             # creating the path lengths and opening the openprice file with read permissions
-            openPriceCryptoPath = os.path.join(cryptoPaths, value + "OpenPrice" + ".txt")
+            openPriceCryptoPath = os.path.join(cryptoPaths, currencyname + "OpenPrice" + ".txt")
             oprice = open(openPriceCryptoPath, "r")
 
             #reading through the file
@@ -121,34 +126,34 @@ def getOpenPrice(interval, minutesBack):
                     #check to see that the datapoint is between the endpoint and startpoint of the interval to train on
                     if mins > minutesBack and mins <= (minutesBack + interval):
                         # if there is not already a dictionary created for the value create one and put the first value in it
-                        if (cryptoOpenPriceData == {} or value not in cryptoOpenPriceData):
-                            temp = {value: [i]}
+                        if (cryptoOpenPriceData == {} or currencyname not in cryptoOpenPriceData):
+                            temp = {currencyname: [i]}
                             cryptoOpenPriceData.update(temp)
                         # otherwise append the price to the list that is already there
                         else:
-                            cryptoOpenPriceData[value].append(i)
+                            cryptoOpenPriceData[currencyname].append(i)
                     mins+=1
 
         #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
 
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             reversedData = []
-            for i in reversed(cryptoOpenPriceData[value]):
+            for i in reversed(cryptoOpenPriceData[currencyname]):
                 reversedData.append(i)
-            cryptoOpenPriceData.update({value: reversedData})
+            cryptoOpenPriceData.update({currencyname: reversedData})
 
     return cryptoOpenPriceData
 
 def getClosePrice(interval, minutesBack):
     if(cryptoClosePriceData == {}):
         #iterating through all the crypto symbols
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             #the number of number of minutes we have gone back so far
             mins = 0
             #creating the path lengths and opening the close price file with read permissions
-            closePriceCryptoPath = os.path.join(cryptoPaths, value + "ClosePrice" + ".txt")
+            closePriceCryptoPath = os.path.join(cryptoPaths, currencyname + "ClosePrice" + ".txt")
             cprice = open(closePriceCryptoPath, "r")
 
             #reading through the file
@@ -161,33 +166,33 @@ def getClosePrice(interval, minutesBack):
                 for i in words:
                     # check to see that the datapoint is between the endpoint and startpoint of the interval to train on
                     if mins > minutesBack and mins <= (minutesBack + interval):
-                        if (cryptoClosePriceData == {} or value not in cryptoClosePriceData):
-                            temp = {value: [i]}
+                        if (cryptoClosePriceData == {} or currencyname not in cryptoClosePriceData):
+                            temp = {currencyname: [i]}
                             cryptoClosePriceData.update(temp)
                         else:
-                            cryptoClosePriceData[value].append(i)
+                            cryptoClosePriceData[currencyname].append(i)
                     mins+=1
 
         #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
 
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             reversedData = []
-            for i in reversed(cryptoClosePriceData[value]):
+            for i in reversed(cryptoClosePriceData[currencyname]):
                 reversedData.append(i)
-            cryptoClosePriceData.update({value: reversedData})
+            cryptoClosePriceData.update({currencyname: reversedData})
 
     return cryptoClosePriceData
 
 def getVolume(interval, minutesBack):
     if(cryptoVolumeData == {}):
         #iterate through all the crypto symbols
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             # the number of number of minutes we have gone back so far
             mins = 0
             # creating the path lengths and opening the files with read permissions
-            volumeCryptoPath = os.path.join(cryptoPaths, value + "Volume" + ".txt")
+            volumeCryptoPath = os.path.join(cryptoPaths, currencyname + "Volume" + ".txt")
             volume = open(volumeCryptoPath, "r")
 
             # reading through the volume file of the files
@@ -200,34 +205,34 @@ def getVolume(interval, minutesBack):
                 for i in openprice:
                     # check to see that the datapoint is between the endpoint and startpoint of the interval to train on
                     if mins > minutesBack and mins <= (minutesBack + interval):
-                        if (cryptoVolumeData == {} or value not in cryptoVolumeData):
-                            temp = {value: [i]}
+                        if (cryptoVolumeData == {} or currencyname not in cryptoVolumeData):
+                            temp = {currencyname: [i]}
                             cryptoVolumeData.update(temp)
                         else:
-                            cryptoVolumeData[value].append(i)
+                            cryptoVolumeData[currencyname].append(i)
                     mins+=1
 
         #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
 
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             reversedData = []
-            for i in reversed(cryptoVolumeData[value]):
+            for i in reversed(cryptoVolumeData[currencyname]):
                 reversedData.append(i)
 
-            cryptoVolumeData.update({value: reversedData})
+            cryptoVolumeData.update({currencyname: reversedData})
 
     return cryptoVolumeData
 
 def getHighPrice(interval, minutesBack):
     if (cryptoHighData == {}):
         # iterating through all the crypto symbols
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             # the number of number of minutes we have gone back so far
             mins = 0
             # creating the path lengths and opening the close price file with read permissions
-            highCryptoPath = os.path.join(cryptoPaths, value + "High" + ".txt")
+            highCryptoPath = os.path.join(cryptoPaths, currencyname + "High" + ".txt")
             hprice = open(highCryptoPath, "r")
 
             # reading through the file
@@ -240,33 +245,33 @@ def getHighPrice(interval, minutesBack):
                 for i in words:
                     # check to see that the datapoint is between the endpoint and startpoint of the interval to train on
                     if mins > minutesBack and mins <= (minutesBack + interval):
-                        if (cryptoHighData == {} or value not in cryptoHighData):
-                            temp = {value: [i]}
+                        if (cryptoHighData == {} or currencyname not in cryptoHighData):
+                            temp = {currencyname: [i]}
                             cryptoHighData.update(temp)
                         else:
-                            cryptoHighData[value].append(i)
+                            cryptoHighData[currencyname].append(i)
 
                     mins += 1
 
         # makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             reversedData = []
-            for i in reversed(cryptoHighData[value]):
+            for i in reversed(cryptoHighData[currencyname]):
                 reversedData.append(i)
-            cryptoHighData.update({value: reversedData})
+            cryptoHighData.update({currencyname: reversedData})
 
     return cryptoHighData
 
 def getLowPrice(interval, minutesBack):
     if (cryptoLowData == {}):
         # iterating through all the crypto symbols
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             # the number of number of minutes we have gone back so far
             mins = 0
             # creating the path lengths and opening the close price file with read permissions
-            lowCryptoPath = os.path.join(cryptoPaths, value + "Low" + ".txt")
+            lowCryptoPath = os.path.join(cryptoPaths, currencyname + "Low" + ".txt")
             lprice = open(lowCryptoPath, "r")
 
             # reading through the file
@@ -279,22 +284,22 @@ def getLowPrice(interval, minutesBack):
                 for i in words:
                     # check to see that the datapoint is between the endpoint and startpoint of the interval to train on
                     if mins > minutesBack and mins <= (minutesBack + interval):
-                        if (cryptoLowData == {} or value not in cryptoLowData):
-                            temp = {value: [i]}
+                        if (cryptoLowData == {} or currencyname not in cryptoLowData):
+                            temp = {currencyname: [i]}
                             cryptoLowData.update(temp)
                         else:
-                            cryptoLowData[value].append(i)
+                            cryptoLowData[currencyname].append(i)
 
                     mins += 1
 
         # makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
         # it can be used to train oldest to newest in the evalutator
-        for key, value in priceSymbols.items():
+        for key, currencyname in priceSymbols.items():
             reversedData = []
-            for i in reversed(cryptoLowData[value]):
+            for i in reversed(cryptoLowData[currencyname]):
                 reversedData.append(i)
-            cryptoLowData.update({value: reversedData})
+            cryptoLowData.update({currencyname: reversedData})
 
     return cryptoLowData
 

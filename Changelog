@@ -181,3 +181,16 @@ plotbar will now do histograms
 added equality testing for means of samples
 added in ttest for pairs
 fixed label rearranging issue for the bar charts
+
+5/12/18
+new file PseudoAPI-Datastream retrieves the new data to be stored every minute for all the cryptos
+added a function to prime each database with 2 hours of info
+added a function to open a connection with a set of databases passed
+added a function to close the connections you pass
+implemented relative paths for all files
+
+5/13/18
+tables for each kind of data created in the pseudoapi database
+functions to add rows of data to each table created
+function to prime the database with 2 hours of each data type added
+removed CTRBTC from all files now that it is delisted

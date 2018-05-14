@@ -23,10 +23,12 @@ from Websockets import generatePriceSymbols
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
 
+#setup the relative file path
+dirname = os.path.dirname(__file__)
+filename = os.path.join(dirname + '/', '')
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
-#paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+paramPaths = os.path.join(dirname, '')
 
 
 #param file name + path
@@ -37,8 +39,6 @@ paramCompletePath = os.path.join(paramPaths, "TEST_PARAMETERS.txt")
 #open a file for appending (a). + creates file if does not exist
 file = open(paramCompletePath, "r+")
 
-#param file name + path
-paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 #makes the directorys in the path variable if they do not exist
 pathlib.Path(paramPaths).mkdir(parents=True, exist_ok=True)
 
@@ -87,7 +87,7 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
                 'LTC': 'LTCBTC', 'Dash': 'DASHBTC',
                 'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
-                'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'CTR':'CTRBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
+                'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION' : 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK':'LINKBTC', 'LRC':'LRCBTC', 'LSK':'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 
 
 #will hold the specific parameter given to each list
@@ -143,14 +143,14 @@ MIN_CYCLES = 0.0
 
 #reads pickle from a file into the passed parameter dictionary
 def readParamPickle(path):
-    with open(path + "\\param.pkl", "rb") as pickle_in:
+    with open(path + "/param.pkl", "rb") as pickle_in:
         paramDict = pickle.load(pickle_in)
 
     return paramDict
 
 #write pickle to a file
 def writeParamPickle(paramDict, path):
-    with open(path + "\\param.pkl", "wb") as pickle_out:
+    with open(path + "/param.pkl", "wb") as pickle_out:
         pickle.dump(paramDict, pickle_out)
 
 
@@ -162,11 +162,10 @@ def buildLogs():
     global running
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-    #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+    logPaths = os.path.join(dirname + '/', 'Logs')
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
-    withMode = logPaths + '\\Mode-' + running
+    withMode = logPaths + '/Mode-' + running
 
     #datetime object that holds the date
     date =  datetime.date.today()
@@ -176,12 +175,12 @@ def buildLogs():
 
 
     # concatenates the logpath with a date so each analysis log set is in its own file by day
-    withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
+    withDate = withMode + '/Year-' + str(year) + '/Month-' + str(calendar.month_name[month] + '/Day-' + str(day))
 
-    withRunTime = withDate + '\\RunTime-' + str(runTime)
+    withRunTime = withDate + '/RunTime-' + str(runTime)
 
     #the label for the trainer so that it gets its own folder
-    withTrainer = withRunTime + '\\Trainer'
+    withTrainer = withRunTime + '/Trainer'
 
     # creates a directory if one does not exist
     pathlib.Path(withTrainer).mkdir(parents=True, exist_ok=True)
@@ -315,10 +314,10 @@ def createPickleDirect(classNum, varNum):
     global mode
 
     # path for directory of pickle files passed from the trainer
-    picklePath = r'C:\Users\katso\Documents\GitHub\Crypto\O-IO'
+    picklePath =  os.path.join(dirname + '/', 'O-IO')
 
     # concatenates with the mode this is running in (solo, training in a class with other variations)
-    modePickleDirec = picklePath + '\\Mode-' + running
+    modePickleDirec = picklePath + '/Mode-' + running
 
     date = datetime.date.today()
     day = date.day
@@ -326,20 +325,20 @@ def createPickleDirect(classNum, varNum):
     year = date.year
 
     # concatenates the logpath with a date so each analysis log set is in its own file by day
-    datePickleDirec = modePickleDirec + '\\Year-' + str(year) + '\\Month-' + str(
-            calendar.month_name[month] + '\\Day-' + str(day))
+    datePickleDirec = modePickleDirec + '/Year-' + str(year) + '/Month-' + str(
+            calendar.month_name[month] + '/Day-' + str(day))
 
-    runTimePickleDirec = datePickleDirec + '\\RunTime-' + str(runTime)
+    runTimePickleDirec = datePickleDirec + '/RunTime-' + str(runTime)
 
-    classPickleDirec = runTimePickleDirec + '\\Class-' + str(int(classNum))
+    classPickleDirec = runTimePickleDirec + '/Class-' + str(int(classNum))
 
     # concatenates with the variation number
-    varNumPickleDirec = classPickleDirec + '\\Variation-' + str(int(varNum))
+    varNumPickleDirec = classPickleDirec + '/Variation-' + str(int(varNum))
 
     # creates a directory if one does not exist
     pathlib.Path(varNumPickleDirec).mkdir(parents=True, exist_ok=True)
 
-    return varNumPickleDirec + '\\'
+    return varNumPickleDirec + '/'
 
 #pickles the different input files for each bot run
 def pickleInput(paramDict, pickleDirect):
