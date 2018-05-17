@@ -423,6 +423,74 @@ def add_volume_row(conn, volumes):
     cur = conn.cursor()
     cur.execute(sql, volumes)
 
+#selects and then prints all the rows for the given connection and table name
+#ex: select_all_rows(connection, 'openprices')
+def select_all_rows(conn, tablename):
+    """
+    Query all rows in the tasks table
+    :param conn: the Connection object
+    :param tablename: the table name
+    :return rows: the rows
+    """
+    cur = conn.cursor()
+    statement = "SELECT * FROM " + tablename
+    cur.execute(statement)
+
+    rows = cur.fetchall()
+
+    for row in rows:
+        print(row)
+
+    return rows
+
+#grab a specific row of data
+#ex: select_by_row(connection, 'openprices', 1)
+def select_by_row(conn, tablename, id):
+    """
+    Query tasks by priority
+    :param conn: the Connection object
+    :param tablename: the table name
+    :param id: the row number
+    :return row: the row
+    """
+    cur = conn.cursor()
+    statement = "SELECT * FROM " + tablename + " WHERE id=?"
+    cur.execute(statement, (id,))
+
+    rows = cur.fetchall()
+
+    for row in rows:
+        print(row)
+
+    return rows
+
+#grab the column of prices for a crypto (can specify a specific row as well)
+#ex: select_by_crypto(connection, 'openprices', 'BTCUSDT')
+#ex 2: select_by_crypto(connection, 'openprices', 'BTCUSDT', 1)
+def select_by_crypto(conn, tablename, crypto, id=-1):
+    """
+    Query tasks by priority
+    :param conn: the Connection object
+    :param tablename: the table name
+    :param crypto: the name of the crypto you want the data for
+    :param id: the row number
+    :return row: the row
+    """
+    cur = conn.cursor()
+
+    if id != -1:
+        statement = "SELECT " + crypto + " FROM " + tablename + " WHERE id=?"
+        cur.execute(statement, (id,))
+    else:
+        statement = "SELECT * FROM  " + tablename
+        cur.execute(statement)
+
+    rows = cur.fetchall()
+
+    for row in rows:
+        print(row)
+
+    return rows
 
 def main():
 

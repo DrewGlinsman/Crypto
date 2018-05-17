@@ -194,3 +194,8 @@ tables for each kind of data created in the pseudoapi database
 functions to add rows of data to each table created
 function to prime the database with 2 hours of each data type added
 removed CTRBTC from all files now that it is delisted
+
+5/17/18
+ability to print all rows out of a table
+added a function to print a row by the minute it is associated with (its id)
+added a function that lets you select by the crypto (and the row as well)
