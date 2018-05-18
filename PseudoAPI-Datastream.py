@@ -600,7 +600,6 @@ def select_by_crypto(conn, tablename, crypto, id=-1):
     return rows
 
 
-
 def main():
 
     db_file = setupdbfiles()
