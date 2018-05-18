@@ -2,15 +2,21 @@
 # Keeps database continuously updated with new python data for all 5 categories and all cryptos
 
 import pathlib
-import requests
 import sqlite3
 from sqlite3 import Error
+import time
+import asyncio
 import os
+import requests
+import threading
 
 
 #setup the relative file path
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname + '/', '')
+
+#the buffer time used to set exactly a minute between the last retrieved priming data and the first new minute of data
+buffertimestart = 0
 
 #dictionary that contains all the symbols for the binance API calls
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
@@ -30,8 +36,107 @@ TWO_HOURS = 7200000
 #two hours in min
 TWO_HOURS_MIN = 120
 
+#one minute in ms
+ONE_MIN_MS = 60000
+
+class klinedataThread(threading.Thread):
+    def __init__(self, symbol, starttime, endtime):
+        threading.Thread.__init__(self)
+        self.symbol = symbol
+        self.starttime = starttime
+        self.endtime = endtime
+        self.mindict = {}
+
+    def run(self):
+        self.mindict.update((asyncio.new_event_loop().run_until_complete(getklinedata(self.symbol, self.starttime, self.endtime))))
+
+
+    def getmindict(self):
+        return self.mindict
+
+priceSymbolsLower = {'bitcoin': 'btcusdt', 'ripple': "xrpbtc",
+                'ethereum': 'ethbtc', 'bcc': 'bccbtc',
+                'ltc': 'ltcbtc', 'dash': 'dashbtc',
+                'monero': 'xmrbtc', 'qtum': 'qtumbtc', 'etc': 'etcbtc',
+                'zcash': 'zecbtc', 'ada': 'adabtc', 'adx': 'adxbtc', 'aion' : 'aionbtc', 'amb': 'ambbtc', 'appc': 'appcbtc', 'ark': 'arkbtc', 'arn': 'arnbtc', 'ast': 'astbtc', 'bat': 'batbtc', 'bcd': 'bcdbtc', 'bcpt': 'bcptbtc', 'bnb': 'bnbbtc', 'bnt': 'bntbtc', 'bqx': 'bqxbtc', 'brd': 'brdbtc', 'bts': 'btsbtc', 'cdt': 'cdtbtc', 'cmt': 'cmtbtc', 'cnd': 'cndbtc', 'dgd': 'dgdbtc', 'dlt': 'dltbtc', 'dnt': 'dntbtc', 'edo': 'edobtc', 'elf': 'elfbtc', 'eng': 'engbtc', 'enj': 'enjbtc', 'eos': 'eosbtc', 'evx': 'evxbtc', 'fuel': 'fuelbtc', 'fun': 'funbtc', 'gas': 'gasbtc', 'gto': 'gtobtc', 'gvt': 'gvtbtc', 'gxs': 'gxsbtc', 'hsr': 'hsrbtc', 'icn': 'icnbtc', 'icx': 'icxbtc', 'iota': "iotabtc", 'kmd': 'kmdbtc', 'knc': 'kncbtc', 'lend': 'lendbtc', 'link':'linkbtc', 'lrc':'lrcbtc', 'lsk':'lskbtc', 'lun': 'lunbtc', 'mana': 'manabtc', 'mco': 'mcobtc', 'mda': 'mdabtc', 'mod': 'modbtc', 'mth': 'mthbtc', 'mtl': 'mtlbtc', 'nav': 'navbtc', 'nebl': 'neblbtc', 'neo': 'neobtc', 'nuls': 'nulsbtc', 'oax': 'oaxbtc', 'omg': 'omgbtc', 'ost': 'ostbtc', 'poe': 'poebtc', 'powr': 'powrbtc', 'ppt': 'pptbtc', 'qsp': 'qspbtc', 'rcn': 'rcnbtc', 'rdn': 'rdnbtc', 'req': 'reqbtc', 'salt': 'saltbtc', 'sngls': 'snglsbtc', 'snm': 'snmbtc', 'snt': 'sntbtc', 'storj': 'storjbtc', 'strat': 'stratbtc', 'sub': 'subbtc', 'tnb': 'tnbbtc', 'tnt': 'tntbtc', 'trig': 'trigbtc', 'trx': 'trxbtc', 'ven': 'venbtc', 'vib': 'vibbtc', 'vibe': 'vibebtc', 'wabi': 'wabibtc', 'waves': 'wavesbtc', 'wings': 'wingsbtc', 'wtc': 'wtcbtc', 'xvg': 'xvgbtc', 'xzc': 'xzcbtc', 'yoyo': 'yoyobtc', 'zrx': 'zrxbtc'}
+
+
+symbols = ['btcusdt', "xrpbtc",
+                'ethbtc', 'bccbtc',
+               'ltcbtc', 'dashbtc',
+                'xmrbtc','qtumbtc','etcbtc',
+                'zecbtc', 'adabtc', 'adxbtc',  'aionbtc','ambbtc','appcbtc','arkbtc', 'arnbtc',  'astbtc',  'batbtc', 'bcdbtc', 'bcptbtc',  'bnbbtc',  'bntbtc',  'bqxbtc','brdbtc', 'btsbtc',  'cdtbtc', 'cmtbtc', 'cndbtc', 'dgdbtc', 'dltbtc', 'dntbtc',  'edobtc',  'elfbtc','engbtc',  'enjbtc', 'eosbtc', 'evxbtc',  'fuelbtc',  'funbtc',  'gasbtc',  'gtobtc', 'gvtbtc', 'gxsbtc', 'hsrbtc', 'icnbtc', 'icxbtc', "iotabtc", 'kmdbtc', 'kncbtc', 'lendbtc', 'linkbtc', 'lrcbtc', 'lskbtc', 'lunbtc', 'manabtc', 'mcobtc', 'mdabtc', 'modbtc','mthbtc', 'mtlbtc', 'navbtc', 'neblbtc', 'neobtc', 'nulsbtc', 'oaxbtc','omgbtc',  'ostbtc', 'poebtc',  'powrbtc',  'pptbtc',  'qspbtc',  'rcnbtc',  'rdnbtc', 'reqbtc', 'saltbtc', 'snglsbtc', 'snmbtc', 'sntbtc', 'storjbtc', 'stratbtc', 'subbtc',  'tnbbtc',  'tntbtc',  'trigbtc', 'trxbtc',  'venbtc', 'vibbtc', 'vibebtc',  'wabibtc',  'wavesbtc',  'wingsbtc', 'wtcbtc', 'xvgbtc', 'xzcbtc',  'yoyobtc',  'zrxbtc']
+
+lock = threading.Lock()
+
+base = 'wss://stream.binance.com:9443/ws/'
+
+#gran a minute of kline data and return it as a dictionary
+async def getklinedata(currency, starttime, endtime):
+
+    parameters = {'symbol': currency, 'startTime': starttime, 'endTime': endtime, 'interval': '1m'}
+    data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
+    data = data.json()
+    try:
+        return {currency: {'openprice': data[0][1], 'closeprice': data[0][4], 'highprice': data[0][2], 'lowprice': data[0][3], 'volume': data[0][5]}}
+    except IndexError:
+        print(data)
+        quit(0)
+
+#synchronously grab all the minute data for each cryptocurrency, store them in lists, and add the rows of data to their respective datafield
+def getcurrentmindata(connection):
+    global ONE_MIN_MS
+
+    #list to hold all the threads
+    threads = []
+
+    #lists to hold the different data for the cryptos that will be added to the database
+    openprices = []
+    closeprices = []
+    highprices = []
+    lowprices = []
+    volumes = []
+
+    #dictionary to hold all the returned dictionaries of data
+    allmindata = {}
+
+    # starttime and endtime used for api calls
+    endtime = requests.get("https://api.binance.com/api/v1/time")
+    endtime = endtime.json()
+    endtime = endtime['serverTime']
+    #the extra 2 is just to make sure that they all give a kline because exactly one minute and some do not register
+    starttime = endtime - ONE_MIN_MS + 2
+
+    #iterate through the price symbols dictionary and create a thread to find the crypto data then append the thread to the list of threads
+    for key, currencyname in priceSymbols.items():
+        thread = klinedataThread(currencyname, starttime, endtime)
+        thread.start()
+        threads.append(thread)
+
+    #wait for all the threads to finish
+    for thread in threads:
+        thread.join()
+        allmindata.update(thread.getmindict())
+
+    #iterate through the minute data and store them in order in the correct list
+    for key, currname in priceSymbols.items():
+        openprices.append(allmindata[currname]['openprice'])
+        closeprices.append(allmindata[currname]['closeprice'])
+        highprices.append(allmindata[currname]['highprice'])
+        lowprices.append(allmindata[currname]['lowprice'])
+        volumes.append(allmindata[currname]['volume'])
+
+    #add the new row of data to each of the respective database tables
+    add_open_row(connection, openprices)
+    add_close_row(connection, closeprices)
+    add_high_row(connection, highprices)
+    add_low_row(connection, lowprices)
+    add_volume_row(connection, volumes)
+
 #gives the databases 2 hours of data for each datatype
 def primeDatabase(connections):
+    global buffertimestart
+
 
     #grabbing the starttime of the data desired and the current time (endtime)
     endTime = requests.get("https://api.binance.com/api/v1/time")
@@ -56,7 +161,6 @@ def primeDatabase(connections):
         lowpricedict.update({minute: []})
         volumedict.update({minute: []})
 
-    count = 0
     #iterate through the dictionary of price symbols and store the five kinds of data in their corresponding dictionaries
     for key, currencyname in priceSymbols.items():
         #store 2 hours of data for the five categories to prime the database
@@ -72,8 +176,11 @@ def primeDatabase(connections):
             highpricedict[min].append(interval[2])
             lowpricedict[min].append(interval[3])
             volumedict[min].append(interval[5])
+
             min+=1
 
+    #grabbing the time after the last set of data is stored
+    buffertimestart = time.time()
 
     #add each row of data to the five tables of the database
     for rownum in range(TWO_HOURS_MIN):
@@ -94,7 +201,7 @@ def primeDatabase(connections):
 
 
 #creates a connection with the specified database file
-def create_connection(db_file):
+def create_connection_db(db_file):
     """ create a database connection to a SQLite database """
 
     try:
@@ -492,15 +599,27 @@ def select_by_crypto(conn, tablename, crypto, id=-1):
 
     return rows
 
+
+
 def main():
 
     db_file = setupdbfiles()
 
-    connection = create_connection(db_file)
+    connection = create_connection_db(db_file)
 
     setuptables(connection)
 
     primeDatabase(connection)
+    #waits for one minute - time spent priming database with 2 hours of data so that the next data we grab is a full minute
+    #after we have primed
+    time.sleep(60.0 - ((time.time() - buffertimestart) % 60.0))
+
+    #loop that runs every minute to grab another row of data
+    starttime = time.time()
+    while True:
+        getcurrentmindata(connection)
+        time.sleep(60.0 - ((time.time() - starttime) % 60.0))
+
 
     cursor = connection.cursor()
 
@@ -508,3 +627,80 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+#OLD FUNCTIONS TO GRAB EVERY STREAM INDEPENDENTLY AS WELL AS ALL THE STREAMS AT ONCE
+
+"""
+async def getklinedata(symbol):
+
+    
+    :param symbol the currency we want the depth for:
+    :return:
+
+    payload return structure
+    "e": "kline",     // Event type
+    "E": 123456789,   // Event time
+    "s": "BNBBTC",    // Symbol
+    "k": {
+    "t": 123400000, // Kline start time
+    "T": 123460000, // Kline close time
+    "s": "BNBBTC",  // Symbol
+    "i": "1m",      // Interval
+    "f": 100,       // First trade ID
+    "L": 200,       // Last trade ID
+    "o": "0.0010",  // Open price
+    "c": "0.0020",  // Close price
+    "h": "0.0025",  // High price
+    "l": "0.0015",  // Low price
+    "v": "1000",    // Base asset volume
+    "n": 100,       // Number of trades
+    "x": false,     // Is this kline closed?
+    "q": "1.0000",  // Quote asset volume
+    "V": "500",     // Taker buy base asset volume
+    "Q": "0.500",   // Taker buy quote asset volume
+    "B": "123456"   // Ignore
+  }
+}
+
+    
+
+    symbol = symbol
+    interval = '1m'
+    symbolPath = str(symbol) + "@kline_" + str(interval)
+    wsURL = os.path.join(base, symbolPath)
+
+    async with websockets.connect(wsURL) as websocket:
+
+                #set a variable equal to the payload received from the websocket
+                kline = await websocket.recv()
+
+                print(kline)
+                #recv() returns a string represnetaiton of a dictionary but we need a dictionary so this line changes a string to a dictionary
+                #kline = ast.literal_eval(kline)
+
+async def klines():
+
+    interval = '1m'
+    allsymbols = ''
+    count = 0
+    for currency in symbols:
+        newpath = str(currency) + "@kline_" + str(interval)
+        if count == 0:
+            allsymbols += newpath
+        else:
+            allsymbols += '/' + newpath
+        count+=1
+
+    base = 'wss://stream.binance.com:9443/stream?streams='
+
+    wsURL = base + allsymbols
+
+    print(wsURL)
+
+    while True:
+        async with websockets.connect(wsURL) as websocket:
+            kline = await websocket.recv()
+            print(kline)
+"""

@@ -199,3 +199,6 @@ removed CTRBTC from all files now that it is delisted
 ability to print all rows out of a table
 added a function to print a row by the minute it is associated with (its id)
 added a function that lets you select by the crypto (and the row as well)
+
+5/18/18
+all five data fields will update with minute information every minute in the pseudo api datastream
