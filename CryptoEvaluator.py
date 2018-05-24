@@ -33,6 +33,7 @@ filename = os.path.join(dirname + '/', '')
 #GLOBAL_VARIABLES
 
 #0 is false, 1 is true
+#flags used to exit if different exit conditions are met (set with random params from the parameter set)
 RESTART = 0
 RESTART_TN = 0
 RESTART_LOW = 0
@@ -212,6 +213,10 @@ lowPriceData = {}
 
 
 def buildLogs(timestamp):
+    """
+    :param timestamp:
+    :return:
+    """
     global file
     global storedInput
 
@@ -256,6 +261,10 @@ def buildLogs(timestamp):
 
 #reads pickle from a file into the passed parameter dictionary
 def readParamPickle(paramDict):
+    """
+    :param paramDict:
+    :return:
+    """
 
     pickleFileName = "param.pkl"
     picklefile = storedInput['pickleDirec'] + pickleFileName
@@ -269,6 +278,10 @@ def readParamPickle(paramDict):
 
 #write pickle to a file
 def writeParamPickle(paramDict):
+    """
+    :param paramDict:
+    :return:
+    """
 
     pickleFileName = "param.pkl"
     picklefile = storedInput['pickleDirec'] + pickleFileName
@@ -281,6 +294,10 @@ def writeParamPickle(paramDict):
 
 #todo add a way to read in the runNumber from the crypto trainer
 def readTheInput(timestamp):
+    """
+    :param timestamp:
+    :return:
+    """
     global modes
     global priceList
     global storedInput
@@ -325,7 +342,11 @@ def readTheInput(timestamp):
 
 #buy the specified crypto currency
 def buyBin(symbol, currentMinute):
-
+    """
+    :param symbol:
+    :param currentMinute:
+    :return:
+    """
     global priceBought
     global truePriceBought
     global owned
@@ -342,7 +363,11 @@ def buyBin(symbol, currentMinute):
 
 #sell the specified crypto
 def sellBin(symbol):
-   return 0
+    """
+    :param symbol:
+    :return:
+    """
+    return 0
 
 
 
@@ -350,6 +375,12 @@ def sellBin(symbol):
 #calculates the weighted moving average over the specified interval for a crypto currency
 
 def setWeightedMovingAverage(currency, startMinute, endMinute):
+    """
+    :param currency:
+    :param startMinute:
+    :param endMinute:
+    :return:
+    """
     global realInterval
     global openPriceData
     global closePriceData
@@ -385,6 +416,11 @@ def setWeightedMovingAverage(currency, startMinute, endMinute):
 
 #gets the cumulative volume over a period and scales it based on the currency's price
 def getVolume(currency, currentMinute):
+    """
+    :param currency:
+    :param currentMinute:
+    :return:
+    """
     global realInterval
     global volumeData
 
@@ -406,6 +442,10 @@ def getVolume(currency, currentMinute):
 #then interates through and calculates a cumulative volume where the volume is considered negative
 #when the percent change was negative and positive when the percent change was positive
 def getModifiedVolume(currency):
+    """
+    :param currency:
+    :return:
+    """
     oldVolume = 0
     vols = []
     volList = []
@@ -443,6 +483,11 @@ def getModifiedVolume(currency):
 
 #get the binance price of the specified currency
 def getbinanceprice(currency, currentMinute):
+    """
+    :param currency:
+    :param currentMinute:
+    :return:
+    """
     global realInterval
     global closePriceData
 
@@ -465,6 +510,12 @@ def getbinanceprice(currency, currentMinute):
 
 
 def updateCrypto(startMinute, endMinute, currentMinute):
+    """
+    :param startMinute:
+    :param endMinute:
+    :param currentMinute:
+    :return:
+    """
     global realInterval
     global openPriceData
     global closePriceData
@@ -584,7 +635,11 @@ def updateCrypto(startMinute, endMinute, currentMinute):
  # TODO update the modulo so that it is a modulo not a multiplcation so that
  #patterns are detected
 def getTimeIncreasing(isWeighted, currency):
-
+    """
+    :param isWeighted:
+    :param currency:
+    :return:
+    """
     list = percentChanges[currency]
     slots = 0.0
     slots_increasing = 0.0
@@ -621,7 +676,11 @@ def getTimeIncreasing(isWeighted, currency):
 #caclulates and returns the time spent increasing for volume
 #weighted = 0 is false, weighted = 1 is true
 def getVolumeTimeIncreasing(isWeighted, currency):
-
+    """
+    :param isWeighted:
+    :param currency:
+    :return:
+    """
     list = volumePercentChanges[currency]
 
     slots = 0.0
@@ -654,7 +713,10 @@ def getVolumeTimeIncreasing(isWeighted, currency):
 # score is a combination of weighted time increasing and % change over hour.
 # for both volume and price
 def getScore(symbol):
-
+    """
+    :param symbol:
+    :return:
+    """
     new_score = 0.0
 
 
@@ -696,6 +758,9 @@ def getScore(symbol):
 
 #finds the next currency to buy
 def priceChecker():
+    """
+    :return:
+    """
     currencyToBuy = ''
     #Compares the two price lists and sets the currencyToBuy to be
     # the coin with the highest score that also is above the minimum moving average
@@ -720,6 +785,11 @@ def priceChecker():
 
 #just calculates the percent change between two values
 def calcPercentChange(startVal, endVal):
+    """
+    :param startVal:
+    :param endVal:
+    :return:
+    """
     if(float(startVal) == 0.0):
         return float(endVal) * 100.0
 
@@ -729,6 +799,13 @@ def calcPercentChange(startVal, endVal):
 #checks if the current crypto has been decreasing the past ten minutes
 #if yes it forces a new check to see if there is a better crypto
 def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
+    """
+    :param currency:
+    :param timesIncreasing:
+    :param startMinute:
+    :param endMinute:
+    :return:
+    """
     global realInterval
     global openPriceData
     global closePriceData
@@ -762,6 +839,11 @@ def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute):
 
 #checks whether the function has caused too large of negative decrease the specified interval
 def checkTooNegative(symbol, currentMinute):
+    """
+    :param symbol:
+    :param currentMinute:
+    :return:
+    """
     global realInterval
     global openPriceData
     global closePriceData
@@ -785,6 +867,11 @@ def checkTooNegative(symbol, currentMinute):
 #checks to see if the currency has increased or decreased more than is allowed
 # if yes, then the reevaluation process is restarted
 def checkExitCondition(currency, currentMinute):
+    """
+    :param currency:
+    :param currentMinute:
+    :return:
+    """
 
     global priceBought
 
@@ -816,6 +903,13 @@ def checkExitCondition(currency, currentMinute):
 
 #checks to see if the current currency is too near to its starting point
 def checkTooLow(currency, timesIncreasing, startMinute, endMinute):
+    """
+    :param currency:
+    :param timesIncreasing:
+    :param startMinute:
+    :param endMinute:
+    :return:
+    """
     global priceBought
 
     currentPrice = getbinanceprice(currency, startMinute)
@@ -836,6 +930,12 @@ def checkTooLow(currency, timesIncreasing, startMinute, endMinute):
 #returns whether the specified currency is increasing or decreasing over the interval
 # 0 means decreasing, 1 means stable or increasing
 def increasingOrDecreasing(currency, startMinute, endMinute):
+    """
+    :param currency:
+    :param startMinute:
+    :param endMinute:
+    :return:
+    """
     global realInterval
     global openPriceData
     global closePriceData
@@ -856,6 +956,9 @@ def increasingOrDecreasing(currency, startMinute, endMinute):
 
 #reset the list of parameter values
 def resetValues():
+    """
+    :return:
+    """
     #reset the list of parameter value that are calculated below
     for key, value in values.items():
         values[key][:] = []
@@ -863,7 +966,9 @@ def resetValues():
 
 #runs through the values collected and storess the max value
 def setMaxValue():
-
+    """
+    :return:
+    """
     for key, value in values.items():
         currentMaxVal = 0
 
@@ -877,6 +982,9 @@ def setMaxValue():
 
 #creates a dictionary with all the different statistic holding dictionaries that are created with each run
 def createStatsDict():
+    """
+    :return:
+    """
     statDict.update({'percentChanges': percentChanges})
     statDict.update({'volumePercentChanges': volumePercentChanges})
     statDict.update({'volumeAmounts': volumeAmounts})
@@ -888,12 +996,20 @@ def createStatsDict():
 
 #sets all the list of how the cryptos were seperated back to being empty
 def resetDecisionsStored(dict):
+    """
+    :param dict:
+    :return:
+    """
     for key, value in dict.items():
 
         value[:] = []
 
 #set the parameter dictionary to use string not float by casting the passed dictionary from pickle file
 def strToFloat(paramDict):
+    """
+    :param paramDict:
+    :return:
+    """
     newDict = PARAMETERS
 
     for key, value in paramDict.items():

@@ -23,6 +23,11 @@ filename = os.path.join(dirname + '/', '')
 class plot():
 
     def __init__(self, runTime, direc = filename, style = 'fivethirtyeight'):
+        """
+        :param runTime:
+        :param direc:
+        :param style:
+        """
         self.runTime = runTime
         self.style = style
         self.direc = direc  + '\\' + str(runTime) + '\\'
@@ -32,6 +37,21 @@ class plot():
 
     # plots a graph with the type of data, for the specified symbols over the whole time
     def plotlines(self, graphname, stats, symbols, type, mins, linetype = 'percentchanges', showlegend = False, figsize = (5,5), fitline = False, storedfitlinename = '', calcerrorvals = False):
+        """
+        :param graphname:
+        :param stats:
+        :param symbols:
+        :param type:
+        :param mins:
+        :param linetype:
+        :param showlegend:
+        :param figsize:
+        :param fitline:
+        :param storedfitlinename:
+        :param calcerrorvals:
+        :return:
+        """
+
         #calculated error values in case you want lines of best fit
         errorvals = {}
 
@@ -95,6 +115,13 @@ class plot():
 
     #converts all the data into percent changes indexed at the beginning
     def topercentchange(self, data, symbols, type, start = 0):
+        """
+        :param data:
+        :param symbols:
+        :param type:
+        :param start:
+        :return:
+        """
         for key, value in symbols.items():
             name = value + type
             data[name] = (data[name] - data[name][start]) / data[name][start] * 100.0
@@ -103,6 +130,13 @@ class plot():
 
     # makes a list of the col headers for the type of data passed
     def getCols(self, symbolDict, typelist, compliment =False):
+        """
+        :param symbolDict:
+        :param typelist:
+        :param compliment:
+        :return:
+        """
+
         cols = []
         if type(typelist) != type([]):
             typelist = [typelist]
@@ -124,6 +158,20 @@ class plot():
     #makes a bar chart displaying the different statistics gathered on each crypto, can isolate one kind
     #bars can be organized higherst-lowest, lowest-highest, no
     def plotbar(self, graphname, stats, symbols, chosentype, showlegend = False, statistic = 'mean', barwidth = 0.35, figsize = (5,5), organizebars = 'no', histogram = False):
+        """
+        :param graphname:
+        :param stats:
+        :param symbols:
+        :param chosentype:
+        :param showlegend:
+        :param statistic:
+        :param barwidth:
+        :param figsize:
+        :param organizebars:
+        :param histogram:
+        :return:
+        """
+
         statisticchoices = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
 
         #makes sure that the stats given are only those with the right symbol and type and statistic row
@@ -189,6 +237,10 @@ class plot():
 
     #returns a list of the names of the cryptos
     def getcryptonameslist(self, symbolsdict):
+        """
+        :param symbolsdict:
+        :return:
+        """
         list = []
         for key, value in symbolsdict.items():
             list.append(value)

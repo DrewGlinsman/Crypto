@@ -202,3 +202,12 @@ added a function that lets you select by the crypto (and the row as well)
 
 5/18/18
 all five data fields will update with minute information every minute in the pseudo api datastream
+made a new file that just houses any general use versions of certain variables so that if they do not need to be changed they can be used instead
+of copy and paste into each file
+made a buy and sell pseudo api that just uses autotrader's version (use the binstepsize from here to populate your local stepsize
+dictionary)
+
+5/24/18
+updated datastream api to commit any changes
+updated datastream to delete the tables before the file is closed
+added parameters documentation to every function in all files so as we go through them we fill out what each parameter and return value means

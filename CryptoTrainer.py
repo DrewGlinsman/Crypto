@@ -143,6 +143,10 @@ MIN_CYCLES = 0.0
 
 #reads pickle from a file into the passed parameter dictionary
 def readParamPickle(path):
+    """
+    :param path:
+    :return:
+    """
     with open(path + "/param.pkl", "rb") as pickle_in:
         paramDict = pickle.load(pickle_in)
 
@@ -150,6 +154,11 @@ def readParamPickle(path):
 
 #write pickle to a file
 def writeParamPickle(paramDict, path):
+    """
+    :param paramDict:
+    :param path:
+    :return:
+    """
     with open(path + "/param.pkl", "wb") as pickle_out:
         pickle.dump(paramDict, pickle_out)
 
@@ -157,6 +166,9 @@ def writeParamPickle(paramDict, path):
 #makes a log file for this instance of the trainer that is sorted into a folder by the date it was run
 # and its name is just its timestamp
 def buildLogs():
+    """
+    :return:
+    """
     global file2
     global runTime
     global running
@@ -198,6 +210,10 @@ def buildLogs():
 
 
 def keyCheck(key):
+    """
+    :param key:
+    :return:
+    """
     for i in UNCHANGED_PARAMS:
         if i == key:
             return 1
@@ -210,6 +226,11 @@ def keyCheck(key):
 #type 3 means none
 #TODO remember after to testing not to randomize stuff like cumulative percent change store (i.e data)
 def randomizeParams(paramDict, typeOfRandom):
+    """
+    :param paramDict:
+    :param typeOfRandom:
+    :return:
+    """
     #default range size and stepSize
     range = 10.0
 
@@ -245,6 +266,9 @@ def randomizeParams(paramDict, typeOfRandom):
 #if there is input on the command line it will assign the NUM_CLASSES and NUM_ITERATIONS based on the flags passed
 # the flag -cl5 will set the classes to 5. the flag -it6 will set the iterations to 6
 def setVals():
+    """
+    :return:
+    """
 
     global NUM_CLASSES
     global NUM_ITERATIONS
@@ -269,6 +293,10 @@ def setVals():
 
 #converts the given string to a Dict. Used to parse the returned string from the bots being trained
 def stringToDict(stringToChange):
+    """
+    :param stringToChange:
+    :return:
+    """
     newDict = {}
     stringKeySplit = ''
     stringValSplit = ''
@@ -298,17 +326,26 @@ def stringToDict(stringToChange):
 
 #makes the string line exclusively consist of the correct string of parameters
 def reformatLine(line, attDict):
+    """
+    :param line:
+    :param attDict:
+    :return:
+    """
 
+    firstFormat = line.split('LINEBEGIN')[1]
+    reformat = firstFormat.split('DONEEND')[0]
+    attributes = firstFormat.split('DONEEND')[1]
 
-   firstFormat = line.split('LINEBEGIN')[1]
-   reformat = firstFormat.split('DONEEND')[0]
-   attributes = firstFormat.split('DONEEND')[1]
-
-   return reformat
-
+    return reformat
 
 #setup pickle directory
 def createPickleDirect(classNum, varNum):
+    """
+    :param classNum:
+    :param varNum:
+    :return:
+    """
+
     global runTime
     global running
     global mode
@@ -342,6 +379,11 @@ def createPickleDirect(classNum, varNum):
 
 #pickles the different input files for each bot run
 def pickleInput(paramDict, pickleDirect):
+    """
+    :param paramDict:
+    :param pickleDirect:
+    :return:
+    """
 
     # passing the parameters to the processes by pickling!
     with open(pickleDirect + "param.pkl", "wb") as pickle_file:
@@ -355,6 +397,12 @@ def pickleInput(paramDict, pickleDirect):
 
 #just calculates the percent change between two values
 def calcPercentChange(startVal, endVal):
+    """
+    :param startVal:
+    :param endVal:
+    :return:
+    """
+
     if(float(startVal) == 0.0):
         return float(endVal) * 100.0
 
@@ -362,6 +410,11 @@ def calcPercentChange(startVal, endVal):
 
 #set the parameter dictionary to use string not float by casting the passed dictionary from pickle file
 def strToFloat(paramDict):
+    """
+    :param paramDict:
+    :return:
+    """
+
     newDict = PARAMETERS
 
     for key, value in paramDict.items():

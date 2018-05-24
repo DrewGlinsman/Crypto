@@ -18,6 +18,9 @@ stepsizes = {}
 
 #get the binance step sizes of each crypto (the step size is the minimum significant digits allowed by binance for crypto to be traded in)
 def binStepSize():
+    """
+    :return:
+    """
     #getting the dictionary of a lot of aggregate data for all symbols
     stepsizeinfo = get("https://api.binance.com/api/v1/exchangeInfo")
     bigdata = stepsizeinfo.json()["symbols"]
@@ -32,7 +35,14 @@ def binStepSize():
 #buy the specified crypto currency
 #returns the new currencytotrade and pricebought in case it is used
 def buyBin(symbol, stepsize, currencyToTrade, percenttospend=PARAMETERS['PERCENT_TO_SPEND'], percentquantitytospend=PARAMETERS['PERCENT_QUANTITY_TO_SPEND']):
-
+    """
+    :param symbol:
+    :param stepsize:
+    :param currencyToTrade:
+    :param percenttospend:
+    :param percentquantitytospend:
+    :return:
+    """
     timestamp = int(time.time() * 1000)
     balance = getBalance('BTC')
 
@@ -77,6 +87,11 @@ def buyBin(symbol, stepsize, currencyToTrade, percenttospend=PARAMETERS['PERCENT
 
 #sell the specified crypto
 def sellBin(symbol, stepsize):
+    """
+    :param symbol:
+    :param stepsize:
+    :return:
+    """
     #current time in ms
     timestamp = int(time.time() * 1000) - 1000
 
@@ -131,6 +146,10 @@ def sellBin(symbol, stepsize):
 
 #get the balance in bitcoins
 def getBalance(symbol):
+    """
+    :param symbol:
+    :return:
+    """
     timestamp = int(time.time() * 1000)
     # building the request query url plus other parameters(signed)
     headers = {'X-MBX-APIKEY': api_key}
@@ -154,6 +173,10 @@ def getBalance(symbol):
 
 #get the binance price of the specified currency
 def getbinanceprice(currency):
+    """
+    :param currency:
+    :return:
+    """
     #getting the aggregate trade data and finding one price to return
     parameters = {'symbol': currency}
     binData = get("https://api.binance.com/api/v3/ticker/price", params= parameters)

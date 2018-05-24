@@ -41,8 +41,6 @@ def main():
     testReadParamPickle()
 
     get_num_prices()
-
-
     
 
 #return the number of price symbols

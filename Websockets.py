@@ -144,6 +144,11 @@ async def getDepth(symbol, desiredVolume, maxLoss):
 
 # just calculates the percent change between two values
 def calcPercentChange(startVal, endVal):
+    """
+    :param startVal:
+    :param endVal:
+    :return:
+    """
     if (float(startVal) == 0.0):
         return float(endVal) * 100.0
 
@@ -151,6 +156,12 @@ def calcPercentChange(startVal, endVal):
 
 
 def generatePriceSymbols(desiredVolume, maxLoss):
+    """
+    :param desiredVolume:
+    :param maxLoss:
+    :return:
+    """
+
     #list to hold all the threads
     threads = []
 
