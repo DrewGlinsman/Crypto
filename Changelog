@@ -211,3 +211,17 @@ dictionary)
 updated datastream api to commit any changes
 updated datastream to delete the tables before the file is closed
 added parameters documentation to every function in all files so as we go through them we fill out what each parameter and return value means
+
+6/3/18
+made supertrainer file
+
+-SuperTrainer
+added functions to read param files with a specific id number, day of the week, and website associated with them
+
+
+-Generics
+added modes dictionary
+added websites dictionary
+added superparameter dictionary
+added superparameter definitions
+added superparameter do not change list

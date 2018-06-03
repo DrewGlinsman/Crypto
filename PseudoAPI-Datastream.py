@@ -723,6 +723,7 @@ def main():
         getcurrentmindata(connection)
         connection.commit()
         time.sleep(60.0 - ((time.time() - starttime) % 60.0))
+        mins+=1
 
     #deleting all rows from each table so the next run begins with a fresh set of data
     for tablename in tablenames:
