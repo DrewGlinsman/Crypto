@@ -176,8 +176,8 @@ def generatePriceSymbols(desiredVolume, maxLoss):
 
 #Parallel(n_jobs=-1)(delayed(asyncio.get_event_loop().run_until_complete(getDepth(value, 10000, -1))(value, 10000, -1) for key, value in priceSymbols.items()))
 
-#for key, value in priceSymbols.items():
-    #asyncio.get_event_loop().run_until_complete(getDepth(value, 10000, -1))
+for key, value in priceSymbols.items():
+    asyncio.get_event_loop().run_until_complete(getDepth(value, 10000, -1))
 
 
 
