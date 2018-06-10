@@ -43,6 +43,10 @@ alphatwotail = [0.2, 0.1, 0.05, 0.02, 0.01, 0.002, 0.001]
 
 #reads pickle from a file
 def readParamPickle(path):
+    """
+    :param path:
+    :return:
+    """
 
     pickle_in = open(path + '/' + "param.pkl", "rb")
     testDict = pickle.load(pickle_in)
@@ -52,7 +56,10 @@ def readParamPickle(path):
 
 #reads the pickle file for the tcritical value
 def readttable(name='ttablesingle'):
-
+    """
+    :param name:
+    :return:
+    """
     picklefile = filename + '/' + name + '.pkl'
 
     with open(picklefile, "rb") as pickle_in:
@@ -66,7 +73,22 @@ def readttable(name='ttablesingle'):
 def plotgraphlines(graphname, plotobject, stats, symbols, chosentype, mins = PARAMETERS['INTERVAL_TO_TEST'] +
             PARAMETERS['MIN_OFFSET'], runTime = -1, linetype = 'percentchanges', showlegend = False,
             figsize = (5,5), fitline = False, storedlinefitname = '', calcerrorvalues = False):
-
+    """
+    :param graphname:
+    :param plotobject:
+    :param stats:
+    :param symbols:
+    :param chosentype:
+    :param mins:
+    :param runTime:
+    :param linetype:
+    :param showlegend:
+    :param figsize:
+    :param fitline:
+    :param storedlinefitname:
+    :param calcerrorvalues:
+    :return:
+    """
     if type(chosentype) != type(''):
         print('Chosen type needs to be a single type string')
 
@@ -86,6 +108,20 @@ def plotgraphlines(graphname, plotobject, stats, symbols, chosentype, mins = PAR
 
 #plots a bar chart
 def plotbarchart(graphname, plotobject, stats, symbols, chosentype, showlegend=False, statistic = 'mean', barwidth=0.35,figsize=(5,5), organizebars = 'no', histogram=False):
+    """
+    :param graphname:
+    :param plotobject:
+    :param stats:
+    :param symbols:
+    :param chosentype:
+    :param showlegend:
+    :param statistic:
+    :param barwidth:
+    :param figsize:
+    :param organizebars:
+    :param histogram:
+    :return:
+    """
     if type(chosentype) != type(''):
         print('Chosen type needs to be a single type string')
 
@@ -107,6 +143,12 @@ def plotbarchart(graphname, plotobject, stats, symbols, chosentype, showlegend=F
 
 #gets a dataframe with the statistics for each symbol
 def getstatistics(stats, symbols, typed):
+    """
+    :param stats:
+    :param symbols:
+    :param typed:
+    :return:
+    """
     cols = getCols(symbols, typed)
     newdf = stats[cols]
     newdf = newdf.describe()
@@ -114,6 +156,12 @@ def getstatistics(stats, symbols, typed):
 
 #sets up all the differnet dictionary data
 def initializeData(realInterval, minutesinpast, typesofdata = typesData):
+    """
+    :param realInterval:
+    :param minutesinpast:
+    :param typesofdata:
+    :return:
+    """
 
     #go thorugh all the kinds of data that can be chosen, if the datatype was chosen then call the appropriate statsfunction
     listofdata = {}
@@ -129,6 +177,15 @@ def initializeData(realInterval, minutesinpast, typesofdata = typesData):
     return listofdata
 #creates dataframe only for the dataframe that is passed
 def constructDataFrame(alldata, symbols, minutes, types = typesData, startmin = 0, minpast = 0):
+    """
+    :param alldata:
+    :param symbols:
+    :param minutes:
+    :param types:
+    :param startmin:
+    :param minpast:
+    :return:
+    """
 
     cols = getCols(symbols, types)
     df = pd.DataFrame(columns=cols)
@@ -160,6 +217,12 @@ def constructDataFrame(alldata, symbols, minutes, types = typesData, startmin = 
 
 # makes a list of the col headers for the type of data passed
 def getCols(symbolDict, typelist, compliment=False):
+    """
+    :param symbolDict:
+    :param typelist:
+    :param compliment:
+    :return:
+    """
     cols = []
     if type(typelist) != type([]):
         typelist = [typelist]
@@ -182,6 +245,12 @@ def getCols(symbolDict, typelist, compliment=False):
 #returned dictionary is of the form  {symbol: {b0: b0value, b1: b1value}}
 #if alldata = true then each symbol dict includes sumx, sumx^2, n, sumy, sumxy, sumy^2, meanx, stdx, meany, stdy, p(Called correlation coefficient),
 def estimatefiteline(data, allData = False):
+    """
+    :param data:
+    :param allData:
+    :return:
+    """
+
     #the list of the different normally stored equation data
     listofequations = {}
     #the list of different equation data plus the extra data if allData = True
@@ -230,6 +299,11 @@ def estimatefiteline(data, allData = False):
 #calcualates and stores b0 and b1 for each estimated line
 # of the form y = b0 + b1x for the data
 def calculateb0andb1(equationcoeffcients, allcalculateddata):
+    """
+    :param equationcoeffcients:
+    :param allcalculateddata:
+    :return:
+    """
 
     for currencyname, dicofdata in equationcoeffcients.items():
         #set local variables equal to the corresponding variables in allcalculateddata for clarity
@@ -252,7 +326,12 @@ def calculateb0andb1(equationcoeffcients, allcalculateddata):
 
 #populates the dictionaries of calculated equation values with the correct calulations
 def populatecalculatedvaluesdict(dictofalldata, yvalues, xvalues):
-
+    """
+    :param dictofalldata:
+    :param yvalues:
+    :param xvalues:
+    :return:
+    """
     #iterate through the dictionary that contains all the calculated stats for the estimation of a line
     for currencyname, dictofdata in dictofalldata.items():
 
@@ -295,6 +374,12 @@ def populatecalculatedvaluesdict(dictofalldata, yvalues, xvalues):
 
 #get product of two lists past and return
 def getproductlist(list1, list2):
+    """
+    :param list1:
+    :param list2:
+    :return:
+    """
+
     productlist = []
 
     if(len(list1) != len(list2)):
@@ -309,6 +394,10 @@ def getproductlist(list1, list2):
 
 #the sum of the values in the passed list
 def getsumlist(list):
+    """
+    :param list:
+    :return:
+    """
     sum = 0
 
     for value in list:
@@ -318,6 +407,12 @@ def getsumlist(list):
 
 #returns a list with the difference between each value in the passed lists
 def getdifferencelist(list1, list2):
+    """
+    :param list1:
+    :param list2:
+    :return:
+    """
+
     if(len(list1) != len(list2)):
         print('Pass two lists of the same size')
         exit(1)
@@ -330,7 +425,11 @@ def getdifferencelist(list1, list2):
 
 #returns a list with the difference between each memember of the list and the passed value
 def getdifferencelistval(list, val):
-
+    """
+    :param list:
+    :param val:
+    :return:
+    """
     listdiffs = []
 
     for value in list:
@@ -340,12 +439,23 @@ def getdifferencelistval(list, val):
 
 #gets the mean of the values in the list
 def getmean(list):
+    """
+    :param list:
+    :return:
+    """
 
-   sum = getsumlist(list)
+    sum = getsumlist(list)
 
-   return sum / len(list)
+    return sum / len(list)
 
 def getrelativeerror(listoferror, realyvalueslist):
+    """
+    :param listoferror:
+    :param realyvalueslist:
+    :return:
+    """
+
+
     relativepercenterror = []
     for index in range(len(listoferror)):
         if realyvalueslist[index] != 0:
@@ -357,7 +467,11 @@ def getrelativeerror(listoferror, realyvalueslist):
 
 #estimates the yvalues for all xvalues using the lines of best fit
 def estimatevalues(lineequationdict, xvaluelist):
-
+    """
+    :param lineequationdict:
+    :param xvaluelist:
+    :return:
+    """
     ydata = {}
 
     #loop through the dict of the equation information for the line equation
@@ -374,6 +488,11 @@ def estimatevalues(lineequationdict, xvaluelist):
 
 #gets the chi-square of the passed distribution and the p value
 def getchisquare(actualvalueslist, expectedvalueslist):
+    """
+    :param actualvalueslist:
+    :param expectedvalueslist:
+    :return:
+    """
 
     if len(expectedvalueslist) == 0:
         chi2, p = chisquare(f_obs=actualvalueslist)
@@ -384,6 +503,12 @@ def getchisquare(actualvalueslist, expectedvalueslist):
 
 #returns a dictionary with the calculated error values for the estimatedlinedata and the dataset it estimatedfor
 def errorofestimatedline(estimateddata, realdata):
+    """
+    :param estimateddata:
+    :param realdata:
+    :return:
+    """
+
     cols = estimateddata.columns
     dictoferrorvalues = {}
 
@@ -440,11 +565,21 @@ def errorofestimatedline(estimateddata, realdata):
 
 #gets the lambda value
 def getlambda(value):
+    """
+    :param value:
+    :return:
+    """
+
     return 1/value
 
 
 #get the expected values for the exponential distribution considering the given lamba
 def getexpectedexponentialpdf(lenlistofvalues, lambdavalue):
+    """
+    :param lenlistofvalues:
+    :param lambdavalue:
+    :return:
+    """
     newpdf = []
 
     for x in range(lenlistofvalues):
@@ -455,6 +590,12 @@ def getexpectedexponentialpdf(lenlistofvalues, lambdavalue):
 
 #get the expected value for the cumulative expondnetial distribution given lambda
 def getexpectedexponentialcdf(listofintervals, lambdavalue):
+    """
+    :param listofintervals:
+    :param lambdavalue:
+    :return:
+    """
+
     newcdf = []
     highend = len(listofintervals) - 1
     for x in range(1, highend):
@@ -464,6 +605,12 @@ def getexpectedexponentialcdf(listofintervals, lambdavalue):
 
 #gets the actual expected values for an exponential distribution
 def getexponentialvalues(exponentialprobabilities, samplesize):
+    """
+    :param exponentialprobabilities:
+    :param samplesize:
+    :return:
+    """
+
     exponentiallist = []
     for val in exponentialprobabilities:
         exponentiallist.append(val * samplesize)
@@ -472,6 +619,10 @@ def getexponentialvalues(exponentialprobabilities, samplesize):
 
 #get the frequency of each value in the list
 def getfreq(list):
+    """
+    :param list:
+    :return:
+    """
     sum = getsumlist(list)
     freqlist = []
 
@@ -482,6 +633,15 @@ def getfreq(list):
 
 #check if the x values are both equal to the valuespassed for two sets of data with the same sample size
 def twosampleproportiontest(x1, x2, v1, v2, samplesize):
+    """
+    :param x1:
+    :param x2:
+    :param v1:
+    :param v2:
+    :param samplesize:
+    :return:
+    """
+
     #the means are converted to a p (not same thing as a p-value)
     p1 = x1/samplesize
     p2 = x2/samplesize
@@ -502,6 +662,12 @@ def twosampleproportiontest(x1, x2, v1, v2, samplesize):
 
 #the checks required to be passed when checking if two means are equal
 def checksforequalitytesting(p1, p2, samplesize):
+    """
+    :param p1:
+    :param p2:
+    :param samplesize:
+    :return:
+    """
     firstcheck = (samplesize * p1) >= 5
     secondcheck = (samplesize * (1-p1)) >= 5
     thirdcheck = (samplesize * p2) >= 5
@@ -511,7 +677,16 @@ def checksforequalitytesting(p1, p2, samplesize):
 
 #paired t-test, see if the two means are equal
 def pairedttest(dataset1, dataset2, expectedmean1=0, expectedmean2=0, alpha = 0.05, diffpopulationmeans = 0, tails='ttablesingle'):
-
+    """
+    :param dataset1:
+    :param dataset2:
+    :param expectedmean1:
+    :param expectedmean2:
+    :param alpha:
+    :param diffpopulationmeans:
+    :param tails:
+    :return:
+    """
     if tails == 'ttablesingle':
         return ttest_1samp(a=dataset1, popmean=expectedmean1)
     else:
@@ -566,6 +741,11 @@ def pairedttest(dataset1, dataset2, expectedmean1=0, expectedmean2=0, alpha = 0.
 
 #gets the index of the alpha for the specific kind of t distribution
 def getalphacol(tails='ttablesingle', alpha=0.05):
+    """
+    :param tails:
+    :param alpha:
+    :return:
+    """
 
     if tails == 'ttablesingle':
         for i in range(len(alphaonetail)):
@@ -580,6 +760,11 @@ def getalphacol(tails='ttablesingle', alpha=0.05):
 
 #the main file for my math project
 def andrewProject(runTime, direc):
+    """
+    :param runTime:
+    :param direc:
+    :return:
+    """
 
     #the symbols I chose for statistics on the mean
     symbolsformean = {'ripple': "XRPBTC",
@@ -734,6 +919,9 @@ def andrewProject(runTime, direc):
 
 #function used for homework
 def homeworktest():
+    """
+    :return:
+    """
     rubberdata = pd.DataFrame({'col1': [20, 20.75, 45.5, 42.5, 58, 56]}, index=[135, 135, 150, 150, 165, 165])
     pingpongdata = pd.DataFrame({'col1': [16, 13, 33, 34, 44.75, 40]}, index=[135,135,150,150,165,165])
 
@@ -744,8 +932,6 @@ def homeworktest():
 def main():
     runTime = time.time() * 1000
 
-    andrewProjectDirec =  os.path.join(dirname + '/', 'Andrewproj')
-    andrewProject(runTime, direc = andrewProjectDirec)
 
 if __name__ == "__main__":
     main()

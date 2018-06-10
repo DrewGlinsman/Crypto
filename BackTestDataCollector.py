@@ -46,6 +46,10 @@ cryptoLowData = {}
 cryptoVolumeData = {}
 
 def getData(numDays):
+    """
+    :param numDays:
+    :return:
+    """
     # code for writing the values into three text files for each crypto: an open price, close price, and volume file.
     for key, currencyname in priceSymbols.items():
         # creating the file path lengths and opening them
@@ -105,6 +109,11 @@ def getData(numDays):
     volume.close()
 
 def getOpenPrice(interval, minutesBack):
+    """
+    :param interval:
+    :param minutesBack:
+    :return:
+    """
     if(cryptoOpenPriceData == {}):
         #iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():
@@ -147,6 +156,11 @@ def getOpenPrice(interval, minutesBack):
     return cryptoOpenPriceData
 
 def getClosePrice(interval, minutesBack):
+    """
+    :param interval:
+    :param minutesBack:
+    :return:
+    """
     if(cryptoClosePriceData == {}):
         #iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():
@@ -186,6 +200,11 @@ def getClosePrice(interval, minutesBack):
     return cryptoClosePriceData
 
 def getVolume(interval, minutesBack):
+    """
+    :param interval:
+    :param minutesBack:
+    :return:
+    """
     if(cryptoVolumeData == {}):
         #iterate through all the crypto symbols
         for key, currencyname in priceSymbols.items():
@@ -226,6 +245,11 @@ def getVolume(interval, minutesBack):
     return cryptoVolumeData
 
 def getHighPrice(interval, minutesBack):
+    """
+    :param interval:
+    :param minutesBack:
+    :return:
+    """
     if (cryptoHighData == {}):
         # iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():
@@ -265,6 +289,11 @@ def getHighPrice(interval, minutesBack):
     return cryptoHighData
 
 def getLowPrice(interval, minutesBack):
+    """
+    :param interval:
+    :param minutesBack:
+    :return:
+    """
     if (cryptoLowData == {}):
         # iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():

@@ -23,9 +23,23 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
 modes = {'SoloEvaluator': {'string': 'SoloEvaluator', 'value': 0}, 'SoloTrainer': {'string': 'SoloTrainer', 'value': 1}, 'MultiTrainer': {'string': 'MultiTrainer', 'value': 2}}
 
 class CryptoStatsAnalysis:
+
     #place data attributes in here that you do not want stored by different instances of the bot
     #or redefine them using the parameter list passed
     def __init__(self, variationNum, classNum,  training, startMinute, endMinute, PARAMS, timestamp, openPrices, closePrices, volumes, runTime):
+        """
+        :param variationNum:
+        :param classNum:
+        :param training:
+        :param startMinute:
+        :param endMinute:
+        :param PARAMS:
+        :param timestamp:
+        :param openPrices:
+        :param closePrices:
+        :param volumes:
+        :param runTime:
+        """
         #the timestamp of the run of cryptoTrainer
         self.runTime = runTime
 
@@ -120,6 +134,21 @@ class CryptoStatsAnalysis:
     #adds a dictionary where every crypto has a special holder object assigned to it with all important information to it from that moment when the dictionary was made
     # this method is called each time a crypto has been bought, as well as when the cryptos decide to keep the same crypto currency, and when they choose not to buy one
     def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld , didNotBuy, owned):
+        """
+        :param statsDict:
+        :param minute:
+        :param didBuy:
+        :param didSell:
+        :param bought:
+        :param sold:
+        :param decisions:
+        :param decisionNum:
+        :param timeHeld:
+        :param didNotBuy:
+        :param owned:
+        :return:
+        """
+
         self.runStats.append({decisionNum: self.newCryptoDict()})
         self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld, owned)})
 
@@ -133,7 +162,9 @@ class CryptoStatsAnalysis:
 
     #calculates and returns the true change in the money
     def calcMoneyChange(self):
-
+        """
+        :return:
+        """
         startMoney = self.params['START_MONEY']
         newEndMoney = startMoney
 
@@ -156,6 +187,12 @@ class CryptoStatsAnalysis:
 
     #calcualtes and stores all the positive percent changes
     def calcPercentChanges(self, decisionNum, minute, timeHeld):
+        """
+        :param decisionNum:
+        :param minute:
+        :param timeHeld:
+        :return:
+        """
 
         for key, currencyname in priceSymbols.items():
             change = self.caclulatePercentChange(minute, timeHeld, currencyname)
@@ -164,6 +201,14 @@ class CryptoStatsAnalysis:
 
     # calculating the positive correlation for the different decision groups
     def calcPosCorrelations(self, timeHeld, decisions, decisionNum, minute, indexOf):
+        """
+        :param timeHeld:
+        :param decisions:
+        :param decisionNum:
+        :param minute:
+        :param indexOf:
+        :return:
+        """
 
         self.calcPercentChanges(decisionNum, minute, timeHeld)
 
@@ -207,20 +252,36 @@ class CryptoStatsAnalysis:
 
     #stores the positive correlations for each crypto
     def storePosCorrelations(self, percentChange, key, decisionNum):
-       self.runsInfo[decisionNum][decisionNum].percentChanges.update({key: percentChange})
+        """
+        :param percentChange:
+        :param key:
+        :param decisionNum:
+        :return:
+        """
+        self.runsInfo[decisionNum][decisionNum].percentChanges.update({key: percentChange})
 
 
     #adds more minutes to the minutes counter
     def addMin(self, min):
+        """
+        :param min:
+        :return:
+        """
         self.minPast += min
         self.timeHeld.append(min)
 
     #add one to the number of times the program did not buy
     def addDidNotBuy(self):
+        """
+        :return:
+        """
         self.numAbstain += 1
 
     #returns a dictionary with one holder object for each crypto
     def newCryptoDict(self):
+        """
+        :return:
+        """
         newDict = {}
         for key, currencyname in priceSymbols.items():
             newDict.update({currencyname: CryptoHolder(currencyname)})
@@ -229,6 +290,10 @@ class CryptoStatsAnalysis:
 
     #gets the average minutes held
     def getAverageMin (self, timeHeld):
+        """
+        :param timeHeld:
+        :return:
+        """
         lenList = len(timeHeld)
         sumMin = 0
 
@@ -241,6 +306,11 @@ class CryptoStatsAnalysis:
 
     #sets the value passed to be whatever value num is specified
     def setVal(self, value, valueNum):
+        """
+        :param value:
+        :param valueNum:
+        :return:
+        """
         if valueNum == 0:
             self.numBuys = value
         elif valueNum == 1:
@@ -250,12 +320,21 @@ class CryptoStatsAnalysis:
 
     #calculates the percentage change over the interval for the currency
     def caclulatePercentChange(self, minute, timeHeld, currency):
+        """
+        :param minute:
+        :param timeHeld:
+        :param currency:
+        :return:
+        """
 
         change = calcPercentChange(self.openPriceData[currency][minute - timeHeld], self.closePriceData[currency][minute])
         return change
 
     #works through all calculations that cover changes over the whole bot
     def finalCalculations(self):
+        """
+        :return:
+        """
         endMoney = self.calcMoneyChange()
 
 
@@ -264,6 +343,9 @@ class CryptoStatsAnalysis:
 
     #calls the functions in order to format the analysis file correctly
     def writeToFile(self):
+        """
+        :return:
+        """
         self.basicInfo()
         self.buysAndSales()
         self.diferentDecisions()
@@ -272,6 +354,9 @@ class CryptoStatsAnalysis:
 
     #prints the date and timestamp
     def basicInfo(self):
+        """
+        :return:
+        """
         self.file.write('----------------------------------------- \n')
         self.file.write('Run was at ' + str(self.timestamp) + '\n')
         self.file.write('Number of times chose not to buy ' + str(self.numAbstain))
@@ -283,6 +368,9 @@ class CryptoStatsAnalysis:
 
     #writes the buys and sale numbers to the analysis file
     def buysAndSales(self):
+        """
+        :return:
+        """
         self.file.write('----------------------------------------- \n')
         self.file.write('Number of buys ' + str(self.numBuys) + '\n')
         self.file.write('Number of sales ' + str(self.numSells) + '\n')
@@ -290,6 +378,10 @@ class CryptoStatsAnalysis:
 
     #print out different information for each decision made
     def diferentDecisions(self):
+        """
+        :return:
+        """
+
         count = 0
         self.file.write('----------------------------------------- \n')
         for i in self.runsInfo:
@@ -304,6 +396,12 @@ class CryptoStatsAnalysis:
 
     #prints the transaction information
     def transactionInfo(self, i, count):
+        """
+        :param i:
+        :param count:
+        :return:
+        """
+
         self.file.write("Held crypto " + str(i[count].timeHeld) + '\n')
         self.file.write("Start minute " + str(i[count].minute - i[count].timeHeld) + '\n')
         self.file.write("End minute " + str(i[count].minute) + '\n')
@@ -318,12 +416,24 @@ class CryptoStatsAnalysis:
 
     #prints the positive correlations between each of the decision groups and the % that gained money
     def printPosCorrelations(self, i, count):
+        """
+        :param i:
+        :param count:
+        :return:
+        """
+
         for key, value in i[count].posOverInterval.items():
             self.file.write(str(key) + ': ' + str(value) + '\n')
 
 
     #prints out all the average percent Changes
     def printAveragePercentChange(self, i, count):
+        """
+        :param i:
+        :param count:
+        :return:
+        """
+
         for key, value in i[count].averagePercent.items():
             self.file.write(str(key) + ': ' + str(value) + '\n')
 
@@ -334,6 +444,9 @@ class CryptoHolder():
 
     #decision can be B for bought, C for chosen, or NC for not chosen
     def __init__(self, cryptoName):
+        """
+        :param cryptoName:
+        """
         self.symbol = cryptoName
         self.score = 0.0
         self.mean = 0.0
@@ -343,6 +456,17 @@ class CryptoHolder():
 class cyrptoRunInfo():
 
     def __init__(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld, owned):
+        """
+        :param statsDict:
+        :param minute:
+        :param didBuy:
+        :param didSell:
+        :param bought:
+        :param sold:
+        :param decisions:
+        :param timeHeld:
+        :param owned:
+        """
         self.statsDict = statsDict
         self.minute = minute
         self.didBuy = didBuy
@@ -358,7 +482,17 @@ class cyrptoRunInfo():
         self.averagePercent = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0, 'chosenNotCut': 0.0, 'theMax': 0.0}
 
     def setPosOverInterval(self, average, key):
+        """
+        :param average:
+        :param key:
+        :return:
+        """
         self.posOverInterval[key] = average * 100
 
     def setAveragePercentChange(self, averageChange, key):
+        """
+        :param averageChange:
+        :param key:
+        :return:
+        """
         self.averagePercent[key] = averageChange

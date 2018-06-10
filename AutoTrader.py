@@ -214,6 +214,10 @@ PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMU
 
 #get the balance in bitcoins
 def getBalance(symbol):
+    """
+    :param symbol:
+    :return:
+    """
     timestamp = int(time.time() * 1000)
     # building the request query url plus other parameters(signed)
     headers = {'X-MBX-APIKEY': api_key}
@@ -236,6 +240,11 @@ def getBalance(symbol):
 
 #buy the specified crypto currency
 def buyBin(symbol):
+    """
+    :param symbol:
+    :return:
+    """
+
     global priceBought
 
     timestamp = int(time.time() * 1000)
@@ -292,6 +301,11 @@ def buyBin(symbol):
 
 #sell the specified crypto
 def sellBin(symbol):
+    """
+    :param symbol:
+    :return:
+    """
+
     #current time in ms
     timestamp = int(time.time() * 1000) - 1000
 
@@ -359,6 +373,9 @@ def sellBin(symbol):
 
 #get the binance step sizes of each crypto (the step size is the minimum significant digits allowed by binance for crypto to be traded in)
 def binStepSize():
+    """
+    :return:
+    """
     #getting the dictionary of a lot of aggregate data for all symbols
     stepsizeinfo = requests.get("https://api.binance.com/api/v1/exchangeInfo")
     bigdata = stepsizeinfo.json()["symbols"]
@@ -375,6 +392,14 @@ def binStepSize():
 #calculates the weighted moving average over the specified interval for a crypto currency
 
 def setWeightedMovingAverage(currency, interval, starttime, endtime):
+    """
+    :param currency:
+    :param interval:
+    :param starttime:
+    :param endtime:
+    :return:
+    """
+
     cumulativePrice = 0.0
 
     parameters = {"symbol": currency, "interval": interval, 'startTime': starttime, 'endTime': endtime}
@@ -408,6 +433,14 @@ def setWeightedMovingAverage(currency, interval, starttime, endtime):
 
 #gets the cumulative volume over a period and scales it based on the currency's price
 def getVolume(interval, starttime, endtime, currency):
+    """
+    :param interval:
+    :param starttime:
+    :param endtime:
+    :param currency:
+    :return:
+    """
+
     slots = 0
     volume = 0
 
@@ -431,6 +464,11 @@ def getVolume(interval, starttime, endtime, currency):
 #then interates through and calculates a cumulative volume where the volume is considered negative
 #when the percent change was negative and positive when the percent change was positive
 def getModifiedVolume(currency):
+    """
+    :param currency:
+    :return:
+    """
+
     oldVolume = 0
     currentSlot = 0
 
@@ -466,6 +504,10 @@ def getModifiedVolume(currency):
 
 #get the binance price of the specified currency
 def getbinanceprice(currency):
+    """
+    :param currency:
+    :return:
+    """
     #getting the aggregate trade data and finding one price to return
     parameters = {'symbol': currency}
     binData = requests.get("https://api.binance.com/api/v3/ticker/price", params= parameters)
@@ -475,6 +517,9 @@ def getbinanceprice(currency):
 
 
 def resetValues():
+    """
+    :return:
+    """
     #reset the list of parameter value that are calculated below
     for key, value in values.items():
         values[key] = []
@@ -487,7 +532,12 @@ def resetValues():
 #method to iterate through all the cryptos available on binance and store their price changes, percent price changes,
 #volume changes, percent volume changes, scores, time increasing, and time decreasing
 def updateCrypto(interval, starttime, endtime):
-
+    """
+    :param interval:
+    :param starttime:
+    :param endtime:
+    :return:
+    """
 
     resetValues()
 
@@ -602,7 +652,11 @@ def updateCrypto(interval, starttime, endtime):
 # TODO update the modulo so that it is a modulo not a multiplcation so that
 #patterns are detected
 def getTimeIncreasing(isWeighted, currency):
-
+    """
+    :param isWeighted:
+    :param currency:
+    :return:
+    """
     list = percentChanges[currency]
     slots = 0.0
     slots_increasing = 0.0
@@ -638,6 +692,11 @@ def getTimeIncreasing(isWeighted, currency):
 #caclulates and returns the time spent increasing for volume
 #weighted = 0 is false, weighted = 1 is true
 def getVolumeTimeIncreasing(isWeighted, currency):
+    """
+    :param isWeighted:
+    :param currency:
+    :return:
+    """
 
     list = volumePercentChanges[currency]
     slots = 0.0
@@ -668,6 +727,11 @@ def getVolumeTimeIncreasing(isWeighted, currency):
 # score is a combination of weighted time increasing and % change over hour.
 # for both volume and price
 def getScore(symbol):
+    """
+    :param symbol:
+    :return:
+    """
+
     new_score = 0
 
 
@@ -693,6 +757,10 @@ def getScore(symbol):
 
 #finds the next currency to buy
 def priceChecker():
+    """
+    :return:
+    """
+
     currencyToBuy = ''
     #Compares the two price lists and sets the currencyToBuy to be
     # the coin with the highest score that also is above the minimum moving average
@@ -721,6 +789,12 @@ def priceChecker():
 
 #just calculates the percent change between two values
 def calcPercentChange(startVal, endVal):
+    """
+    :param startVal:
+    :param endVal:
+    :return:
+    """
+
     if(float(startVal) == 0.0):
         return float(endVal) * 100.0
 
@@ -730,7 +804,11 @@ def calcPercentChange(startVal, endVal):
 #checks if the current crypto has been decreasing the past ten minutes
 #if yes it forces a new check to see if there is a better crypto
 def checkFailureCondition(currency, timesIncreasing):
-
+    """
+    :param currency:
+    :param timesIncreasing:
+    :return:
+    """
     print("New Interval")
     file.write("New Interval")
 
@@ -774,6 +852,10 @@ def checkFailureCondition(currency, timesIncreasing):
 
 #checks whether the function has caused too large of negative decrease the specified interval
 def checkTooNegative(symbol):
+    """
+    :param symbol:
+    :return:
+    """
     startTime = int(time.time()) * 1000 - 60000
     endTime = int(time.time()) * 1000
 
@@ -800,7 +882,10 @@ def checkTooNegative(symbol):
 #checks to see if the currency has increased or decreased more than is allowed
 # if yes, then the reevaluation process is restarted
 def checkExitCondition(currency):
-
+    """
+    :param currency:
+    :return:
+    """
     global priceBought
 
     currentPrice= getbinanceprice(currency)
@@ -819,6 +904,11 @@ def checkExitCondition(currency):
 
 #checks to see if the current currency is too near to its starting point
 def checkTooLow(currency, timesIncreasing):
+    """
+    :param currency:
+    :param timesIncreasing:
+    :return:
+    """
     global priceBought
 
     currentPrice = getbinanceprice(currency)
@@ -839,6 +929,12 @@ def checkTooLow(currency, timesIncreasing):
 
 #calculates and returns the last slot of an array or list based on the interval, starttime, and endtime
 def getLastSlot(interval, starttime, endtime):
+    """
+    :param interval:
+    :param starttime:
+    :param endtime:
+    :return:
+    """
     difference = endtime - starttime
     intervalInMs = intervalTypes[interval]['inMS']
 
@@ -853,6 +949,13 @@ def getLastSlot(interval, starttime, endtime):
 #returns whether the specified currency is increasing or decreasing over the interval
 # 0 means decreasing, 1 means stable or increasing
 def increasingOrDecreasing(currency, interval, starttime, endtime):
+    """
+    :param currency:
+    :param interval:
+    :param starttime:
+    :param endtime:
+    :return:
+    """
 
     lastSlot = getLastSlot(interval, starttime, endtime)
 
@@ -879,6 +982,10 @@ def increasingOrDecreasing(currency, interval, starttime, endtime):
 
 # function just resets parameters to the best stored parameters
 def resetParameters(paramDict):
+    """
+    :param paramDict:
+    :return:
+    """
     valList = []
     count = 0
     file.seek(0)
@@ -895,7 +1002,9 @@ def resetParameters(paramDict):
 
 #runs through the values collected and storess the max value
 def setMaxValue():
-
+    """
+    :return:
+    """
     for key, value in values.items():
         currentMaxVal = 0
 

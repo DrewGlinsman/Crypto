@@ -41,6 +41,11 @@ ONE_MIN_MS = 60000
 
 class klinedataThread(threading.Thread):
     def __init__(self, symbol, starttime, endtime):
+        """
+        :param symbol:
+        :param starttime:
+        :param endtime:
+        """
         threading.Thread.__init__(self)
         self.symbol = symbol
         self.starttime = starttime
@@ -48,10 +53,16 @@ class klinedataThread(threading.Thread):
         self.mindict = {}
 
     def run(self):
+        """
+        :return:
+        """
         self.mindict.update((asyncio.new_event_loop().run_until_complete(getklinedata(self.symbol, self.starttime, self.endtime))))
 
 
     def getmindict(self):
+        """
+        :return:
+        """
         return self.mindict
 
 priceSymbolsLower = {'bitcoin': 'btcusdt', 'ripple': "xrpbtc",
@@ -73,6 +84,12 @@ base = 'wss://stream.binance.com:9443/ws/'
 
 #gran a minute of kline data and return it as a dictionary
 async def getklinedata(currency, starttime, endtime):
+    """
+    :param currency:
+    :param starttime:
+    :param endtime:
+    :return:
+    """
 
     parameters = {'symbol': currency, 'startTime': starttime, 'endTime': endtime, 'interval': '1m'}
     data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
@@ -85,6 +102,10 @@ async def getklinedata(currency, starttime, endtime):
 
 #synchronously grab all the minute data for each cryptocurrency, store them in lists, and add the rows of data to their respective datafield
 def getcurrentmindata(connection):
+    """
+    :param connection:
+    :return:
+    """
     global ONE_MIN_MS
 
     #list to hold all the threads
@@ -135,6 +156,11 @@ def getcurrentmindata(connection):
 
 #gives the databases 2 hours of data for each datatype
 def primeDatabase(connections):
+    """
+    :param connections:
+    :return:
+    """
+
     global buffertimestart
 
 
@@ -202,7 +228,10 @@ def primeDatabase(connections):
 
 #creates a connection with the specified database file
 def create_connection_db(db_file):
-    """ create a database connection to a SQLite database """
+    """
+    :param db_file:
+    :return:
+    """
 
     try:
         conn = sqlite3.connect(db_file)
@@ -215,10 +244,17 @@ def create_connection_db(db_file):
 
 #closes the passed connection
 def close_connection(conn):
+    """
+    :param conn:
+    :return:
+    """
     conn.close()
 
 #sets the file path for the databses using the relative file path
 def setupdbfiles():
+    """
+    :return:
+    """
     global dirname
 
     db_file = os.path.join(dirname + '/', 'databases/current.db')
@@ -228,6 +264,10 @@ def setupdbfiles():
 
 #sets up tables in the database corresponding to each crypto
 def setuptables(conn):
+    """
+    :param conn:
+    :return:
+    """
 
     #create tables with an integer as the id (in minutes) and a column of real numbers for each crypto
 
@@ -378,6 +418,11 @@ def setuptables(conn):
 
 #creates the table for the connection and table specified
 def create_table(conn, sql_statement):
+    """
+    :param conn:
+    :param sql_statement:
+    :return:
+    """
 
     try:
         c = conn.cursor()
@@ -387,7 +432,11 @@ def create_table(conn, sql_statement):
 
 #creates a row for the specified database and open price row values
 def add_open_row(conn, openprices):
-
+    """
+    :param conn:
+    :param openprices:
+    :return:
+    """
     sql = ''' INSERT INTO openprices(BTCUSDT , XRPBTC , ETHBTC , BCCBTC ,
                 LTCBTC , DASHBTC , XMRBTC , QTUMBTC , ETCBTC ,
                 ZECBTC , ADABTC , ADXBTC , AIONBTC , AMBBTC ,
@@ -417,6 +466,11 @@ def add_open_row(conn, openprices):
 
 # creates a row for the specified database and close price row values
 def add_close_row(conn, closeprices):
+    """
+    :param conn:
+    :param closeprices:
+    :return:
+    """
     sql = ''' INSERT INTO closeprices(BTCUSDT , XRPBTC , ETHBTC , BCCBTC ,
                 LTCBTC , DASHBTC , XMRBTC , QTUMBTC , ETCBTC ,
                 ZECBTC , ADABTC , ADXBTC , AIONBTC , AMBBTC ,
@@ -446,6 +500,11 @@ def add_close_row(conn, closeprices):
 
 # creates a row for the specified database and high price row values
 def add_high_row(conn, highprices):
+    """
+    :param conn:
+    :param highprices:
+    :return:
+    """
     sql = ''' INSERT INTO highprices(BTCUSDT , XRPBTC , ETHBTC , BCCBTC ,
                 LTCBTC , DASHBTC , XMRBTC , QTUMBTC , ETCBTC ,
                 ZECBTC , ADABTC , ADXBTC , AIONBTC , AMBBTC ,
@@ -475,6 +534,11 @@ def add_high_row(conn, highprices):
 
 # creates a row for the specified database and low price row values
 def add_low_row(conn, lowprices):
+    """
+    :param conn:
+    :param lowprices:
+    :return:
+    """
     sql = ''' INSERT INTO lowprices(BTCUSDT , XRPBTC , ETHBTC , BCCBTC ,
                 LTCBTC , DASHBTC , XMRBTC , QTUMBTC , ETCBTC ,
                 ZECBTC , ADABTC , ADXBTC , AIONBTC , AMBBTC ,
@@ -504,6 +568,11 @@ def add_low_row(conn, lowprices):
 
 # creates a row for the specified database and volume price row values
 def add_volume_row(conn, volumes):
+    """
+    :param conn:
+    :param volumes:
+    :return:
+    """
     sql = ''' INSERT INTO volumes(BTCUSDT , XRPBTC , ETHBTC , BCCBTC ,
                 LTCBTC , DASHBTC , XMRBTC , QTUMBTC , ETCBTC ,
                 ZECBTC , ADABTC , ADXBTC , AIONBTC , AMBBTC ,
@@ -599,8 +668,29 @@ def select_by_crypto(conn, tablename, crypto, id=-1):
 
     return rows
 
+#delete all the rows from the specified table
+def delete_rows(conn, tablename):
+    """
+    :param conn: the connection object to a specific database
+    :param tablename: the name of a table in the database
+    :return:
+    """
+
+    cur = conn.cursor()
+
+    statement = "DELETE FROM " + tablename
+    cur.execute(statement)
 
 def main():
+
+    #the number of minutes that have passed
+    mins = 0
+
+    #the max number of minutes we will let this datastream run for (should be set by whatever function runs this)
+    minmax = 1440
+
+    #the different table names
+    tablenames = ['openprices', 'closeprices', 'highprices', 'lowprices', 'volumes']
 
     db_file = setupdbfiles()
 
@@ -608,20 +698,38 @@ def main():
 
     setuptables(connection)
 
+    #deleting all rows from each table so the next run begins with a fresh set of data
+    for tablename in tablenames:
+        delete_rows(connection, tablename)
+
+    connection.commit()
+
+    #set the database up with 240 minutes of data
     primeDatabase(connection)
+
+    #set the mins passed to reflect the new data
+    mins+=240
+
     #waits for one minute - time spent priming database with 2 hours of data so that the next data we grab is a full minute
     #after we have primed
     time.sleep(60.0 - ((time.time() - buffertimestart) % 60.0))
 
+    #commit any changes
+    connection.commit()
+
     #loop that runs every minute to grab another row of data
     starttime = time.time()
-    while True:
+    while mins < minmax:
         getcurrentmindata(connection)
+        connection.commit()
         time.sleep(60.0 - ((time.time() - starttime) % 60.0))
+        mins+=1
 
+    #deleting all rows from each table so the next run begins with a fresh set of data
+    for tablename in tablenames:
+        delete_rows(connection, tablename)
 
-    cursor = connection.cursor()
-
+    connection.commit()
     close_connection(connection)
 
 if __name__ == "__main__":

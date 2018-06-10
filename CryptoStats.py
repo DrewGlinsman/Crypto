@@ -49,9 +49,14 @@ ONE_THIRD_DAY = 28800000
 COUNT = 21
 
 def getData(numDays):
+    """
 
-  #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
-  for key, currencyname in priceSymbols.items():
+    :param numDays:
+    :return:
+    """
+
+    #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
+    for key, currencyname in priceSymbols.items():
         #creating the file path lengths and opening them
         openPriceCryptoPath = os.path.join(cryptoPaths, currencyname + "OpenPrice" + ".txt")
         closePriceCryptoPath = os.path.join(cryptoPaths, currencyname + "ClosePrice" + ".txt")
@@ -83,15 +88,18 @@ def getData(numDays):
                 volume.write("{},".format(i[5]))
             timeBackwards += ONE_THIRD_DAY
 
-  #closing all the files once we're done
-  oprice.close()
-  highPrice.close()
-  lowPrice.close()
-  cprice.close()
-  volume.close()
+    #closing all the files once we're done
+    oprice.close()
+    highPrice.close()
+    lowPrice.close()
+    cprice.close()
+    volume.close()
 
 #get the binance step sizes of each crypto (the step size is the minimum significant digits allowed by binance for crypto to be traded in)
 def binStepSize():
+    """
+    :return:
+    """
     #getting the dictionary of a lot of aggregate data for all symbols
     global stepsize
     stepsizeinfo = requests.get("https://api.binance.com/api/v1/exchangeInfo")
@@ -106,6 +114,13 @@ def binStepSize():
 
 
 def getOpenPrice(interval, minutesBack, cryptoOpenPriceLocalData = cryptoOpenPriceData):
+    """
+    :param interval:
+    :param minutesBack:
+    :param cryptoOpenPriceLocalData:
+    :return:
+    """
+
     if(cryptoOpenPriceLocalData  == {}):
         #iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():
@@ -151,6 +166,13 @@ def getOpenPrice(interval, minutesBack, cryptoOpenPriceLocalData = cryptoOpenPri
 
 
 def getClosePrice(interval, minutesBack, cryptoClosePriceLocalData = cryptoClosePriceData):
+    """
+    :param interval:
+    :param minutesBack:
+    :param cryptoClosePriceLocalData:
+    :return:
+    """
+
     if(cryptoClosePriceLocalData == {}):
         #iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():
@@ -190,6 +212,13 @@ def getClosePrice(interval, minutesBack, cryptoClosePriceLocalData = cryptoClose
     return cryptoClosePriceLocalData
 
 def getVolume(interval, minutesBack, cryptoVolumeLocalData = cryptoVolumeData):
+    """
+    :param interval:
+    :param minutesBack:
+    :param cryptoVolumeLocalData:
+    :return:
+    """
+
     if(cryptoVolumeLocalData == {}):
         print(interval)
         print(minutesBack)
@@ -233,6 +262,13 @@ def getVolume(interval, minutesBack, cryptoVolumeLocalData = cryptoVolumeData):
     return cryptoVolumeLocalData
 
 def getHighPrice(interval, minutesBack, cryptoHighPriceLocalData = cryptoHighData):
+    """
+    :param interval:
+    :param minutesBack:
+    :param cryptoHighPriceLocalData:
+    :return:
+    """
+
     if (cryptoHighPriceLocalData == {}):
         # iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():
@@ -272,6 +308,13 @@ def getHighPrice(interval, minutesBack, cryptoHighPriceLocalData = cryptoHighDat
     return cryptoHighPriceLocalData
 
 def getLowPrice(interval, minutesBack, cryptoLowPriceLocalData = cryptoLowData):
+    """
+    :param interval:
+    :param minutesBack:
+    :param cryptoLowPriceLocalData:
+    :return:
+    """
+
     if (cryptoLowPriceLocalData == {}):
         # iterating through all the crypto symbols
         for key, currencyname in priceSymbols.items():
