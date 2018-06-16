@@ -77,5 +77,7 @@ MAX_DECREASE: the maximum percent decrease allowed before the bot auto stops tra
 # the parameters used by the supertrainer
 superParams = {'ignoreparams': [], 'classes': 1, 'variations': 1, 'mode': 'MultiTrainer', 'modevalue': 2, 'percentpositivebots': 0, 'worstbotreturnsaved': 0, 'bestbotreturnedsaved': 0, 'maxbotsstored': 1, 'MAX_TIME_CYCLE': 60.0, 'MAX_CYCLES': 24, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'MAX_PERCENT_CHANGE': 100.0, 'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0, 'MAX_DECREASE': -10.0}
 
-#parameters that the superTrainer should not change
+# parameters that the superTrainer should not change
 unchangedSuperParams = ['MIN_OFFSET', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST']
+
+maxVolume = 7000
