@@ -19,14 +19,15 @@ style.use("ggplot")
 
 
 class volumeThread(threading.Thread):
-    def __init__(self, symbol, timestamp, percentLoss):
+    def __init__(self, symbol, timestamp, percentLoss, priceThread):
         threading.Thread.__init__(self)
         self.symbol = symbol
         self.timestamp = timestamp
         self.percentLoss = percentLoss
+        self.priceThread = priceThread
 
     def run(self):
-        asyncio.new_event_loop().run_until_complete(getData(self.symbol, self.timestamp, self.percentLoss))
+        asyncio.new_event_loop().run_until_complete(getData(self.symbol, self.timestamp, self.percentLoss, self.priceThread))
 
 
 class priceThread(threading.Thread):
@@ -37,11 +38,14 @@ class priceThread(threading.Thread):
     def run(self):
         # path to save the different text files in
         while True:
-            asyncio.new_event_loop().run_until_complete(getBTC(price))
+            asyncio.new_event_loop().run_until_complete(getBTC(self.price))
             time.sleep(1)
 
+    def getPrice(self):
+        return self.price
 
-async def getData(symbol, timestamp, percentLoss):
+
+async def getData(symbol, timestamp, percentLoss, priceThread):
     """
         :param symbol the currency we want the depth for:
 
@@ -108,7 +112,7 @@ async def getData(symbol, timestamp, percentLoss):
                     break
 
                 # get the bitcoin price to scale the crypto price to dollars
-                bitcoinPrice = price[0]
+                bitcoinPrice = priceThread.getPrice()
 
                 if (bitcoinPrice is None):
                     break
@@ -153,7 +157,7 @@ async def getData(symbol, timestamp, percentLoss):
                     break
 
                 # get the bitcoin price to scale the crypto price to dollars
-                bitcoinPrice = price[0]
+                bitcoinPrice = priceThread.getPrice()
                 if (bitcoinPrice is None):
                     break
 
@@ -188,9 +192,6 @@ async def getData(symbol, timestamp, percentLoss):
         # creating two dictionaries to store the currency and how much we can buy and sell of it in $$$
         buyVolumeDict = {symbol: [currBuyVolume]}
         sellVolumeDict = {symbol: [currSellVolume]}
-
-        # setting up file path to write to
-        dirname = os.path.dirname(__file__)
 
         # get integer representation of day 1 = monday, 7 = sunday
         day = timestamp.isoweekday()
@@ -275,6 +276,7 @@ def writePickle(symbol, weekday, timestamp, buyVolumeDict, sellVolumeDict):
             newSellVolumeDict[symbol].append(sellVolumeDict[symbol][0])
             sellVolumeDict = newSellVolumeDict
 
+    # write both the dictionaries into memory
     with open(buyPickleFile, "wb") as pickle_out:
         pickle.dump(buyVolumeDict, pickle_out)
 
@@ -296,46 +298,39 @@ def readPickle(symbol, weekday, timestamp):
     return buyVolume, sellVolume
 
 
-# start of the main code
-# compare current time against 4 pm to see if its within a ten minute interval
-baseTS = datetime.datetime(2018, 5, 25, 16, 30, 0)
-baseTS = baseTS.astimezone(pytz.timezone('US/Eastern'))
+def main():
+    # start of the main code
+    # compare current time against 4 pm to see if its within a ten minute interval
+    baseTS = datetime.datetime(2018, 5, 25, 16, 30, 0)
+    baseTS = baseTS.astimezone(pytz.timezone('US/Eastern'))
 
-x = 0
+    threads = []
+    price = [0.0]
+    pThread = priceThread(price)
+    pThread.start()
 
-threads = []
-price = [0.0]
-thread = priceThread(price)
-thread.start()
+    while(True):
+        # get the date current time and set it to US Eastern time
+        currentTime = datetime.datetime.now(tz=pytz.UTC)
+        currentTime = currentTime.astimezone(pytz.timezone('US/Eastern'))
 
-while(True):
-    # get the date current time and set it to US Eastern time
-    currentTime = datetime.datetime.now(tz=pytz.UTC)
-    currentTime = currentTime.astimezone(pytz.timezone('US/Eastern'))
-    day = currentTime.isoweekday()
-    weekday = {
-        1: "Monday",
-        2: "Tuesday",
-        3: "Wednesday",
-        4: "Thursday",
-        5: "Friday",
-        6: "Saturday",
-        7: "Sunday"
-    }[day]
+        # find time delta between current time and the base timestamp
+        timedelta = currentTime.minute - baseTS.minute
+        print('Time delta = ' + str(timedelta))
+        if (timedelta % 10 == 0):
+            print("Time Difference is 10 minutes")
+            threads = []
 
-    # find time delta between current time and the base timestamp
-    timedelta = currentTime.minute - baseTS.minute
-    print('Time delta = ' + str(timedelta))
-    if (timedelta % 10 == 0):
-        print("Time Difference is 10 minutes")
-        threads = []
+            for key, currency in priceSymbols.items():
+                currency = currency.lower()
+                thread = volumeThread(currency, currentTime, -1, pThread)
+                thread.start()
+                threads.append(thread)
 
-        for key, currency in priceSymbols.items():
-            currency = currency.lower()
-            thread = volumeThread(currency, currentTime, -1)
-            thread.start()
-            threads.append(thread)
+            for thread in threads:
+                thread.join()
+        time.sleep(1)
 
-        for thread in threads:
-            thread.join()
-    time.sleep(1)
+
+if __name__ == "__main__":
+    main()
