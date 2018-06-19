@@ -5,20 +5,15 @@ import time
 import os
 import pickle
 import pathlib
+import PriceSymbolsUpdater
 from AutoTrader import getbinanceprice
-from Generics import PARAMETERS, superParams
+from Generics import PARAMETERS, superParams, priceSymbols
 
 
-# dictionary that contains all the symbols for the binance API calls
-priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
-                'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
-                'LTC': 'LTCBTC', 'Dash': 'DASHBTC',
-                'Monero': 'XMRBTC', 'Qtum': 'QTUMBTC', 'ETC': 'ETCBTC',
-                'Zcash': 'ZECBTC', 'ADA': 'ADABTC', 'ADX': 'ADXBTC', 'AION': 'AIONBTC', 'AMB': 'AMBBTC', 'APPC': 'APPCBTC', 'ARK': 'ARKBTC', 'ARN': 'ARNBTC', 'AST': 'ASTBTC', 'BAT': 'BATBTC', 'BCD': 'BCDBTC', 'BCPT': 'BCPTBTC', 'BNB': 'BNBBTC', 'BNT': 'BNTBTC', 'BQX': 'BQXBTC', 'BRD': 'BRDBTC', 'BTS': 'BTSBTC', 'CDT': 'CDTBTC', 'CMT': 'CMTBTC', 'CND': 'CNDBTC', 'DGD': 'DGDBTC', 'DLT': 'DLTBTC', 'DNT': 'DNTBTC', 'EDO': 'EDOBTC', 'ELF': 'ELFBTC', 'ENG': 'ENGBTC', 'ENJ': 'ENJBTC', 'EOS': 'EOSBTC', 'EVX': 'EVXBTC', 'FUEL': 'FUELBTC', 'FUN': 'FUNBTC', 'GAS': 'GASBTC', 'GTO': 'GTOBTC', 'GVT': 'GVTBTC', 'GXS': 'GXSBTC', 'HSR': 'HSRBTC', 'ICN': 'ICNBTC', 'ICX': 'ICXBTC', 'IOTA': "IOTABTC", 'KMD': 'KMDBTC', 'KNC': 'KNCBTC', 'LEND': 'LENDBTC', 'LINK': 'LINKBTC', 'LRC': 'LRCBTC', 'LSK': 'LSKBTC', 'LUN': 'LUNBTC', 'MANA': 'MANABTC', 'MCO': 'MCOBTC', 'MDA': 'MDABTC', 'MOD': 'MODBTC', 'MTH': 'MTHBTC', 'MTL': 'MTLBTC', 'NAV': 'NAVBTC', 'NEBL': 'NEBLBTC', 'NEO': 'NEOBTC', 'NULS': 'NULSBTC', 'OAX': 'OAXBTC', 'OMG': 'OMGBTC', 'OST': 'OSTBTC', 'POE': 'POEBTC', 'POWR': 'POWRBTC', 'PPT': 'PPTBTC', 'QSP': 'QSPBTC', 'RCN': 'RCNBTC', 'RDN': 'RDNBTC', 'REQ': 'REQBTC', 'SALT': 'SALTBTC', 'SNGLS': 'SNGLSBTC', 'SNM': 'SNMBTC', 'SNT': 'SNTBTC', 'STORJ': 'STORJBTC', 'STRAT': 'STRATBTC', 'SUB': 'SUBBTC', 'TNB': 'TNBBTC', 'TNT': 'TNTBTC', 'TRIG': 'TRIGBTC', 'TRX': 'TRXBTC', 'VEN': 'VENBTC', 'VIB': 'VIBBTC', 'VIBE': 'VIBEBTC', 'WABI': 'WABIBTC', 'WAVES': 'WAVESBTC', 'WINGS': 'WINGSBTC', 'WTC': 'WTCBTC', 'XVG': 'XVGBTC', 'XZC': 'XZCBTC', 'YOYO': 'YOYOBTC', 'ZRX': 'ZRXBTC'}
 basesource = r'wss://stream.binance.com:9443'
 
 # setup the relative file path
-dirname = os.path.dirname(__file__)
+dirname = os.path.dirname(os.path.realpath(__file__))
 filename = os.path.join(dirname, '')
 
 # param file name + path
@@ -38,8 +33,74 @@ colors = ['008fd5', 'fc4f30', 'e5ae38', '6d904f', '8b8b8b', '810f7c', 'f2d4b6', 
 
 
 def main():
-    testWriteParamPickle()
+    global  priceSymbols
+    priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
 
+
+# reads pickle from a file into the passed parameter dictionary
+def readParamPickle(directory, idnum):
+    """
+    :param directory: the path of the pickle file
+    :param idnum: the id number for the superparam file
+    :return:
+    """
+    # makes the directorys in the path variable if they do not exist
+    pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
+    with open(directory + str(idnum) + "superparam.pkl", "rb") as pickle_in:
+        paramDict = pickle.load(pickle_in)
+
+    return paramDict
+
+
+
+#builds the logs for the trainer file if none is created and prepares the logs for the evaluator files
+# makes a log file for this instance of the trainer that is sorted into a folder by the date it was run
+# and its name is just its timestamp
+def initdirectories(paramspassed, typedirec='storage'):
+    """
+    :param paramspassed: the parameters passed from the command line or the superTrainer
+    :return:
+    """
+
+    directory = "{}{}/{}/{}/{}/{}".format(filename, typedirec, paramspassed['website'], paramspassed['day'], paramspassed['hour']
+                                          , paramspassed['min'])
+
+    # makes the directorys in the path variable if they do not exist
+    pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
+
+    #makes the directory of the associated idnum exist if it does not already
+    pathlib.Path("{}/{}".format(directory, paramspassed['idnum'])).mkdir(parents=True, exist_ok=True)
+
+    #if this is a training directory then make a class file for the param variaitons to be picked by the evaluator bots
+    #and make log directory for each class
+    if typedirec == 'training':
+        for numclass in range(superParams['classes']):
+            # makes the param directory of the associated class exist if it does not already
+            pathlib.Path("{}/{}/{}class/variations".format(directory, paramspassed['idnum'], numclass)).mkdir(parents=True, exist_ok=True)
+
+            # makes the log directory of the associated class exist if it does not already
+            pathlib.Path("{}/{}/{}class/logs".format(directory, paramspassed['idnum'], numclass)).mkdir(parents=True, exist_ok=True)
+
+
+
+
+#reads the parameters passed
+#determines if the trainer is run standalone or by another function
+def readParamsPassed():
+    """
+    :return: param dictionary storing the parameters passed
+    """
+
+    if sys.argv[1] == "Alone":
+        print("Alone")
+    else:
+        for line in sys.stdin:
+            if line != '':
+                params = line.split()
+                passedparams = {'website': params[0], 'day': params[1], 'hour': params[2], 'min': params[3],
+                 'idnum': int(params[4])}
+    print(passedparams)
+    return passedparams
 
 # return the number of price symbols
 def get_num_prices():

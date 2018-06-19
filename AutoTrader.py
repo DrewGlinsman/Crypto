@@ -37,7 +37,7 @@ except ImportError:
 TESTING = 1
 
 #setup the relative file path
-dirname = os.path.dirname(__file__)
+dirname = os.path.dirname(os.path.realpath(__file__))
 filename = os.path.join(dirname + '/', 'Logs')
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
@@ -239,6 +239,7 @@ def getBalance(symbol):
     return balance
 
 #buy the specified crypto currency
+
 def buyBin(symbol):
     """
     :param symbol:

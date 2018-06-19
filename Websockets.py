@@ -4,6 +4,9 @@ import os
 import ast
 import requests
 import threading
+import PriceSymbolsUpdater
+
+from Generics import priceSymbols, getLowerCaseDict
 
 class depthThread(threading.Thread):
     def __init__(self, symbol, desiredVolume, maxLoss):
@@ -15,18 +18,7 @@ class depthThread(threading.Thread):
     def run(self):
         asyncio.new_event_loop().run_until_complete(getDepth(self.symbol, self.desiredVolume, self.maxLoss))
 
-priceSymbols = {'bitcoin': 'btcusdt', 'ripple': "xrpbtc",
-                'ethereum': 'ethbtc', 'bcc': 'bccbtc',
-                'ltc': 'ltcbtc', 'dash': 'dashbtc',
-                'monero': 'xmrbtc', 'qtum': 'qtumbtc', 'etc': 'etcbtc',
-                'zcash': 'zecbtc', 'ada': 'adabtc', 'adx': 'adxbtc', 'aion' : 'aionbtc', 'amb': 'ambbtc', 'appc': 'appcbtc', 'ark': 'arkbtc', 'arn': 'arnbtc', 'ast': 'astbtc', 'bat': 'batbtc', 'bcd': 'bcdbtc', 'bcpt': 'bcptbtc', 'bnb': 'bnbbtc', 'bnt': 'bntbtc', 'bqx': 'bqxbtc', 'brd': 'brdbtc', 'bts': 'btsbtc', 'cdt': 'cdtbtc', 'cmt': 'cmtbtc', 'cnd': 'cndbtc', 'dgd': 'dgdbtc', 'dlt': 'dltbtc', 'dnt': 'dntbtc', 'edo': 'edobtc', 'elf': 'elfbtc', 'eng': 'engbtc', 'enj': 'enjbtc', 'eos': 'eosbtc', 'evx': 'evxbtc', 'fuel': 'fuelbtc', 'fun': 'funbtc', 'gas': 'gasbtc', 'gto': 'gtobtc', 'gvt': 'gvtbtc', 'gxs': 'gxsbtc', 'hsr': 'hsrbtc', 'icn': 'icnbtc', 'icx': 'icxbtc', 'iota': "iotabtc", 'kmd': 'kmdbtc', 'knc': 'kncbtc', 'lend': 'lendbtc', 'link':'linkbtc', 'lrc':'lrcbtc', 'lsk':'lskbtc', 'lun': 'lunbtc', 'mana': 'manabtc', 'mco': 'mcobtc', 'mda': 'mdabtc', 'mod': 'modbtc', 'mth': 'mthbtc', 'mtl': 'mtlbtc', 'nav': 'navbtc', 'nebl': 'neblbtc', 'neo': 'neobtc', 'nuls': 'nulsbtc', 'oax': 'oaxbtc', 'omg': 'omgbtc', 'ost': 'ostbtc', 'poe': 'poebtc', 'powr': 'powrbtc', 'ppt': 'pptbtc', 'qsp': 'qspbtc', 'rcn': 'rcnbtc', 'rdn': 'rdnbtc', 'req': 'reqbtc', 'salt': 'saltbtc', 'sngls': 'snglsbtc', 'snm': 'snmbtc', 'snt': 'sntbtc', 'storj': 'storjbtc', 'strat': 'stratbtc', 'sub': 'subbtc', 'tnb': 'tnbbtc', 'tnt': 'tntbtc', 'trig': 'trigbtc', 'trx': 'trxbtc', 'ven': 'venbtc', 'vib': 'vibbtc', 'vibe': 'vibebtc', 'wabi': 'wabibtc', 'waves': 'wavesbtc', 'wings': 'wingsbtc', 'wtc': 'wtcbtc', 'xvg': 'xvgbtc', 'xzc': 'xzcbtc', 'yoyo': 'yoyobtc', 'zrx': 'zrxbtc'}
 
-
-symbols = ['btcusdt', "xrpbtc",
-                'ethbtc', 'bccbtc',
-               'ltcbtc', 'dashbtc',
-                'xmrbtc','qtumbtc','etcbtc',
-                'zecbtc', 'adabtc', 'adxbtc',  'aionbtc','ambbtc','appcbtc','arkbtc', 'arnbtc',  'astbtc',  'batbtc', 'bcdbtc', 'bcptbtc',  'bnbbtc',  'bntbtc',  'bqxbtc','brdbtc', 'btsbtc',  'cdtbtc', 'cmtbtc', 'cndbtc', 'dgdbtc', 'dltbtc', 'dntbtc',  'edobtc',  'elfbtc','engbtc',  'enjbtc', 'eosbtc', 'evxbtc',  'fuelbtc',  'funbtc',  'gasbtc',  'gtobtc', 'gvtbtc', 'gxsbtc', 'hsrbtc', 'icnbtc', 'icxbtc', "iotabtc", 'kmdbtc', 'kncbtc', 'lendbtc', 'linkbtc', 'lrcbtc', 'lskbtc', 'lunbtc', 'manabtc', 'mcobtc', 'mdabtc', 'modbtc','mthbtc', 'mtlbtc', 'navbtc', 'neblbtc', 'neobtc', 'nulsbtc', 'oaxbtc','omgbtc',  'ostbtc', 'poebtc',  'powrbtc',  'pptbtc',  'qspbtc',  'rcnbtc',  'rdnbtc', 'reqbtc', 'saltbtc', 'snglsbtc', 'snmbtc', 'sntbtc', 'storjbtc', 'stratbtc', 'subbtc',  'tnbbtc',  'tntbtc',  'trigbtc', 'trxbtc',  'venbtc', 'vibbtc', 'vibebtc',  'wabibtc',  'wavesbtc',  'wingsbtc', 'wtcbtc', 'xvgbtc', 'xzcbtc',  'yoyobtc',  'zrxbtc']
 
 possibleCryptos = []
 lock = threading.Lock()
@@ -155,15 +147,23 @@ def calcPercentChange(startVal, endVal):
     return (((float(endVal) - float(startVal)) / float(startVal)) * 100)
 
 
-def generatePriceSymbols(desiredVolume, maxLoss):
+def generatePriceSymbols(desiredVolume, maxLoss, website='binance'):
     """
     :param desiredVolume:
     :param maxLoss:
+    :param website:
     :return:
     """
+    global priceSymbols
 
     #list to hold all the threads
     threads = []
+
+    #get an updated version of price symbols
+    symbols = PriceSymbolsUpdater.chooseUpdate(website)
+
+    #get the prices to lowercase
+    priceSymbols = getLowerCaseDict(symbols)
 
     #iterate through the price symbols dictionary and create a thread to find the the depth of that crypto then append the thread to the list of threads
     for key, currencyname in priceSymbols.items():
