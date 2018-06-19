@@ -143,3 +143,173 @@ fixed modified volume's index issue where the percent changes and volume changes
 4/15/18
 added a new file CryptoGraphs that will make graphs of the basic data collected over the interval being used
 added Start money and End money parameters to track the balance as it would change in reality
+
+4/22/18
+made a new script that holds all the different kinds of plots that can be made using the data
+added functions to create a dataframe of all the data passed to cryptographs for analysis
+added function to crypto graph that initializes all the data into dictionaries
+added function to plot data in crypto graph that uses the classes in plotClass
+added function to plotlines in plot class, is capable of doing it by the percent change or the correlation each crypto has or by price
+added ability to plot volume over each of the five data types!
+
+4/23/18
+added a bar charting function to plotclass
+added the ability to select what kinds of data you want for the initializedata and constructdataframes functions in cryptographs
+fleshed out andrewsproj function so that it use the plotdata function in a few different ways
+added a default param to each get data function in CryptoStats so that you can get new dicts of data even if you have already made one and it wont
+interfere with the currently existing one
+
+4/24/18
+updated cryptoevaluator to use global data variables and not rely on the global variables for cryptostat
+made sure all the logic gates with decrease or increase are treated as the positive or negative as intended in cryptoevaluator
+replaced value with more descriptive name in iterations of priceSymbols in all files
+
+4/25/18
+fixed some line estimation calculations in cryptographs
+added estimation of yvalues for a dataframe using the estimated lines calculated for the data
+can now plot an estimated line fit on a piece of data or use another one that has already been calculated
+serparated the plotting functions in cryptographs so that they only need parameters relevant to them
+
+4/26/18
+added functions to calculate the estimated probabilities for an exponentially distributed set of data
+added functions to calculate the exponential cdf and pdf
+added a function to calculate chisquare and the p-value
+bar charts now show all the bar names
+plotbar will now do histograms
+
+4/27/18
+added equality testing for means of samples
+added in ttest for pairs
+fixed label rearranging issue for the bar charts
+
+5/12/18
+new file PseudoAPI-Datastream retrieves the new data to be stored every minute for all the cryptos
+added a function to prime each database with 2 hours of info
+added a function to open a connection with a set of databases passed
+added a function to close the connections you pass
+implemented relative paths for all files
+
+5/13/18
+tables for each kind of data created in the pseudoapi database
+functions to add rows of data to each table created
+function to prime the database with 2 hours of each data type added
+removed CTRBTC from all files now that it is delisted
+
+5/17/18
+ability to print all rows out of a table
+added a function to print a row by the minute it is associated with (its id)
+added a function that lets you select by the crypto (and the row as well)
+
+5/18/18
+all five data fields will update with minute information every minute in the pseudo api datastream
+made a new file that just houses any general use versions of certain variables so that if they do not need to be changed they can be used instead
+of copy and paste into each file
+made a buy and sell pseudo api that just uses autotrader's version (use the binstepsize from here to populate your local stepsize
+dictionary)
+
+5/24/18
+updated datastream api to commit any changes
+updated datastream to delete the tables before the file is closed
+added parameters documentation to every function in all files so as we go through them we fill out what each parameter and return value means
+
+6/3/18
+made supertrainer file
+
+-SuperTrainer
+added functions to read param files with a specific id number, day of the week, and website associated with them
+
+
+-Generics
+added modes dictionary
+added websites dictionary
+added superparameter dictionary
+added superparameter definitions
+added superparameter do not change list
+
+6/9/18
+SuperTrainer
+-added setUpCryptoTrainerBots to return an array of subprocesses that will run the separate CryptoTrainer bots
+-run parameters indicate if it is run standalone
+-grabs all the trainer files up to the full amount in the directory (or whatever we specify) after that if more trainers are needed it randomly grabs one and randomizes it and gives it to the CryptoTrainer
+
+CryptoEvalutor
+-removed confusing "noinput" variable, now it checks if the system has passed any arguments
+-reads any arguments passed to it by the function running it
+-run parameters indicate if it is run standalone
+
+CryptoTrainer
+-run parameters indicate if it is run standalone
+-added a readparamspassed function so that now there is a dictionary of passed parameters to the supertrainer
+in the event that it is run alone or by the supertrainer
+
+6/10/18
+SuperTrainer
+-added randomize params method
+-intializes a directory for the training parameter files and the training parameter files
+
+CryptoTrainer
+-added an initdirectory that creates a storage set of files and a training set if either does not exist
+-reformatted pickleinput to only pickle the parameter file needed
+-reads in parameters passsed
+
+
+6/13/18
+All Files
+-all relative files paths are now absolute
+
+CryptoTrainer
+-added check the ignoreparams list to the randomizer
+-made the types of randomizing dependent by class
+-the two types of randomization are based on variables detailing their range in their parameters
+-writing and reading a pickle file requires the path to the file and the name of the pickle file
+-a base param file is overwritten after each class and is used during each class to generate vairiations
+-the correct set of parameters are passed to the Evaluators
+
+SuperTrainer
+-randomization can now be specified to affect whole groups of parameters in the same way
+
+Generics
+-specialSuperParams is a list of groups of parameters used by the super trainer to randomize the behavior or each Trainer
+but these groups are all changed in specific ways as specified in the randomizeParameters function
+-specialRange is a list of range values to help set the special param groups
+-nonnegorzero tells the program what groups must be positive and non zero
+-storedInput has been moved from the CryptoEvalutor file and serves as the passed parameters for each Evaluator
+
+CryptoEvalutor
+-reads in input correctly from the argv and stdin if run from a bot
+
+6/15/18
+
+Generics
+-added calcPercentChange
+
+CryptoTrainer
+-now can run multiple evaluators when run by supertrainer
+
+CryptoEvaluator
+-now can be run by a trainer that was run by a super trainer
+
+CryptoStatAnalysis
+-uses the real logging system
+
+
+6/19/18
+updated all files that use priceSymbols to automatically update it
+
+updated both BackTestDataCollector and CryptoStats to use passed priceSymbols dictionaries that are either the default one or one that is passed to them (YOU SHOULD PASS TO IT AN UPDATED ONE). cuts down on overall API calls needed to constantly update priceSymbols
+
+PriceSymbolsUpdater
+-made the file so priceSymbols can be set to the accurate most recent list based on the website used
+
+CryptoEvaluator
+-added function to ensure all the data dictionaries have the right currencies as key values
+
+OldCode
+-old code that I did not want to delete
+
+Generics
+-added a getLowerCaseDict where both the keys and values can be set to lower and a new dictionary is return
+
+PseudoAPIDataStream
+-all rows are  build using full symbol list
+-all tables are build using full symbol list
