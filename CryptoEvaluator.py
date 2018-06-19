@@ -197,7 +197,6 @@ NO = 0
 
 #todo unhard code this path so we dont need two stored inputs for whoevers running it.
 #input values that are stored (other than parameters)
-storedInput = {'runTime': -1, 'running': modes['SoloEvaluator']['string'], 'pickleDirec': r'C:\Users\katso\Documents\GitHub\Crypto\\', 'classNum': -1, 'variationNum': -1}
 #storedInput = {'runTime': -1, 'running': modes['SoloEvaluator']['string'], 'pickleDirec': r'C:\Users\katso\Documents\GitHub\Crypto\\', 'classNum': -1, 'variationNum': -1}
 storedInput = {'runTime': -1, 'running': modes['SoloEvaluator']['string'], 'pickleDirec': r'C:\Users\DrewG\Documents\GitHub\Crypto\\', 'classNum': -1, 'variationNum': -1}
 
@@ -212,14 +211,11 @@ def buildLogs(timestamp):
 
     # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 
-    logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
-    #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
     #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
     logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
-    withMode = logPaths + '\\Mode-' + storedInput['running']
     withMode = logPaths + '\Mode-' + storedInput['running']
 
     date = datetime.date.today()
@@ -228,18 +224,14 @@ def buildLogs(timestamp):
     year = date.year
 
     # concatenates the logpath with a date so each analysis log set is in its own file by day
-    withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
     withDate = withMode + '\Year-' + str(year) + '\Month-' + str(calendar.month_name[month] + '\Day-' + str(day))
 
 
-    withRunTime = withDate + '\\RunTime-' + str(storedInput['runTime'])
     withRunTime = withDate + '\RunTime-' + str(storedInput['runTime'])
 
-    withClass = withRunTime + '\\Class-' + str(storedInput['classNum'])
     withClass = withRunTime + '\Class-' + str(storedInput['classNum'])
 
     # concatenates with the variation number
-    withVarNum = withClass + '\\Variation-' + str(int(storedInput['variationNum']))
     withVarNum = withClass + '\Variation-' + str(int(storedInput['variationNum']))
 
     # creates a directory if one does not exist
