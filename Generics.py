@@ -107,9 +107,8 @@ superParams = {'smallrange': 10,'bigrange': 100, 'lowoffirstrange': 0, 'lowofsec
 # parameters that the superTrainer should not change
 unchangedSuperParams = ['MIN_OFFSET', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST']
 
-<<<<<<< HEAD
 maxVolume = 7000
-=======
+
 #superparameters that have to be changed specially (the inner lists are the groups that get changed by the same value at the same time)
 specialSuperParams = [['smallrange', 'bigrange', 'lowoffirstrange', 'lowofsecondrange', 'randcheckrangeone', 'randcheckrangetwo',
                       'lowercheckthreshold', 'uppercheckthreshold'],['classes'],['variations'], ['MIN_CYCLES', 'MAX_CYCLES']]
@@ -173,4 +172,4 @@ def getLowerCaseDict(dict, key=True, value = True):
         return dict
 
     return lowercase
->>>>>>> e1c541f282411dc27b523bc6e6b7346efd83ea34
+
