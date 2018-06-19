@@ -42,7 +42,7 @@ class priceThread(threading.Thread):
             time.sleep(1)
 
     def getPrice(self):
-        return self.price
+        return self.price[0]
 
 
 async def getData(symbol, timestamp, percentLoss, priceThread):
