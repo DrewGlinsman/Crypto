@@ -2,15 +2,20 @@ import websockets
 import asyncio
 import os
 import ast
-import requests
 import threading
-import sqlite3
 import time
-import pathlib
+
+
+import PriceSymbolsUpdater
+
+from Generics import priceSymbols, getLowerCaseDict
+
+
 
 #setup the relative file path
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname + '/', '')
+
 
 class depthThread(threading.Thread):
     def __init__(self, symbol, desiredVolume, maxLoss, price):
@@ -35,12 +40,8 @@ class priceThread(threading.Thread):
             time.sleep(1)
 
 
-priceSymbols = {'bitcoin': 'btcusdt', 'ripple': "xrpbtc",
-                'ethereum': 'ethbtc', 'bcc': 'bccbtc',
-                'ltc': 'ltcbtc', 'dash': 'dashbtc',
-                'monero': 'xmrbtc', 'qtum': 'qtumbtc', 'etc': 'etcbtc',
-                'zcash': 'zecbtc', 'ada': 'adabtc', 'adx': 'adxbtc', 'aion' : 'aionbtc', 'amb': 'ambbtc', 'appc': 'appcbtc', 'ark': 'arkbtc', 'arn': 'arnbtc', 'ast': 'astbtc', 'bat': 'batbtc', 'bcd': 'bcdbtc', 'bcpt': 'bcptbtc', 'bnb': 'bnbbtc', 'bnt': 'bntbtc', 'bqx': 'bqxbtc', 'brd': 'brdbtc', 'bts': 'btsbtc', 'cdt': 'cdtbtc', 'cmt': 'cmtbtc', 'cnd': 'cndbtc', 'dgd': 'dgdbtc', 'dlt': 'dltbtc', 'dnt': 'dntbtc', 'edo': 'edobtc', 'elf': 'elfbtc', 'eng': 'engbtc', 'enj': 'enjbtc', 'eos': 'eosbtc', 'evx': 'evxbtc', 'fuel': 'fuelbtc', 'fun': 'funbtc', 'gas': 'gasbtc', 'gto': 'gtobtc', 'gvt': 'gvtbtc', 'gxs': 'gxsbtc', 'hsr': 'hsrbtc', 'icn': 'icnbtc', 'icx': 'icxbtc', 'iota': "iotabtc", 'kmd': 'kmdbtc', 'knc': 'kncbtc', 'lend': 'lendbtc', 'link':'linkbtc', 'lrc':'lrcbtc', 'lsk':'lskbtc', 'lun': 'lunbtc', 'mana': 'manabtc', 'mco': 'mcobtc', 'mda': 'mdabtc', 'mod': 'modbtc', 'mth': 'mthbtc', 'mtl': 'mtlbtc', 'nav': 'navbtc', 'nebl': 'neblbtc', 'neo': 'neobtc', 'nuls': 'nulsbtc', 'oax': 'oaxbtc', 'omg': 'omgbtc', 'ost': 'ostbtc', 'poe': 'poebtc', 'powr': 'powrbtc', 'ppt': 'pptbtc', 'qsp': 'qspbtc', 'rcn': 'rcnbtc', 'rdn': 'rdnbtc', 'req': 'reqbtc', 'salt': 'saltbtc', 'sngls': 'snglsbtc', 'snm': 'snmbtc', 'snt': 'sntbtc', 'storj': 'storjbtc', 'strat': 'stratbtc', 'sub': 'subbtc', 'tnb': 'tnbbtc', 'tnt': 'tntbtc', 'trig': 'trigbtc', 'trx': 'trxbtc', 'ven': 'venbtc', 'vib': 'vibbtc', 'vibe': 'vibebtc', 'wabi': 'wabibtc', 'waves': 'wavesbtc', 'wings': 'wingsbtc', 'wtc': 'wtcbtc', 'xvg': 'xvgbtc', 'xzc': 'xzcbtc', 'yoyo': 'yoyobtc', 'zrx': 'zrxbtc'}
 
+<<<<<<< HEAD
 symbols = ['btcusdt', "xrpbtc",
                 'ethbtc', 'bccbtc',
                'ltcbtc', 'dashbtc',
@@ -49,6 +50,10 @@ symbols = ['btcusdt', "xrpbtc",
 
 possibleBuyCryptos = []
 possibleSellCryptos = []
+=======
+
+possibleCryptos = []
+>>>>>>> e1c541f282411dc27b523bc6e6b7346efd83ea34
 lock = threading.Lock()
 
 base = 'wss://stream.binance.com:9443/ws/'
@@ -223,15 +228,25 @@ def calcPercentChange(startVal, endVal):
     return (((float(endVal) - float(startVal)) / float(startVal)) * 100)
 
 
-def generatePriceSymbols(desiredVolume, maxLoss, price):
+
+def generatePriceSymbols(desiredVolume, maxLoss, website='binance'):
+
     """
     :param desiredVolume:
     :param maxLoss:
+    :param website:
     :return:
     """
+    global priceSymbols
 
     #list to hold all the threads
     threads = []
+
+    #get an updated version of price symbols
+    symbols = PriceSymbolsUpdater.chooseUpdate(website)
+
+    #get the prices to lowercase
+    priceSymbols = getLowerCaseDict(symbols)
 
     #iterate through the price symbols dictionary and create a thread to find the the depth of that crypto then append the thread to the list of threads
     for key, currencyname in priceSymbols.items():

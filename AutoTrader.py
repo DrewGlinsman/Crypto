@@ -37,12 +37,11 @@ except ImportError:
 TESTING = 1
 
 #setup the relative file path
-dirname = os.path.dirname(__file__)
+dirname = os.path.dirname(os.path.realpath(__file__))
 filename = os.path.join(dirname + '/', 'Logs')
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 logPaths = os.path.join(dirname + '/', 'Logs')
-
 
 #log file name + path
 logCompletePath = os.path.join(logPaths, "log.txt")
@@ -52,7 +51,6 @@ file = open(logCompletePath, "a+")
 
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 paramPaths = os.path.join(dirname, '')
-
 
 #param file name + path
 paramCompletePath = os.path.join(paramPaths, "BEST_PARAMETERS.txt")
@@ -239,6 +237,7 @@ def getBalance(symbol):
     return balance
 
 #buy the specified crypto currency
+
 def buyBin(symbol):
     """
     :param symbol:
