@@ -61,9 +61,12 @@ class CryptoStatsAnalysis:
         # Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
         logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
         #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+        #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+        logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
         #concatenates the logpath with a autotrader vs crypto evalutor distinction
         withMode = logPaths + '\\Mode-' + training
+        withMode = logPaths + '\Mode-' + training
 
         # datetime object that holds the date
         date = datetime.date.today()
@@ -73,16 +76,20 @@ class CryptoStatsAnalysis:
 
         # concatenates the logpath with a date so each analysis log set is in its own file by day
         withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
+        withDate = withMode + '\Year-' + str(year) + '\Month-' + str(calendar.month_name[month] + '\Day-' + str(day))
 
 
         #concatenates the timestamp of the crypto trainer
         withRunTime = withDate  + '\\RunTime-'+  str(runTime)
+        withRunTime = withDate  + '\RunTime-'+  str(runTime)
 
         #concatenates with the class of the run included
         withClass = withRunTime + '\\Class-' + str(int(classNum))
+        withClass = withRunTime + '\Class-' + str(int(classNum))
 
         #concatenates with the variation number
         withVarNum = withClass + '\\Variation-' +str(int(variationNum))
+        withVarNum = withClass + '\Variation-' +str(int(variationNum))
 
         #creates a directory if one does not exist
         pathlib.Path(withVarNum).mkdir(parents=True, exist_ok=True)

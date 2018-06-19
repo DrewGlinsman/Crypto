@@ -19,6 +19,8 @@ basesource = r'wss://stream.binance.com:9443'
 
 #param file name + path
 paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+# paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+paramPaths = r'C:\Users\DrewG\Documents\Github\Crypto'
 #makes the directorys in the path variable if they do not exist
 pathlib.Path(paramPaths).mkdir(parents=True, exist_ok=True)
 
@@ -36,6 +38,8 @@ def main():
 #reads pickle from a file
 def testReadParamPickle():
     logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
+    #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
+    logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\\'
     pickle_in = open(logPaths + '\\' + "param.pkl", "rb")
     testDict = pickle.load(pickle_in)
 
@@ -46,6 +50,8 @@ def testReadParamPickle():
 def testWriteParamPickle():
     testDict = PARAMETERS
     logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
+    #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\\'
+    logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\\'
     pickle_out = open(logPaths + '\\' + "param.pkl", "wb")
     pickle.dump(testDict, pickle_out)
     pickle_out.close()

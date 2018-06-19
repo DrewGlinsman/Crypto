@@ -27,12 +27,16 @@ stepsize = {}
 #path to save the different text files in
 #cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
 cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
+cryptoPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoData'
+#cryptoPaths = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoData'
 #makes the directorys in the path variable if they do not exist
 pathlib.Path(cryptoPaths).mkdir(parents=True, exist_ok=True)
 
 
 logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
 #logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+#logPath = r'C:\Users\katso\Documents\GitHub\Crypto\CryptoDataDebug.txt'
+logPath = r'C:\Users\DrewG\Documents\GitHub\Crypto\CryptoDataDebug.txt'
 
 
 file = open(logPath, "w")

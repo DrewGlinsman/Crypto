@@ -27,6 +27,8 @@ from PrivateData import api_key, secret_key
 #Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
 paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
 #paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+paramPaths = r'C:\Users\DrewG\Documents\GitHub\Crypto'
 
 
 #param file name + path
@@ -39,6 +41,8 @@ file = open(paramCompletePath, "r+")
 
 #param file name + path
 paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+#paramPaths = r'C:\Users\katso\Documents\GitHub\Crypto'
+
 #makes the directorys in the path variable if they do not exist
 pathlib.Path(paramPaths).mkdir(parents=True, exist_ok=True)
 
@@ -164,9 +168,12 @@ def buildLogs():
 
     logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
     #logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
+    #logPaths = r'C:\Users\katso\Documents\GitHub\Crypto\Logs'
+    logPaths = r'C:\Users\DrewG\Documents\Github\Crypto\Logs'
 
     #concatenates with the mode this is running in (solo, training in a class with other variations)
     withMode = logPaths + '\\Mode-' + running
+    withMode = logPaths + '\Mode-' + running
 
     #datetime object that holds the date
     date =  datetime.date.today()
@@ -177,11 +184,14 @@ def buildLogs():
 
     # concatenates the logpath with a date so each analysis log set is in its own file by day
     withDate = withMode + '\\Year-' + str(year) + '\\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
+    withDate = withMode + '\Year-' + str(year) + '\Month-' + str(calendar.month_name[month] + '\\Day-' + str(day))
 
     withRunTime = withDate + '\\RunTime-' + str(runTime)
+    withRunTime = withDate + '\RunTime-' + str(runTime)
 
     #the label for the trainer so that it gets its own folder
     withTrainer = withRunTime + '\\Trainer'
+    withTrainer = withRunTime + '\Trainer'
 
     # creates a directory if one does not exist
     pathlib.Path(withTrainer).mkdir(parents=True, exist_ok=True)
@@ -316,6 +326,8 @@ def createPickleDirect(classNum, varNum):
 
     # path for directory of pickle files passed from the trainer
     picklePath = r'C:\Users\katso\Documents\GitHub\Crypto\O-IO'
+    #picklePath = r'C:\Users\katso\Documents\GitHub\Crypto\O-IO'
+    picklePath = r'C:\Users\DrewG\Documents\Github\Crypto\O-IO'
 
     # concatenates with the mode this is running in (solo, training in a class with other variations)
     modePickleDirec = picklePath + '\\Mode-' + running
@@ -486,6 +498,7 @@ def main():
         for var in range(NUM_ITERATIONS):
             file2.write("Class " + str(cla) + " Variation " + str(var) + ' Return ' + str(returns[cla * var + var]) + '\n')
 
+    print("andrew is the best")
     file2.close()
 
 
