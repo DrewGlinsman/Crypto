@@ -24,20 +24,16 @@ def setUpLog(directory, filename):
 # correspond to it
 
 
-def grabParamFile(idnum, website, day, hour, min, typedirec='storage'):
+def grabParamFile(directory, picklefilename):
     """
-    :param day: the day of the week that the params were produced from
-    :param website: the website that the params were trained with data from
-    :param idnum: the idnumber of the supertrainer param file
-    :param hour: the hour of the test
-    :param min: the minute the test was run
-    :param typedirec: the type of directory the param file will be stored in
-    :return:
+    :param directory: the directory where the file is
+    :param picklefilename: the pickle file name
+    :return: the param dict
     """
-    directory = "{}{}/{}/{}/{}/{}".format(filename, typedirec, website, day, hour, min)
+
     # makes the directorys in the path variable if they do not exist
     pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
-    with open(directory + "/{}superparam.pkl".format(idnum), "rb") as pickle_in:
+    with open("{}/{}".format(directory, picklefilename), "rb") as pickle_in:
         paramDict = pkl.load(pickle_in)
 
     return paramDict
@@ -46,21 +42,17 @@ def grabParamFile(idnum, website, day, hour, min, typedirec='storage'):
 # if no id is provided it will overwrite the first one
 
 
-def writeParamPickle(paramDict, website, day, hour, min, idnum, typedirec='storage'):
+def writeParamPickle(paramDict, directory, picklefilename):
     """
-    :param paramDict: the super trainer parameter dictionary to be written to
-    :param day: the day of the week that the supertrainer was trained on
-    :param website: the website that the supertrainer was trained on
-    :param idnum: the id number of the super trainer parameter file
-    :param hour: the hour of the test
-    :param min: the minute the test was run
-    :param typedirec: the type of directory the param file will be stored in
+    :param paramDict: the parameter dictionary to write
+    :param directory: the directory desired to be written to
+    :param picklefilename: the name of the pickleifile
     :return:
     """
-    directory = "{}{}/{}/{}/{}/{}".format(filename, typedirec, website, day, hour, min)
+
     # makes the directorys in the path variable if they do not exist
     pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
-    with open(directory + "/{}superparam.pkl".format(idnum), "wb") as pickle_out:
+    with open("{}/{}".format(directory, picklefilename), "wb") as pickle_out:
         pkl.dump(paramDict, pickle_out)
 
 # reads the parameters passed from the script running this file
@@ -134,34 +126,53 @@ def runBots(procs, paramspassed, idnummax):
     :return:
     """
     numprocs = 0
-
     # randomizes parameters and runs different instances of the bot using the different starting parameters
     for proc in procs:
         # if we exceed the number of old parameter files we want to grab we randomly pick one and randomize it
         if (numprocs > paramspassed['oldidnummax']):
             #get a random id number
             curridnum = int(random.uniform(0, 1) * idnummax)
+
+            #the directory to look in for a param file to randomize
+            storeagedirectory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'], paramspassed['min'])
+
             #grab the param file we chose from the stored param files
-            paramstorandomize = grabParamFile(curridnum, paramspassed['website'], paramspassed['day'],paramspassed['hour'], paramspassed['min'], 'storage')
+            paramstorandomize = grabParamFile(storeagedirectory ,str(curridnum)+'superparam.pkl')
+
             #randomize it
             randomizeParams(paramstorandomize)
+
+            #directory to be used in writing the param pickle file below
+            directory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'], paramspassed['min'],
+                                     typedirec='training')
+
             #write it to a new file in the training directory
-            writeParamPickle(paramstorandomize, paramspassed['website'], paramspassed['day'], paramspassed['hour'], paramspassed['min'], numprocs, 'training')
+            writeParamPickle(paramstorandomize, directory, str(numprocs)+'superparam.pkl')
 
         else: #otherwise we grab a random parameter file
             curridnum = int(random.uniform(0, 1) * idnummax)
+
+            # the directory to look in for a param file to randomize
+            storeagedirectory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'],
+                                             paramspassed['min'])
+
             #grab the file with the related id from the storage set
-            paramstouse = grabParamFile(curridnum, paramspassed['website'], paramspassed['day'], paramspassed['hour'],
-                          paramspassed['min'], 'storage')
+            paramstouse = grabParamFile(storeagedirectory, str(curridnum) + 'superparam.pkl')
+
+            #directory to be used to write to the training directtory
+            directory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'], paramspassed['min'],
+                                     typedirec='training')
+
             #write it to a new file in the training directory
-            writeParamPickle(paramstouse, paramspassed['website'], paramspassed['day'], paramspassed['hour'],
-                             paramspassed['min'], numprocs, 'training')
+            writeParamPickle(paramstouse, directory, str(numprocs)+'superparam.pkl')
 
 
 
         out = proc.communicate(
-            input=("{} {} {} {} {}").format( paramspassed['website'], paramspassed['day'],
-                                                                 paramspassed['hour'], paramspassed['min'], numprocs))
+            input=("{} {} {} {} {} {}").format( paramspassed['website'], paramspassed['day'],
+                                                       paramspassed['hour'], paramspassed['min'], numprocs, curridnum))
+
+        #TODO finish changing it so it reads back the super param and param file and decides if it should overwrite any stored files
         logging.info(out)
         print(out)
         numprocs+=1
@@ -186,7 +197,9 @@ def initparamdirectory(directory, currnumparamfiles, desirednumparamfiles, param
         #if the directory path name is storage (training mode does not start with writing params because that is guaranteed
         # to happen when we start the training)
         if 'storage' in directory:
-            writeParamPickle(superParams, paramspassed['website'], paramspassed['day'], paramspassed['hour'], paramspassed['min'], idnum)
+            writeParamPickle(superParams, directory, str(idnum) + 'superparam.pkl')
+            writeParamPickle(PARAMETERS, "{}/{}".format(directory, idnum), 'baseparams.pkl')
+
         #makes the directory to house the related Evaluator Parameter files for the different evaluators
         pathlib.Path("{}/{}".format(directory, idnum)).mkdir(parents=True, exist_ok=True)
 

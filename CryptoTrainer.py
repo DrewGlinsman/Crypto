@@ -241,15 +241,12 @@ def readParamsPassed():
 
 
     if len(sys.argv) == 1:
-        paramspassed = defaulttrainerparamspassed
-        baseparams = superParams
+
         paramspassed = defaulttrainerparamspassed
         baseparams = superParams
     elif sys.argv[1] == "Alone":
-        paramspassed = defaulttrainerparamspassed
-        baseparams = superParams
         paramspassed = {'website': sys.argv[2], 'day': sys.argv[3], 'hour': sys.argv[4], 'min': sys.argv[5],
-                        'idnum': int(sys.argv[6])}
+                        'idnum': int(sys.argv[6]), 'originalid': sys.argv[9]}
         baseparams = superParams
         baseparams['classes'] = sys.argv[7]
         baseparams['variations'] = sys.argv[8]
@@ -258,7 +255,7 @@ def readParamsPassed():
             if line != '':
                 params = line.split()
                 paramspassed = {'website': params[0], 'day': params[1], 'hour': params[2], 'min': params[3],
-                                'idnum': int(params[4])}
+                                'idnum': int(params[4]), 'originalid': int(params[5])}
                 directory = "{}/{}/{}/{}/{}/{}/".format(dirname, 'training', paramspassed['website'], paramspassed['day'], paramspassed['hour']
                                           , paramspassed['min'])
                 # makes the directorys in the path variable if they do not exist
@@ -325,7 +322,7 @@ def buildDirectory(botparams, passparams, typedirec='storage', typefile='variati
     """
 
     return "{}/{}/{}/{}/{}/{}/{}/{}/".format(dirname, typedirec, passparams['website'], passparams['day'], passparams['hour'],
-                                       passparams['min'],passparams['idnum'],botparams['CLASS_NUM'], typefile,
+                                       passparams['min'] , passparams['idnum'],botparams['CLASS_NUM'], typefile,
                           )
 
 def main():
@@ -334,6 +331,9 @@ def main():
     global minInDay
     global runTime
 
+    #counters for the number of total bots and the bots that had positive returns
+    numbots = 0
+    numposbots = 0
 
 
     # keeps track of how many times the parameters are changed
@@ -343,23 +343,30 @@ def main():
 
     paramspassed, baseparams = readParamsPassed()
     initdirectories(paramspassed, baseparams)
-    initdirectories(paramspassed,baseparams,  typedirec='training')
+    initdirectories(paramspassed, baseparams,  typedirec='training')
 
     direc = "{}/{}/{}/{}/{}/{}/{}/".format(dirname, 'training', paramspassed['website'], paramspassed['day'], paramspassed['hour'],
                                         paramspassed['min'], paramspassed ['idnum'])
 
     #directory name where the log file is stored
     logdirectory = direc + 'trainerlogs/'
+
     #name of the directory log file
     logfilename = 'trainer.log'
+
     #setup up the log file for this trainer
     setUpLog(logdirectory, logfilename)
 
-    #setup a reference parameter file to edit
-    writeParamPickle(PARAMETERS, direc, 'baseparams.pkl')
+    #the directory for the corresponding storage space for this evaluator and trainer
+    storagedirectory = "{}/{}/{}/{}/{}/{}/{}/".format(dirname, 'storage', paramspassed['website'], paramspassed['day'], paramspassed['hour'],
+                                        paramspassed['min'], paramspassed['originalid'])
 
-    #setup the parameters used to be the base parameters
-    params = readParamPickle(direc, 'baseparams.pkl')
+    #get the stored evaluator parameters relevant to this trainer from storage
+    params = readParamPickle(storagedirectory, 'baseparams.pkl')
+
+    #setup a reference parameter file to edit
+    writeParamPickle(params, direc, 'baseparams.pkl')
+
 
     # store the multiple processes
     for i in range(baseparams['classes']):
@@ -411,14 +418,20 @@ def main():
             # if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
             if (cumulativePerentChangeStore >= current_Max and params['CYCLES'] > superParams['MIN_CYCLES'] and
                     cumulativePerentChangeStore != 0.0 or count == 0):
+                #add up the number of positive bots
+                if(cumulativePerentChangeStore > 0.0):
+                    numposbots += 1
+
                 current_Max = cumulativePerentChangeStore
                 stored_output = params
                 newParamCount += 1
             #load the stored base parameters for this class before the next variation is made
             params = readParamPickle(direc, "baseparams.pkl")
             variationNum += 1
+            #add up the number of total bots
+            numbots+=1
 
-        print('Current Max: {}'.format(current_Max))
+        logging.info('Current Max: {}'.format(current_Max))
         final_Dict = stored_output
         for z in procs:
             z.wait()
@@ -426,6 +439,12 @@ def main():
         # rewrite the parameter file with the final Dict
         writeParamPickle(final_Dict, direc, 'baseparams.pkl')
 
+    paramspassed['percentpositivebots'] = numposbots / numbots * 100
+
+    #update the original training super param file
+    writeParamPickle(paramspassed, direc, str(paramspassed['idnum']) + 'superparam.pkl')
+
+    print(paramspassed['percentpositivebots'])
 
 if __name__ == "__main__":
     main()

@@ -126,7 +126,7 @@ minSuperFiles = 10
 defaultsuperparamspassed = {'website': 'binance', 'day': 'monday', 'numsessions': 10, 'oldidnummax': 10, 'hour': 9, 'min': 00}
 
 #default values for the passsed parameters to a cryptotrainer file
-defaulttrainerparamspassed = {'website': 'binance', 'day': 'monday', 'hour': 9, 'min': 0, 'idnum': 1}
+defaulttrainerparamspassed = {'website': 'binance', 'day': 'monday', 'hour': 9, 'min': 0, 'idnum': 1, 'originalid': 1}
 
 #TODO implement a stored param for ALL levels that is 'lossallowed'
 #input values that are stored for each evaluator (other than parameters)

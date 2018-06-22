@@ -217,13 +217,18 @@ def writeParamPickle(paramDict, directory, picklefilename):
 #todo add a way to read in the runNumber from the crypto trainer
 def readTheInput():
 
+    global storedInput
+    global PARAMETERS
+
     if len(sys.argv) == 1:  # if there are no parameters passed (will be = 3 if this is being run as a subprocess)
         # make the max cycles equal to the number of days of the interval in hours
         PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
         PARAMETERS['CLASS_NUM'] = -1
 
 
-        return PARAMETERS
+        return storedInput, PARAMETERS
+
+
     if sys.argv[1] == "Alone": #if there are more than one argument than we know this is being run from a separate file
         # make the max cycles equal to the number of days of the interval in hours
         PARAMETERS['MAX_CYCLES'] = (PARAMETERS['INTERVAL_TO_TEST'] / minInDay) * 24.0
@@ -235,7 +240,7 @@ def readTheInput():
         storedInput['classNum'], PARAMETERS['CLASS_NUM'] = sys.argv[7] #default should be -1
         storedInput['idnum'] = sys.argv[8]
 
-        return PARAMETERS
+        return storedInput, PARAMETERS
 
     else:
 
@@ -650,6 +655,10 @@ def getScore(symbol):
 
     new_score += (modifiedVolume[symbol] / maxValues['MODIFIED_VOLUME']) * PARAMETERS['MODIFIED_VOLUME_MODIFIER']
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 7566a815060edbc502fb7723146558dd55b69dd2
     return new_score
 
 
