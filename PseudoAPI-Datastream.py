@@ -31,6 +31,15 @@ TWO_HOURS = 7200000
 #two hours in min
 TWO_HOURS_MIN = 120
 
+#one day in ms
+ONE_DAY = 86400000
+
+#one third day in ms
+ONE_THIRD_DAY = 28800000
+
+#one third day in min
+ONE_THIRD_MIN = 480
+
 #one minute in ms
 ONE_MIN_MS = 60000
 
@@ -161,7 +170,7 @@ def primeDatabase(connections, priceSymbols):
     endTime = requests.get("https://api.binance.com/api/v1/time")
     endTime = endTime.json()
     endTime = endTime['serverTime']
-    startTime = endTime - TWO_HOURS
+    startTime = endTime - ONE_THIRD_DAY
 
     #temporary dictionaries for each of the five types of data
     openpricedict = {}
@@ -170,54 +179,55 @@ def primeDatabase(connections, priceSymbols):
     lowpricedict = {}
     volumedict = {}
 
-    #set up the dicts to be made of lists where the index is the minute associated with the list of values
-    # and the values of each list correspond to the currencies in order from price symbols
-    # these are made this way to facilitate easy transfer to the tables of the database
-    for minute in range(TWO_HOURS_MIN):
-        openpricedict.update({minute: []})
-        closepricedict.update({minute: []})
-        highpricedict.update({minute: []})
-        lowpricedict.update({minute: []})
-        volumedict.update({minute: []})
+    for x in range(0,3):
+        endTime += ONE_THIRD_DAY
+        startTime = endTime - ONE_THIRD_DAY
+        #set up the dicts to be made of lists where the index is the minute associated with the list of values
+        # and the values of each list correspond to the currencies in order from price symbols
+        # these are made this way to facilitate easy transfer to the tables of the database
+        for minute in range(ONE_THIRD_MIN):
+            openpricedict.update({minute: []})
+            closepricedict.update({minute: []})
+            highpricedict.update({minute: []})
+            lowpricedict.update({minute: []})
+            volumedict.update({minute: []})
 
-    #iterate through the dictionary of price symbols and store the five kinds of data in their corresponding dictionaries
-    for currencyname in priceSymbols:
-        #store 2 hours of data for the five categories to prime the database
-        parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
-        data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
-        data = data.json()
+        #iterate through the dictionary of price symbols and store the five kinds of data in their corresponding dictionaries
+        for currencyname in priceSymbols:
+            #store 2 hours of data for the five categories to prime the database
+            parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
+            data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
+            data = data.json()
 
-        #iterate through the 2 hours of data and store it in ascending order (oldest to newest)
-        min = 0
-        for interval in data:
-            openpricedict[min].append(interval[1])
-            closepricedict[min].append(interval[4])
-            highpricedict[min].append(interval[2])
-            lowpricedict[min].append(interval[3])
-            volumedict[min].append(interval[5])
+            #iterate through the 2 hours of data and store it in ascending order (oldest to newest)
+            min = 0
+            for interval in data:
+                openpricedict[min].append(interval[1])
+                closepricedict[min].append(interval[4])
+                highpricedict[min].append(interval[2])
+                lowpricedict[min].append(interval[3])
+                volumedict[min].append(interval[5])
 
-            min+=1
+                min+=1
 
-    #grabbing the time after the last set of data is stored
-    buffertimestart = time.time()
+        #grabbing the time after the last set of data is stored
+        buffertimestart = time.time()
 
+        #add each row of data to the five tables of the database
+        for rownum in range(ONE_THIRD_MIN):
+            #storre the list of values for the current row (minute) in the format used to create a new table row
+            opens = (openpricedict[rownum]);
+            closes = (closepricedict[rownum]);
+            highs = (highpricedict[rownum]);
+            lows = (lowpricedict[rownum]);
+            volumes = (volumedict[rownum]);
 
-
-    #add each row of data to the five tables of the database
-    for rownum in range(TWO_HOURS_MIN):
-        #storre the list of values for the current row (minute) in the format used to create a new table row
-        opens = (openpricedict[rownum]);
-        closes = (closepricedict[rownum]);
-        highs = (highpricedict[rownum]);
-        lows = (lowpricedict[rownum]);
-        volumes = (volumedict[rownum]);
-
-        #pass the new lists of values to the functions that append them as new rows to each database
-        add_row(connections, 'openprices', opens, priceSymbols)
-        add_row(connections, 'closepricess', closes, priceSymbols)
-        add_row(connections, 'highprices', highs, priceSymbols)
-        add_row(connections, 'lowprices', lows, priceSymbols)
-        add_row(connections, 'volumes', volumes, priceSymbols)
+            #pass the new lists of values to the functions that append them as new rows to each database
+            add_row(connections, 'openprices', opens, priceSymbols)
+            add_row(connections, 'closepricess', closes, priceSymbols)
+            add_row(connections, 'highprices', highs, priceSymbols)
+            add_row(connections, 'lowprices', lows, priceSymbols)
+            add_row(connections, 'volumes', volumes, priceSymbols)
 
 
 #creates a connection with the specified database file
@@ -548,6 +558,7 @@ def main():
     connection.commit()
 
     cursor = connection.cursor()
+
     #uncomment if you want to clear the database before using
     """
     for name in tablenames:

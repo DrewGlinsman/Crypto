@@ -14,6 +14,7 @@ import time
 import datetime
 from pathlib import Path
 from Generics import priceSymbols, maxVolume
+from PriceSymbolsUpdater import updatePriceSymbolsBinance
 
 style.use("ggplot")
 
@@ -299,9 +300,10 @@ def readPickle(symbol, weekday, timestamp):
 
 
 def main():
+    priceSymbols = updatePriceSymbolsBinance()
     # start of the main code
     # compare current time against 4 pm to see if its within a ten minute interval
-    baseTS = datetime.datetime(2018, 5, 25, 16, 30, 0)
+    baseTS = datetime.datetime(2018, 5, 25, 16, 0, 0)
     baseTS = baseTS.astimezone(pytz.timezone('US/Eastern'))
 
     threads = []
