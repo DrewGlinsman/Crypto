@@ -313,3 +313,8 @@ Generics
 PseudoAPIDataStream
 -all rows are  build using full symbol list
 -all tables are build using full symbol list
+
+6/23/18
+
+CryptoStats
+-now uses an absolute end time where all other endtimes are built off of that

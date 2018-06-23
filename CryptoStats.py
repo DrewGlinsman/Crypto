@@ -43,7 +43,7 @@ file = open(logPath, "w")
 #one day in ms
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
-COUNT = 3
+COUNT = 2
 
 def getDataBinance(numDays):
     """
@@ -52,11 +52,18 @@ def getDataBinance(numDays):
     :return:
     """
     global priceSymbols
+    noData = {}
 
     priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
 
+    #the absolute end time for all data
+    absEndTime = requests.get("https://api.binance.com/api/v1/time")
+    absEndTime = absEndTime.json()
+
     #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
     for key, currencyname in priceSymbols.items():
+
+        noDataCount = 0
         #creating the file path lengths and opening them
         openPriceCryptoPath = os.path.join(cryptoPaths, currencyname + "OpenPrice" + ".txt")
         closePriceCryptoPath = os.path.join(cryptoPaths, currencyname + "ClosePrice" + ".txt")
@@ -72,13 +79,17 @@ def getDataBinance(numDays):
         #while loop with a counter to make sure that the start and endtime stay one day apart but go backwards in time, numdays amount of days
         timeBackwards = 0
         while(timeBackwards < ONE_DAY*numDays):
-            endTime = requests.get("https://api.binance.com/api/v1/time")
-            endTime = endTime.json()
-            endTime = endTime['serverTime'] - timeBackwards
+            endTime = absEndTime['serverTime'] - timeBackwards
             startTime = endTime - ONE_THIRD_DAY
             parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
+
+            if(len(data) == 0):
+                noDataCount+=1
+                noData.update({currencyname: noDataCount})
+
+
             print("Length of data set: {} coin associated with data set: {} data set: {}".format(len(data), currencyname, data))
             for i in reversed(data):
                 oprice.write("{},".format(i[1]))
@@ -88,6 +99,7 @@ def getDataBinance(numDays):
                 volume.write("{},".format(i[5]))
             timeBackwards += ONE_THIRD_DAY
 
+    print(noData)
     #closing all the files once we're done
     oprice.close()
     highPrice.close()
