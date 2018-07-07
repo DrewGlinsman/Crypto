@@ -401,7 +401,7 @@ def add_row(conn, tablename, values, colnames):
     """
     sqlstatement = buildAddRow(tablename, colnames)
 
-
+    print('Values: {}'.format(values)) 
     cur = conn.cursor()
     cur.execute(sqlstatement, values)
 
@@ -465,14 +465,18 @@ def select_by_crypto(conn, tablename, crypto, id=-1):
     if id != -1:
         statement = "SELECT " + crypto + " FROM " + tablename + " WHERE id=?"
         cur.execute(statement, (id,))
+        row = cur.fetchall()
+
+        print(row)
+
+        if len(row) >= 1:
+            return row[0]
+        return row
     else:
-        statement = "SELECT * FROM  " + tablename
+        statement = "SELECT " + crypto + " FROM " + tablename
         cur.execute(statement)
 
     rows = cur.fetchall()
-
-    for row in rows:
-        print(row)
 
     return rows
 
@@ -541,8 +545,7 @@ def getNumRows(cursor, tablename):
 
     dataCopy = cursor.execute("select count(*) from " + tablename)
     values = dataCopy.fetchone()
-    print
-    values[0]
+    return values[0]
 
 def main():
     global priceSymbols
@@ -573,7 +576,7 @@ def main():
     connection.commit()
     """
 
-
+    '''
     numRows = getNumRows(cursor, 'openprices')
 
     if(isinstance(numRows, int)):
@@ -590,7 +593,7 @@ def main():
 
 
 
-    '''
+    
     #waits for one minute - time spent priming database with 2 hours of data so that the next data we grab is a full minute
     #after we have primed
     time.sleep(60.0 - ((time.time() - buffertimestart) % 60.0))

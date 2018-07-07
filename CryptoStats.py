@@ -8,6 +8,7 @@ import pickle
 import sys
 import pathlib
 import PriceSymbolsUpdater
+import sqlite3
 
 from Generics import priceSymbols
 
@@ -15,6 +16,10 @@ from Generics import priceSymbols
 #todo figure out if it is better to insert items at front of the lists or to just remake the lists in reverse order
 
 
+#setup the relative file path
+dirname = os.path.dirname(os.path.realpath(__file__))
+filename = os.path.join(dirname + '/', '')
+databasePath = os.path.join(dirname + '/', 'databases')
 
 #dictionarys to store the data after its read in from a text file.
 cryptoOpenPriceData = {}
@@ -44,6 +49,47 @@ file = open(logPath, "w")
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
 COUNT = 3
+
+def getDataDatabase(numDays, startTime):
+    """
+    :param numDays:
+    :return:
+    """
+    global priceSymbols
+
+    
+
+    priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
+
+    #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
+    dirname = os.path.dirname(os.path.realpath(__file__))
+    filename = os.path.join(dirname + '/', '')
+    databasePath = os.path.join(dirname + '/', 'databases/' + 'binance.db')
+    conn = sqlite3.connect(databasePath)
+
+    openPriceDict = {}
+    closePriceDict = {}
+    volumeDict = {}
+    highPriceDict = {}
+    lowPriceDict = {}
+
+    for key, crypto in priceSymbols.items():
+        if(crypto == 'KEYBTC' or crypto == 'NASBTC'):
+            continue
+
+        openPrice = select_by_crypto(conn, 'openprices', crypto)
+        closePrice = select_by_crypto(conn, 'closeprices', crypto)
+        volume = select_by_crypto(conn, 'volumes', crypto)
+        highPrice = select_by_crypto(conn, 'highprices', crypto)
+        lowPrice = select_by_crypto(conn, 'lowprices', crypto)
+
+        openPriceDict.update({key:openPrice})
+        closePriceDict.update({key:closePrice})
+        volumeDict.update({key:volume})
+        highPriceDict.update({key:highPrice})
+        lowPriceDict.update({key:lowPrice})
+
+    return openPriceDict, closePriceDict, volumeDict, highPriceDict, lowPriceDict
 
 def getDataBinance(numDays):
     """

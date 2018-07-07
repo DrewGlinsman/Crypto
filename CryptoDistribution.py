@@ -311,6 +311,8 @@ def main():
     pThread = priceThread(price)
     pThread.start()
 
+    buffertimestart = time.time()
+
     while(True):
         # get the date current time and set it to US Eastern time
         currentTime = datetime.datetime.now(tz=pytz.UTC)
@@ -331,7 +333,8 @@ def main():
 
             for thread in threads:
                 thread.join()
-        time.sleep(1)
+
+        time.sleep(60.0 - ((time.time() - buffertimestart) % 60.0))
 
 
 if __name__ == "__main__":
