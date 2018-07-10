@@ -9,11 +9,10 @@ import PriceSymbolsUpdater
 import sqlite3
 import datetime
 import pytz
-import logging
 import requests
 from AutoTrader import getbinanceprice
 from Generics import PARAMETERS, superParams, priceSymbols
-from PseudoAPI_Datastream import select_by_crypto, getNumRows, add_row, select_all_rows
+from PseudoAPI_Datastream import select_by_crypto, getNumRows, add_row
 
 
 basesource = r'wss://stream.binance.com:9443'
@@ -49,125 +48,7 @@ def main():
     conn = sqlite3.connect(databasePath)
     cursor = conn.cursor()
 
-    logdirectory = os.path.dirname(os.path.realpath(__file__))
-    logfilename = '/randomshit.log'
-
-    select_all_rows(conn, 'closeprices')
-
-    setUpLog(logdirectory, logfilename)
-
-    #primeDatabase(conn, priceSymbols)
-
-#setup the log file for this evaluator
-def setUpLog(logdirectory, logfilename):
-    logging.basicConfig(filename=logdirectory+logfilename, level='INFO')
-
-#gives the databases 2 hours of data for each datatype
-def primeDatabase(connections, priceSymbols):
-    """
-    :param connections:
-    :param priceSymbols: the price symbols to use
-    :return:
-    """
-
-    #global buffertimestart
-
-    #one day in ms
-    ONE_DAY = 86400000
-
-    #one day in min
-    ONE_DAY_MIN = 1440
-
-    #one third day in ms
-    ONE_THIRD_DAY = 28800000
-
-    #one third day in min
-    ONE_THIRD_MIN = 480
-
-    #one minute in ms
-    ONE_MIN_MS = 60000
-
-    #one second in ms
-    ONE_SEC_MS = 1000
-
-    #grabbing the starttime of the data desired and the current time (endtime)
-    endTime = requests.get("https://api.binance.com/api/v1/time")
-    endTime = endTime.json()
-    endTime = endTime['serverTime']
-    startTime = endTime - ONE_THIRD_DAY
-
-    #temporary dictionaries for each of the five types of data
-    openpricedict = {}
-    closepricedict = {}
-    highpricedict = {}
-    lowpricedict = {}
-    volumedict = {}
-
-    x = ONE_THIRD_MIN
-    
-    # set up the dicts to be made of lists where the index is the minute associated with the list of values
-    # and the values of each list correspond to the currencies in order from price symbols
-    # these are made this way to facilitate easy transfer to the tables of the database
-    for minute in range(ONE_DAY_MIN):
-        openpricedict.update({minute: []})
-        closepricedict.update({minute: []})
-        highpricedict.update({minute: []})
-        lowpricedict.update({minute: []})
-        volumedict.update({minute: []}) 
-
-    while(x <= ONE_DAY_MIN):
-        minute = x - ONE_THIRD_MIN
-
-        print('Minute: {}, X: {}'.format(minute, x))
-       
-        logging.info('Open Price Dict before currencyname for loop: {}'.format(openpricedict))
-        #iterate through the dictionary of price symbols and store the five kinds of data in their corresponding dictionaries
-        for currencyname in priceSymbols:
-            #store 2 hours of data for the five categories to prime the database
-            parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
-            data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
-            data = data.json()
-
-            #iterate through the 2 hours of data and store it in ascending order (oldest to newest)
-            minute = x - ONE_THIRD_MIN
-            for interval in data:
-                openpricedict[minute].append(interval[1])
-                closepricedict[minute].append(interval[4])
-                highpricedict[minute].append(interval[2])
-                lowpricedict[minute].append(interval[3])
-                volumedict[minute].append(interval[5])
-
-                minute += 1
-
-        x += ONE_THIRD_MIN
-        endTime = startTime
-        startTime -= ONE_THIRD_DAY
-
-        logging.info('Open Price Dict: {}'.format(str(openpricedict)))
-        
-    #grabbing the time after the last set of data is stored
-    buffertimestart = time.time()
-    #print('Open Price Dict: {}'.format(openpricedict))
-    #add each row of data to the five tables of the database
-    for rownum in range(ONE_DAY_MIN):
-        #storre the list of values for the current row (minute) in the format used to create a new table row
-        opens = (openpricedict[rownum]);
-        closes = (closepricedict[rownum]);
-        highs = (highpricedict[rownum]);
-        lows = (lowpricedict[rownum]);
-        volumes = (volumedict[rownum]);
-
-        print('Open Price Dict: {}'.format(opens))
-
-        #pass the new lists of values to the functions that append them as new rows to each database
-        add_row(connections, 'openprices', opens, priceSymbols)
-        add_row(connections, 'closeprices', closes, priceSymbols)
-        add_row(connections, 'highprices', highs, priceSymbols)
-        add_row(connections, 'lowprices', lows, priceSymbols)
-        add_row(connections, 'volumes', volumes, priceSymbols)
-    
-
-
+    primeDatabase(conn, priceSymbols)
 
 # reads pickle from a file into the passed parameter dictionary
 def readParamPickle(directory, idnum):
@@ -404,7 +285,106 @@ def getDatabaseValues(numDays, priceSymbols, startHour, startMin):
     return openPriceDict, closePriceDict, volumeDict, highPriceDict, lowPriceDict
 
 
+#gives the databases 2 hours of data for each datatype
+def primeDatabase(connections, priceSymbols):
+    """
+    :param connections:
+    :param priceSymbols: the price symbols to use
+    :return:
+    """
 
+    #global buffertimestart
+
+    #one day in ms
+    ONE_DAY = 86400000
+
+    #one day in min
+    ONE_DAY_MIN = 1440
+
+    #one third day in ms
+    ONE_THIRD_DAY = 28800000
+
+    #one third day in min
+    ONE_THIRD_MIN = 480
+
+    #one minute in ms
+    ONE_MIN_MS = 60000
+
+    #one second in ms
+    ONE_SEC_MS = 1000
+
+    #grabbing the starttime of the data desired and the current time (endtime)
+    endTime = requests.get("https://api.binance.com/api/v1/time")
+    endTime = endTime.json()
+    endTime = endTime['serverTime']
+    startTime = endTime - ONE_THIRD_DAY
+
+    #temporary dictionaries for each of the five types of data
+    openpricedict = {}
+    closepricedict = {}
+    highpricedict = {}
+    lowpricedict = {}
+    volumedict = {}
+
+    x = ONE_THIRD_MIN
+    
+    while(x <= ONE_DAY_MIN):
+        minute = x - ONE_THIRD_MIN
+        # set up the dicts to be made of lists where the index is the minute associated with the list of values
+        # and the values of each list correspond to the currencies in order from price symbols
+        # these are made this way to facilitate easy transfer to the tables of the database
+        for minute in range(x):
+            openpricedict.update({minute: []})
+            closepricedict.update({minute: []})
+            highpricedict.update({minute: []})
+            lowpricedict.update({minute: []})
+            volumedict.update({minute: []}) 
+
+        #iterate through the dictionary of price symbols and store the five kinds of data in their corresponding dictionaries
+        for currencyname in priceSymbols:
+            #store 2 hours of data for the five categories to prime the database
+            parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
+            data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
+            data = data.json()
+
+            #iterate through the 2 hours of data and store it in ascending order (oldest to newest)
+            min = x - ONE_THIRD_MIN
+
+            for interval in data:
+                openpricedict[min].append(interval[1])
+                closepricedict[min].append(interval[4])
+                highpricedict[min].append(interval[2])
+                lowpricedict[min].append(interval[3])
+                volumedict[min].append(interval[5])
+
+                min+=1
+
+        x += ONE_THIRD_MIN
+        endTime = startTime
+        startTime -= ONE_THIRD_DAY
+    
+    print('Open Price Dict: {}, Close Price Dict: {}, High Price Dict: {}, Low Price Dict: {}, Volume Dict: {}'.format(len(openpricedict), len(closepricedict), len(highpricedict), len(lowpricedict), len(volumedict)))
+
+    
+    #grabbing the time after the last set of data is stored
+    buffertimestart = time.time()
+
+    #add each row of data to the five tables of the database
+    for rownum in range(ONE_DAY_MIN):
+        #storre the list of values for the current row (minute) in the format used to create a new table row
+        opens = (openpricedict[rownum]);
+        closes = (closepricedict[rownum]);
+        highs = (highpricedict[rownum]);
+        lows = (lowpricedict[rownum]);
+        volumes = (volumedict[rownum]);
+
+        #pass the new lists of values to the functions that append them as new rows to each database
+        add_row(connections, 'openprices', opens, priceSymbols)
+        add_row(connections, 'closeprices', closes, priceSymbols)
+        add_row(connections, 'highprices', highs, priceSymbols)
+        add_row(connections, 'lowprices', lows, priceSymbols)
+        add_row(connections, 'volumes', volumes, priceSymbols)
+    
     
 
 if __name__ == "__main__":
