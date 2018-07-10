@@ -320,7 +320,7 @@ def main():
 
         # find time delta between current time and the base timestamp
         timedelta = currentTime.minute - baseTS.minute
-        print('Time delta = ' + str(timedelta))
+        print('Time delta = {}'.format(timedelta))
         if (timedelta % 10 == 0):
             print("Time Difference is 10 minutes")
             threads = []
