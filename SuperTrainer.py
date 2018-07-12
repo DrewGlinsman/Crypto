@@ -347,7 +347,6 @@ def initparamdirectory(directory, currnumparamfiles, desirednumparamfiles,  para
         #if the directory path name is storage (training mode does not start with writing params because that is guaranteed
         # to happen when we start the training)
         if 'storage' in directory:
-            print("writing params")
             writeParamPickle(paramstowrite, directory,  '{}superparam.pkl'.format(idnum))
 
 

@@ -49,10 +49,14 @@ def main():
     priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
 
     randnum = 1000000
+    num = 0
+    while(num <15):
+        randnum = int(random.uniform(0, 1) * 6)
 
-    while(randnum != 0):
-        randnum = int(random.uniform(0, 1) * 10)
+
         print(randnum)
+
+        num+=1
 
     quit()
 

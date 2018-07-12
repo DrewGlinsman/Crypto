@@ -19,7 +19,7 @@ import logging
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
 from Generics import UNCHANGED_PARAMS, superParams, defaulttrainerparamspassed, PARAMETERS, priceSymbols, \
-    calcPercentChange, listparms, removeEmptyInnerLists, combinableparams, numFiles
+    calcPercentChange, listparms, removeEmptyInnerLists, paramsthatcanbecombined, numFiles
 
 
 
@@ -146,7 +146,8 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
                 randomizeParamsList(paramDict, key, baseparams['randcheckrangeone'], baseparams['lowercheckthreshold'],
                                     baseparams['smallrange'], baseparams['lowoffirstrange'],
                                     combinableparams, baseparams['lowerstopcheckthreshold'],
-                                    baseparams['lowerremovecheckthreshold'])
+                                    baseparams['lowerremovecheckthreshold'], baseparams['maxcombinedparams'],
+                                    baseparams['maxparameterscombinedpercombinedparam'])
 
             #if this is not an unchangeable parameter and the random value generated is above the
             #randomized threshold (meaning this parameter will be randomized)
@@ -168,7 +169,8 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
                 randomizeParamsList(paramDict, key, baseparams['randcheckrangetwo'], baseparams['uppercheckthreshold'],
                                     baseparams['bigrange'], baseparams['lowofsecondrange'],
                                     combinableparams, baseparams['upperstopcheckthreshold'],
-                                    baseparams['upperremovecheckthreshold'])
+                                    baseparams['upperremovecheckthreshold'], baseparams['maxcombinedparams'],
+                                    baseparams['maxparameterscombinedpercombinedparam'])
 
             # if the key is not in the unchangeable params list and
             # the random number generated clears the threshold for modifying it
@@ -185,7 +187,8 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
 # combinedparams = [[param1, param2], [param3, param1,param5]]
 # combinedparamsmodifiers = [modifier1, modifier2]
 def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, rangevals, lowvalueofrange, combinableparams,
-                        stopchangingparamsthreshold, removeparamsthreshold):
+                        stopchangingparamsthreshold, removeparamsthreshold,
+                        maxcombinedparams, maxparameterscombinedpercombinedparam):
     """
     :param params: the parameter dictionary to be changed
     :param keytochange: the key value to change
@@ -198,6 +201,8 @@ def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, ran
     to combine
     :param removeparamsthreshold: the randomized value must be below this to remove a parameter and above it
     to add one (implied that it is already above the stopchangingparamsthreshold)
+    :param maxcombinedparams: the maximum number of combined parameters that a bot can use
+    :param maxparameterscombinedpercombinedparam: the maximum number of parameters combined in each combined parameter
     :return: the modified parameter dictionary
     """
 
@@ -211,15 +216,29 @@ def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, ran
         #the upperlimit of the range of random values (is not included in range)
         upperlimitofrange = randcheckrange
 
+        #loop and add new combined parameter lists until we stop
+        #and we have not exceeded this trainer's max length of allowed combined parameters
+        while(checkaddnewcombinedparamlist(upperlimitofrange, stopchangingparamsthreshold)
+              and len(params[keytochange]) < maxcombinedparams):
+
+            #makes a new list for a combined parameter
+            indexofnewlist = addnewcombinedparamlist(params[keytochange])
+
+            #picks and then adds a random combinable parameter to the list
+            addcombinedparamtolist(params[keytochange][indexofnewlist],
+                                   maxparameterscombinedpercombinedparam, combinableparams)
+
+            #generates and adds a modifier to be associated with that combined parameter list
+            addmodifiertocombinedparammodifierlist(params['COMBINED_PARAMS_MODIFIERS'], rangevals, lowvalueofrange)
+
         #loop through the lists of the combined parameters
         for listofcombinedparams in params[keytochange]:
 
             #first generate a value to make a decision
             modifiyparamdecision = int(random.uniform(0,1) * upperlimitofrange)
 
-
             #while the decision value is not to add or remove a parameter or when there are no parameters left in the list
-            while(modifiyparamdecision <= stopchangingparamsthreshold or len(listofcombinedparams) == 0):
+            while(modifiyparamdecision > stopchangingparamsthreshold or len(listofcombinedparams) == 0):
                 #if we choose to remove a parameter
                 if modifiyparamdecision <= removeparamsthreshold:
                     #generate a value corresponding to an index in the list of parameters to combined
@@ -227,52 +246,15 @@ def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, ran
                     indexofparamtoremove = int(random.uniform(0,1) * len(listofcombinedparams))
 
                     #remove the specified parameter
-                    listofcombinedparams.remove(indexofparamtoremove)
+                    del listofcombinedparams[indexofparamtoremove]
 
                 #if we choose to add a parameter
                 elif modifiyparamdecision > removeparamsthreshold:
 
-                    #the upper limit that is not included in the add or multiply or subtract parameter decision below
-                    rangeofdecision = 3
+                    #add a parameter to the current list of combined parameters
+                    addcombinedparamtolist(listofcombinedparams, maxparameterscombinedpercombinedparam,
+                                           combinableparams)
 
-                    #the three decisions that can be made about what to do with this parameter
-                    addition = 0
-                    subtraction = 1
-                    multiplication = 3
-
-                    #generate a value to determine if this parameter will be added or multipled or subtracted
-                    #so if added then paramtocombine + alltheothercombinedparams
-                    #and if multipled paramtocombine * alltheothercombinedparams
-                    #and if subtracted paramtocombine - alltheothercominedparams
-                    includeparamdecision = int(random.uniform(0,1) * rangeofdecision)
-
-
-                    #generate a value corresponding to an index in the list of parameters that can be combined
-                    #the value is used to decide which parameter to add to the current list of combined parameters
-                    indexofparamtoinclude = int(random.uniform(0,1) * len(combinableparams))
-
-                    #depending on what we want to do with this parameter we add it to the list
-                    # of parameters to combine for this particular new parameter and we add a symbol
-                    # to the front of the parameter name indicating what to do with this parameter
-                    if includeparamdecision == addition:
-                        listofcombinedparams.append("+ {}".format(combinableparams[indexofparamtoinclude]))
-                    elif includeparamdecision == multiplication:
-                        listofcombinedparams.append("* {}".format(combinableparams[indexofparamtoinclude]))
-                    elif includeparamdecision == subtraction:
-                        listofcombinedparams.append("- {}".format(combinableparams[indexofparamtoinclude]))
-
-                    else:
-                        logging.error("not a valid decision {}".format(includeparamdecision))
-                        quit(-1)
-
-                    #instantiate a new modifier value in the corresponding list of combined parameters modifiers
-                    # each list of combined parameters gets one modifier
-                    # so combinedparams =  [[param1, param2], [param1, param3, param4]
-                    # would have combinedparamsmodifiers = [modifier1, modifier2]
-                    newmodifiervalue = (random.uniform(-1,1) * rangevals) + lowvalueofrange
-
-                    #add the new modifier value to the end of the parameter list of modifiers
-                    params['COMBINED_PARAMS_MODIFIERS'].append(newmodifiervalue)
 
                 #generate a new value for the next decision
                 modifiyparamdecision = int(random.uniform(0, 1) * upperlimitofrange)
@@ -316,6 +298,103 @@ def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, ran
         logging.error("not a valid list key: {}".format(keytochange))
         quit(-1)
 
+#return true if we should add a new combined parameter
+def checkaddnewcombinedparamlist(upperlimitrange, stopchangingparamsthreshold):
+    """
+    :param upperlimitrange: the upper limit of the range of values to generate
+    :param stopchangingparamsthreshold: the threshold we need to generate a value above to add a parameter to be combined
+    :return:
+    """
+
+    # first generate a value to make a decision
+    addparamdecisiomn = int(random.uniform(0, 1) * upperlimitrange)
+
+    #if we determine we want to add a parameter
+    if addparamdecisiomn > stopchangingparamsthreshold:
+        return True
+
+    return False
+
+#make a new list in the combined parameters list so that combinable parameters can be added to the list
+# return the index of the new combined parameter list
+def addnewcombinedparamlist(combinedparamslist):
+    """
+    :param combinedparamslist: the parameter dictionary value list that contains all the combined parameters in lists
+    :return: the index of the parameter we added
+    """
+
+    #index of the new list will be the length of the old list
+    indexofnewcombinedparamlist = len(combinedparamslist)
+
+
+
+    #add a new list to the combined parameter list
+    combinedparamslist.append([])
+
+    return indexofnewcombinedparamlist
+
+#adds a combined parameter to a list in the lists of combined parameters
+def addcombinedparamtolist(listofcombinedparams, maxparameterscombinedpercombinedparam, combinableparams):
+    """
+    :param listofcombinedparams: the list of parameters to be combined we will add another parameter to combine with
+    :param maxparameterscombinedpercombinedparam: the maximum number of parameters that can be combined
+    :param combinableparams: list of parameters that can be combined
+    :return:
+    """
+
+    #if that list already has too many parameters to combine we do nothing
+    if len(listofcombinedparams) > maxparameterscombinedpercombinedparam:
+        return
+
+    # the upper limit that is not included in the add or multiply or subtract parameter decision below
+    rangeofdecision = 3
+
+    # the three decisions that can be made about what to do with this parameter
+    addition = 0
+    subtraction = 1
+    multiplication = 2
+
+    # generate a value to determine if this parameter will be added or multipled or subtracted
+    # so if added then paramtocombine + alltheothercombinedparams
+    # and if multipled paramtocombine * alltheothercombinedparams
+    # and if subtracted paramtocombine - alltheothercominedparams
+    includeparamdecision = int(random.uniform(0, 1) * rangeofdecision)
+
+    # generate a value corresponding to an index in the list of parameters that can be combined
+    # the value is used to decide which parameter to add to the current list of combined parameters
+    indexofparamtoinclude = int(random.uniform(0, 1) * len(combinableparams))
+
+    # depending on what we want to do with this parameter we add it to the list
+    # of parameters to combine for this particular new parameter and we add a symbol
+    # to the front of the parameter name indicating what to do with this parameter
+    if includeparamdecision == addition:
+        listofcombinedparams.append("+ {}".format(combinableparams[indexofparamtoinclude]))
+    elif includeparamdecision == multiplication:
+        listofcombinedparams.append("* {}".format(combinableparams[indexofparamtoinclude]))
+    elif includeparamdecision == subtraction:
+        listofcombinedparams.append("- {}".format(combinableparams[indexofparamtoinclude]))
+
+    else:
+        logging.error("not a valid decision {}".format(includeparamdecision))
+        quit(-1)
+
+#generate and add a new modifier value for a new combined parameter list
+def addmodifiertocombinedparammodifierlist(listofcombinedparametermodifiers, rangevals, lowvalueofrange):
+    """
+    :param listofcombinedparametermodifiers: the list of the combined parameter modifiers so far
+    :param rangevals: the range of values to consider as modifiers
+    :param lowvalueofrange: the low value of the range to consider
+    :return:
+    """
+
+    # instantiate a new modifier value in the corresponding list of combined parameters modifiers
+    # each list of combined parameters gets one modifier
+    # so combinedparams =  [[param1, param2], [param1, param3, param4]
+    # would have combinedparamsmodifiers = [modifier1, modifier2]
+    newmodifiervalue = (random.uniform(-1, 1) * rangevals) + lowvalueofrange
+
+    # add the new modifier value to the end of the parameter list of modifiers
+    listofcombinedparametermodifiers.append(newmodifiervalue)
 
 # converts the given string to a Dict. Used to parse the returned string from the bots being trained
 def stringToDict(stringToChange):
@@ -677,13 +756,19 @@ def main():
         variationNum = 0.0
         minInDay = 1440.0
 
+        #make a list of subprocesses that will act as our bots
         procs = createBots(baseparams, i)
+
+        #set the best parameters to be whatever the current value for params is
+        #if this is the first run then it will be the base params and thereafter it will be whatever bot was best
+        #in the previous class of bots
+        bestparams = params
 
         # randomizes parameters and runs different instances of the bot using the different starting parameters
         for proc in procs:
             reform = ''
             # randomize parameters and send the bot their class and variation num
-            params = randomizeParams(params, typeOfRandom, baseparams, combinableparams)
+            params = randomizeParams(params, typeOfRandom, baseparams, paramsthatcanbecombined)
 
             params['CLASS_NUM'] = i
             params['VARIATION_NUMBER'] = int(variationNum)

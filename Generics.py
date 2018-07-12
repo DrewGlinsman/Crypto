@@ -142,7 +142,7 @@ normalizationValuesToStore = ['PERCENT_BY_HOUR_OPEN_CLOSE', 'PERCENT_BY_HOUR_HIG
 
 #parameters that can be combined and considered (set to the normalization values stored for the score because
 # those should be the only ones that can be combined)
-combinableparams = normalizationValuesToStore
+paramsthatcanbecombined = normalizationValuesToStore
 
 #the list of data types to be persistently stored between updateCrypto runs, because the data is normally overwritten after
 #it is passed to CryptoStatAnalysis
@@ -213,16 +213,19 @@ replacementvalue: the number of the checks that a trainer needs to be better tha
     replace its predecesssor
 NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE: the number of times that an crypto price must be increasing  (at least)
     or a failure flag is set off and it is auto sold
+maxcombinedparams: the maximum number of combined parameters
+maxparameterscombinedpercombinedparam:the maximum number of parameters that can be combined per combined parameter
 """
 # the parameters used by the supertrainer given to each trainer
 superParams = {'smallrange': 2,'bigrange': 15, 'lowoffirstrange': 0, 'lowofsecondrange': 0, 'randcheckrangeone': 10,
                'randcheckrangetwo': 50, 'lowercheckthreshold': 5,'uppercheckthreshold': 7, 'upperstopcheckthreshold': 2,
                'upperremovecheckthreshold' : 4, 'lowerstopcheckthreshold' : 2, 'lowerremovecheckthreshold' : 4,
                'classes': 1, 'variations': 1, 'percentpositivebots': 0, 'percentnegativebots': 0,
-               'worstbotreturnsaved': 0, 'bestbotreturnsaved': 0, 'averagebotreturnsaved': 0,'MAX_TIME_CYCLE': 60.0,
+               'worstbotreturnsaved': 0, 'bestbotreturnsaved': 0, 'averagebotreturnsaved': 0, 'MAX_TIME_CYCLE': 60.0,
                'MAX_CYCLES': 24, 'MIN_CYCLES': 4, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0,
                'MAX_PERCENT_CHANGE': 100.0, 'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0,
-               'MAX_DECREASE': -10.0, 'replacementvalue': 0, 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0}
+               'MAX_DECREASE': -10.0, 'replacementvalue': 0, 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
+               'maxcombinedparams': 3, 'maxparameterscombinedpercombinedparam': 3}
 
 # parameters that the superTrainer should not change
 unchangedSuperParams = ['MIN_OFFSET', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'percentpositivebots',
