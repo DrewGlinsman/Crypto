@@ -494,7 +494,7 @@ def readParamsPassed(dirname, baseparams, paramspassed):
     if sys.argv[1] == "CryptoTrainer": #parameters have been passed through console or run configuration (i.e. this is run on its own)
         paramspassed = {'directoryprefix': sys.argv[1],'website': sys.argv[2], 'day': sys.argv[3], 'hour': sys.argv[4], 'min': sys.argv[5],
                         'idnum': int(sys.argv[6]), 'originalid': sys.argv[9], 'evalID': sys.argv[10],
-                        'lossallowed': sys.argv[11]}
+                        'lossallowed': sys.argv[11], 'startmoney': sys.argv[12]}
         baseparams['classes'] = sys.argv[7]
         baseparams['variations'] = sys.argv[8]
 
@@ -786,11 +786,12 @@ def main():
             pickleInput(params, paramspassed, dirname)
 
             # make one bot run with the input stream of runtime, mode, directory path, classnum, and variationum
-            out = proc.communicate(input="{} {} {} {} {} {} {} {} {}".format(paramspassed['directoryprefix'],
+            out = proc.communicate(input="{} {} {} {} {} {} {} {} {} {}".format(paramspassed['directoryprefix'],
                                                                              paramspassed['website'], paramspassed['day'],
                                                                        paramspassed['hour'], paramspassed['min'],
                                                                        params['CLASS_NUM'], params['VARIATION_NUMBER'],
-                                                                       paramspassed['idnum'], paramspassed['lossallowed']))
+                                                                       paramspassed['idnum'], paramspassed['lossallowed'],
+                                                                             paramspassed['startmoney']))
 
             #build the directory string for the parameter dictionary
             directory = buildDirectory(params, paramspassed, dirname, typedirec='training')

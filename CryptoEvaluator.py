@@ -147,6 +147,7 @@ def readTheInput(paramspassed, evaluatorparams, directory):
         paramspassed['classNum'], evaluatorparams['CLASS_NUM'] = sys.argv[7], sys.argv[7]  #default should be -1
         paramspassed['idnum'] = sys.argv[8]
         paramspassed['lossallowed'] = sys.argv[9]
+        paramspassed['startmoney'] = sys.argv[10]
 
         truedirectory = '{}/{}'.format(directory, sys.argv[1])
 
@@ -1558,7 +1559,6 @@ def main():
     #setup the normal data dictionaries and get an updated price symbol dictionary
     setUpData(passedparams, percentChanges, volumePercentChanges, volumeAmounts, weightedMovingAverage, cryptosymbols)
 
-
     #get the directory of the class
     classdirectory = buildDirectory(passedparams, dirname, typedirec='training')
 
@@ -1609,6 +1609,7 @@ def main():
 
     #the start money and end money used to re-calulate the percent change over time
     # (for checking against crypto stats analysis)
+    params['START_MONEY'] = passedparams['startmoney']
     currmoney = float(params['START_MONEY'])
     endmoney =  currmoney
 

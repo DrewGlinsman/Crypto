@@ -67,7 +67,8 @@ def readParamsPassed(dirname):
 
     if sys.argv[1] == "SuperTrainer": #parameters have been passed through console or run configuration (i.e. this is run on its own)
         returndict = {'directoryprefix': sys.argv[1],'website': sys.argv[2], 'day': sys.argv[3], 'numsessions': int(sys.argv[4]), 'hour': int(sys.argv[5]),
-                      'min': int(sys.argv[6]), 'oldidnummax': int(sys.argv[7]), 'lossallowed': int(sys.argv[8])}
+                      'min': int(sys.argv[6]), 'oldidnummax': int(sys.argv[7]), 'lossallowed': int(sys.argv[8]),
+                      'startmoney': int(sys.argv[9])}
 
         #true directory accounts for what script is running the entire set of scripts
         truedirectory = "{}/{}/".format(dirname, sys.argv[1])
@@ -189,11 +190,11 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
                     break
 
             # the directory to look in for a param file to randomize
-            storeagedirectory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'],
+            storagedirectory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'],
                                              paramspassed['min'], relativedirectory)
 
             #grab the file with the related id from the storage set
-            paramstouse = grabParamFile(storeagedirectory, '{}superparam.pkl'.format(curridnum))
+            paramstouse = grabParamFile(storagedirectory, '{}superparam.pkl'.format(curridnum))
 
             #directory to be used to write to the training directory
             directory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'],
@@ -203,7 +204,7 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
             writeParamPickle(paramstouse, directory, '{}superparam.pkl'.format(numprocs))
 
             # the number of evaluator parameter files in the storage directory
-            numevaluatorfiles = numFiles('{}/{}'.format(storeagedirectory, curridnum))
+            numevaluatorfiles = numFiles('{}/{}'.format(storagedirectory, curridnum))
 
             # generate a random id for the evaluator file that is not the number of total files
             while True:
@@ -215,9 +216,11 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
         ###############################START THIS BOT##################################################################
         #start this bot
         out = proc.communicate(
-            input=("{} {} {} {} {} {} {} {} {}").format(paramspassed['directoryprefix'], paramspassed['website'], paramspassed['day'],
-                                                   paramspassed['hour'], paramspassed['min'], numprocs, curridnum,
-                                                   evaluatorusedid, paramspassed['lossallowed']))
+            input=("{} {} {} {} {} {} {} {} {} {}").format(paramspassed['directoryprefix'], paramspassed['website'],
+                                                           paramspassed['day'], paramspassed['hour'],
+                                                           paramspassed['min'], numprocs, curridnum,
+                                                           evaluatorusedid, paramspassed['lossallowed'],
+                                                           paramspassed['startmoney']))
 
         #add the trainer and evaluator id as a key: value pair where the value is a list of evaluator files that have
         # been trained because multiple versions of the same trainer can be used with different evaluator use ids
@@ -231,13 +234,13 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
 
         #######################################AFTER THE BOT IS RUN ####################################################
         #get the original storage trainer file
-        storedtrainerparams = grabParamFile(storeagedirectory, '{}superparam.pkl'.format(curridnum))
+        storedtrainerparams = grabParamFile(storagedirectory, '{}superparam.pkl'.format(curridnum))
 
         #get the trainer file used
         usedtrainerparams = grabParamFile(directory, '{}superparam.pkl'.format(numprocs))
 
         #get the original storage evaluator file
-        storedevaluatorparams = grabParamFile('{}/{}'.format(storeagedirectory, curridnum),
+        storedevaluatorparams = grabParamFile('{}/{}'.format(storagedirectory, curridnum),
                                                '{}baseparams.pkl'.format(evaluatorusedid))
 
         #get the associated evaluator file used
@@ -247,13 +250,13 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
         savetrainerparams = compareParams(storedtrainerparams, usedtrainerparams, type='trainer')
 
         #store the returned trainer parameters
-        writeParamPickle(savetrainerparams, storeagedirectory, '{}superparam.pkl'.format(numprocs))
+        writeParamPickle(savetrainerparams, storagedirectory, '{}superparam.pkl'.format(numprocs))
 
         #compare the evaluator to its original and replace the original file if it traded poorly
         saveevaluatorparams = compareParams(storedevaluatorparams, usedevaluatorparams, type='evaluator')
 
         #store the returned evaluator parameters
-        writeParamPickle(saveevaluatorparams , '{}/{}'.format(storeagedirectory, curridnum),
+        writeParamPickle(saveevaluatorparams , '{}/{}'.format(storagedirectory, curridnum),
                          '{}baseparams.pkl'.format(evaluatorusedid))
 
         logging.info(out)

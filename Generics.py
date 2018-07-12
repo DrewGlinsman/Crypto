@@ -265,6 +265,8 @@ minSuperFiles = 10
 minEvaluatorFiles = 20
 
 #The default values for the passed supertrainer params
+#directoryprefix: the prefix that will be added to the start of the relative directory for each file that this
+    #indirectly or directly runs
 #website: the website used to gather data, train on, and buy/sell on
 #day: the day of the week this was TRAINED on
 #numsessions: the number of trainers we want to use (think of this like the number of classrooms in a school)
@@ -272,10 +274,13 @@ minEvaluatorFiles = 20
 #hour: the hour this was trained on
 #min: the min this was trained on
 #lossallowed: the percentage loss allowed for every buy/sell decision
+#startmoney: the amount of starting money the bots will use to train with
 defaultsuperparamspassed = {'directoryprefix': 'SuperTrainer','website': 'binance', 'day': 'monday', 'numsessions': 10,
-                            'oldidnummax': 5, 'hour': 9, 'min': 00, 'lossallowed': -1}
+                            'oldidnummax': 5, 'hour': 9, 'min': 00, 'lossallowed': -1, 'startmoney': 100}
 
 #Default values for the passsed parameters to a cryptotrainer file
+#directoryprefix: the prefix that will be added to the start of the relative directory for each file that this
+    #indirectly or directly runs
 #website: the website used to gather data, train on, and buy/sell on
 #day: the day of the week this was TRAINED on
 #hour: the hour this was trained on
@@ -287,8 +292,9 @@ defaultsuperparamspassed = {'directoryprefix': 'SuperTrainer','website': 'binanc
 # so essentially in the storage each trainer gets a set of evaluator parameter files and with each training session it will
 # choose one to vary and optimize
 #lossallowed: the percentage loss allowed for every buy/sell decision
+#startmoney: the amount of starting money the bots will use to train with
 defaulttrainerparamspassed = {'directoryprefix': 'CryptoTrainer','website': 'binance', 'day': 'monday', 'hour': 9,
-                              'min': 0, 'idnum': 1, 'originalid': 1,'evalID': 0, 'lossallowed': -1}
+                              'min': 0, 'idnum': 1, 'originalid': 1,'evalID': 0, 'lossallowed': -1, 'startmoney': 100}
 
 
 #Input values that are stored for each evaluator (other than parameters)
@@ -302,9 +308,10 @@ defaulttrainerparamspassed = {'directoryprefix': 'CryptoTrainer','website': 'bin
 # since trainers are essentially grabbed at random by the super trainer), used by the evaluators to help store them under
 # the right trainer file
 #lossallowed: the percentage loss allowed for every buy/sell decision
+#startmoney: the amount of starting money the bots will use to train with
 storedInput = {'directoryprefix': 'CryptoEvaluator', 'website': 'binance', 'day': 'monday', 'hour': 9, 'min': 0,
                'classNum': -1, 'variationNum': -1,  'idnum': 0,
-               'lossallowed': -1}
+               'lossallowed': -1, 'startmoney': 100}
 
 #parameters passed to the datastream pseudo api
 datastreamparamspassed = {'website': 'binance',  'mins': 0, 'minmax': 1440, 'hourstoprime': 0, 'freshrun': False}
