@@ -4,7 +4,7 @@
 import os
 import logging
 
-from Generics import calcPercentChange
+from Generics import calcPercentChange, percenttodecimal
 
 #setup the relative file path
 dirname = os.path.dirname(os.path.realpath(__file__))
@@ -34,6 +34,9 @@ class CryptoStatsAnalysis:
         :param pricesymbols: the price symbols used by the evaluator
         """
         global priceSymbols
+
+        #store the passed parameters
+        self.passedparams = passedparams
 
         priceSymbols = pricesymbols
 
@@ -94,9 +97,11 @@ class CryptoStatsAnalysis:
 
         logging.basicConfig(filename=directory+filename, level=logging.DEBUG)
 
+
     #adds a dictionary where every crypto has a special holder object assigned to it with all important information to it from that moment when the dictionary was made
     # this method is called each time a crypto has been bought, as well as when the cryptos decide to keep the same crypto currency, and when they choose not to buy one
-    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld , didNotBuy, owned):
+    def newStats(self, statsDict, minute, didBuy, didSell, bought, sold, decisions, decisionNum, timeHeld ,
+                 didNotBuy, owned):
         """
         :param statsDict:
         :param minute:
@@ -113,7 +118,8 @@ class CryptoStatsAnalysis:
         """
 
         self.runStats.append({decisionNum: self.newCryptoDict()})
-        self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions, timeHeld, owned)})
+        self.runsInfo.append({decisionNum: cyrptoRunInfo(statsDict, minute, didBuy, didSell, bought, sold, decisions,
+                                                         timeHeld, owned)})
 
         indexOf = len(self.runsInfo)
 
@@ -128,21 +134,62 @@ class CryptoStatsAnalysis:
         """
         :return:
         """
-        startMoney = self.params['START_MONEY']
-        newEndMoney = startMoney
+        startMoney = int(self.params['START_MONEY'])
+        newEndMoney = int(startMoney)
+        lossallowed = int(self.passedparams['lossallowed'])
 
+        #the number of times we buy and sell
         totalDecisions = len(self.runsInfo)
 
         numDecision = 0
 
+        #print('-----------------------------------------------------')
+
         for i in range(totalDecisions):
+
+            startmon = newEndMoney
+
             currentDecision = self.runsInfo[numDecision][numDecision]
 
             currentCrypto = currentDecision.owned
 
-            addMoney = newEndMoney * (float(currentDecision.percentChanges[currentCrypto]) / 100)
+            #print("decision {}".format(i))
 
+            #if this decision including actually buying and selling
+            if currentDecision.didBuy:
+                #assume a lossallowed is removed for buying
+                buyloss = newEndMoney * (lossallowed / percenttodecimal)
+
+                #assume a lossallowed is removed for selling
+                sellloss = newEndMoney * (lossallowed / percenttodecimal)
+
+                #print("did buy")
+            else:
+                buyloss = 0
+                sellloss = 0
+
+                #print("did not buy")
+
+            #calculate what money would be left after buying/selling loss
+            cryptoMoneyMinusAssumedLoss = newEndMoney + buyloss + sellloss
+
+            #print("money minus assumed loss {}".format(cryptoMoneyMinusAssumedLoss))
+
+            # the money made over holding the crypto (but only considering it after the loss from buy/sell is removed)
+            addMoney = cryptoMoneyMinusAssumedLoss * (
+                        float(currentDecision.percentChanges[currentCrypto]) / percenttodecimal)
+
+            #print("add money {}".format(addMoney))
+
+
+            #alter the new end money by appreciation/depreciation from holding the crypto
+            #and any loss from buying and selling
             newEndMoney += addMoney
+
+            truechange = calcPercentChange(startmon, newEndMoney)
+
+            #print("{} {}".format(float(currentDecision.percentChanges[currentCrypto]) / percenttodecimal, truechange))
+
             numDecision += 1
 
 
@@ -188,17 +235,19 @@ class CryptoStatsAnalysis:
 
             #iterate through each crypto in that segement
             for i in value:
-
+                if i == '': #if this segement is empty skip over this
+                    continue
                 change = self.caclulatePercentChange(minute, timeHeld, i)
 
                 #if the percent change was negative increment our count of poisitve cryptos
                 if change > 0.0:
                     posCryptos += 1.0
 
-
+                #add the current percent change to the total
                 totalChange += change
                 count += 1.0
 
+            #if there was no crypto from that segment (the segments are what we are implicitly classifying things as)
             if count == 0.0:
                 self.runsInfo[decisionNum][decisionNum].setPosOverInterval(0.0, key)
 
@@ -290,7 +339,8 @@ class CryptoStatsAnalysis:
         :return:
         """
 
-        change = calcPercentChange(self.openPriceData[currency][minute - timeHeld], self.closePriceData[currency][minute])
+        change = calcPercentChange(self.closePriceData[currency][minute - timeHeld],
+                                   self.closePriceData[currency][minute])
         return change
 
     #works through all calculations that cover changes over the whole bot
@@ -299,8 +349,6 @@ class CryptoStatsAnalysis:
         :return:
         """
         endMoney = self.calcMoneyChange()
-
-
 
         return endMoney
 
@@ -312,8 +360,6 @@ class CryptoStatsAnalysis:
         self.basicInfo()
         self.buysAndSales()
         self.diferentDecisions()
-
-        
 
     #prints the date and timestamp
     def basicInfo(self):
@@ -438,10 +484,12 @@ class cyrptoRunInfo():
         self.decisions = decisions
         self.timeHeld = timeHeld
         self.owned = owned
-        self.posOverInterval = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0, 'chosenNotCut': 0.0, 'theMax': 0.0}
+        self.posOverInterval = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0,
+                                'chosenNotCut': 0.0, 'theMax': 0.0}
 
         self.percentChanges = {}
-        self.averagePercent = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0, 'chosenNotCut': 0.0, 'theMax': 0.0}
+        self.averagePercent = {'Disregarded': 0.0, 'Chosen': 0.0, 'chosenButCut': 0.0,
+                               'chosenNotCut': 0.0, 'theMax': 0.0}
 
     def setPosOverInterval(self, average, key):
         """

@@ -6,8 +6,9 @@ import os
 import pickle
 import pathlib
 import PriceSymbolsUpdater
+import random
 from AutoTrader import getbinanceprice
-from Generics import PARAMETERS, superParams, priceSymbols
+from Generics import PARAMETERS, superParams, priceSymbols, removeEmptyInnerLists, combinableparams, normalizationValuesToStore
 
 
 basesource = r'wss://stream.binance.com:9443'
@@ -29,13 +30,292 @@ file = open(paramCompletePath, "w+")
 
 
 # list of colors that can be copied into the fivethirtyeightfile
-colors = ['008fd5', 'fc4f30', 'e5ae38', '6d904f', '8b8b8b', '810f7c', 'f2d4b6', 'f2ae1b', 'f4bbc2', '1209e0', 'b0dlc5', 'dd1d36', '55b4d4', 'ff8f40', 'd35058', '252a8b', '623b19', 'b8962e', 'ff66be', '35679a', '7fffd4', '458b74', '8a2be2', 'ff4040', '8b2323', 'ffd39b', '98f5ff', '53868b', '7fff00', '458b00', 'd2691e', 'ff7256', '6495ed', 'fff8dc', '00ffff', '008b8b', 'ffb90f', '006400', 'caff70', 'ff8c00', 'cd6600', '9932cc', 'bf3eff', '8fbc8f', 'c1ffc1', '9bcd9b', '97ffff', '00ced1', '9400d3', 'ff1493', '8b0a50', '00bfff', '1e90fff', 'b22222', 'ff3030', '228b22', 'ffd700', 'adff2f', 'ff69b4', 'ff6a6a', '7cfc00', 'bfefff', 'ee9572', '20b2aa', 'ff00ff', '66cdaa', '0000cd', 'e066ff', '00fa9a', '191970', 'b3ee3a', 'ff4500', 'ff83fa', 'bbffff', 'ff0000', '4169e1', '54ff9f', '87ceeb', 'a0522d', '836fff', '00ff7f', '008b45', '63b8ff', 'd2b48c', 'ffe1ff', 'ff6347', '8b3626', '00f5ff', '00868b', 'ee82ee', 'ff3e96', 'f5deb3', 'd02090', 'ffff00', '9acd32', '00c5cd', 'ff7256', '00cdcd', 'eead0e', '6e8b3d', 'ee7800', 'b23aee', '483d8b', '00b2ee', 'ee2c2c', 'ffc125', '00cd00', 'ee6aa7', 'ee6363', 'f08080', 'eedd82', 'ffb6c1', '87cefa', 'b03060', '3cb371', '191970', 'c0ff3e', 'db7093', '98fb98', 'ff82ab', 'cdaf95', 'ffbbff', 'b0e0e6']
+colors = ['008fd5', 'fc4f30', 'e5ae38', '6d904f', '8b8b8b', '810f7c', 'f2d4b6', 'f2ae1b', 'f4bbc2', '1209e0', 'b0dlc5',
+          'dd1d36', '55b4d4', 'ff8f40', 'd35058', '252a8b', '623b19', 'b8962e', 'ff66be', '35679a', '7fffd4', '458b74',
+          '8a2be2', 'ff4040', '8b2323', 'ffd39b', '98f5ff', '53868b', '7fff00', '458b00', 'd2691e', 'ff7256', '6495ed',
+          'fff8dc', '00ffff', '008b8b', 'ffb90f', '006400', 'caff70', 'ff8c00', 'cd6600', '9932cc', 'bf3eff', '8fbc8f',
+          'c1ffc1', '9bcd9b', '97ffff', '00ced1', '9400d3', 'ff1493', '8b0a50', '00bfff', '1e90fff', 'b22222', 'ff3030',
+          '228b22', 'ffd700', 'adff2f', 'ff69b4', 'ff6a6a', '7cfc00', 'bfefff', 'ee9572', '20b2aa', 'ff00ff', '66cdaa',
+          '0000cd', 'e066ff', '00fa9a', '191970', 'b3ee3a', 'ff4500', 'ff83fa', 'bbffff', 'ff0000', '4169e1', '54ff9f',
+          '87ceeb', 'a0522d', '836fff', '00ff7f', '008b45', '63b8ff', 'd2b48c', 'ffe1ff', 'ff6347', '8b3626', '00f5ff',
+          '00868b', 'ee82ee', 'ff3e96', 'f5deb3', 'd02090', 'ffff00', '9acd32', '00c5cd', 'ff7256', '00cdcd', 'eead0e',
+          '6e8b3d', 'ee7800', 'b23aee', '483d8b', '00b2ee', 'ee2c2c', 'ffc125', '00cd00', 'ee6aa7', 'ee6363', 'f08080',
+          'eedd82', 'ffb6c1', '87cefa', 'b03060', '3cb371', '191970', 'c0ff3e', 'db7093', '98fb98', 'ff82ab', 'cdaf95',
+          'ffbbff', 'b0e0e6']
 
 
 def main():
     global  priceSymbols
     priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
 
+    randnum = 1000000
+
+    while(randnum != 0):
+        randnum = int(random.uniform(0, 1) * 10)
+        print(randnum)
+
+    quit()
+
+
+
+    randomizeParamsList(PARAMETERS, 'COMBINED_PARAMS', 100, 10, 50, 0, combinableparams, 10, 20)
+
+    print(PARAMETERS)
+
+    randomizeParamsList(PARAMETERS, 'COMBINED_PARAMS_MODIFIERS', 100, 10, 50, 0, combinableparams, 10, 20)
+
+    print(PARAMETERS)
+
+
+# setup the stored crypto calculations dictionary of lists and the corresponding dictionary with the max calcualted values
+# for each of the combined parameters
+
+def setupStoredCalculationsForCombinedParams(storeCombinedParamsValues, storedCombinedParamsValuesMaxs,
+                                             combinedparamslist,
+                                             priceSymbols):
+    """
+    :param storeCombinedParamsValues: the dictionary of combined parameters calculations to store
+    :param storedCombinedParamsValuesMaxs: the dictionary of the max for each combined parameter
+    :param combinedparamslist: the list of lists where each sublist has parameters to combine to form a new parameter
+    :param priceSymbols: the dictionary of price symbols
+    :return:
+    """
+
+    for combinedparamindex in range(len(combinedparamslist)):
+        # loop through all the crypto types
+        for key, currencyname in priceSymbols.items():
+            # if the crypto currency name does not have a dictionary for its combined param data
+            if currencyname not in storeCombinedParamsValues:
+                # make a dictionary to hold the data of the current crypto
+                storeCombinedParamsValues.update({currencyname: {}})
+
+            # add a spot to store the data of this type for the current crypto
+            storeCombinedParamsValues[currencyname].update({combinedparamindex: 0.0})
+
+        # add a float to hold the max value for each combined parameter calculation type
+        storedCombinedParamsValuesMaxs.update({combinedparamindex: 0.0})
+
+# setup the stored crypto calculations dictionary of lists and the corresponding dictionary with the max
+# calculated values
+def setupStoredCryptoCalculationsandMaxes(cryptoCalcualtionsStored, maxCalculationsStored, normalizationValuesToStore,
+                                          priceSymbols):
+    """
+    :param cryptoCalcualtionsStored: the dictionary with lists for all the calculations that need to be stored for each crypto
+    :param maxCalculationsStored: the dictionary containing the maximum values for each calculation
+    :param normalizationValuesToStore: the list of names given to each type of calculation to be stored for
+    the normalization of the individual values when deciding a score
+    :param priceSymbols: the dictionary of crypto currency symbols
+    :return:
+    """
+    # run through each normalization value name
+    for valuename in normalizationValuesToStore:
+        # loop through all the crypto types
+        for key, currencyname in priceSymbols.items():
+            # check if the currency already had a dictionary for its data made
+            if currencyname not in cryptoCalcualtionsStored:
+                # make a a new dictionary to hold all the data for that crypto
+                cryptoCalcualtionsStored.update({currencyname: {}})
+
+            # add a spot to store the data of this type for the current crypto
+            cryptoCalcualtionsStored[currencyname].update({valuename: 0.0})
+        # add a float to hold the eventually calculated maximum for value for each calculation type
+        maxCalculationsStored.update({valuename: 0.0})
+
+def setuptestdict(testdict, valuetoset, headers, subheaders):
+
+    for header in headers:
+        testdict.update({header: {}})
+        for subheader in subheaders:
+            testdict[header].update({subheader: valuetoset})
+
+
+def testmodifylistindict(listindict):
+
+    for index in range(len(listindict)):
+        listindict[index] += 2
+
+
+def setupcompoundinteresttest():
+
+    maxyears = 42
+
+    returnedyears = 0
+
+    guessrate = 0.1
+
+    expectedamount = 14000000000
+
+    amount = 0
+
+    while (amount < expectedamount):
+        numyears, amount = calculaterateofcompoundinterest(5000000, expectedamount, guessrate, maxyears)
+
+        guessrate += 0.01
+
+        print(guessrate)
+
+
+
+def calculaterateofcompoundinterest(principal,  amountexpected, guessrate, maxyears):
+
+    curramount = principal
+
+    numyears = 0
+
+    while(curramount < amountexpected and numyears < maxyears):
+
+        curramount = curramount * guessrate + curramount
+
+        curramount -= curramount * 0.5
+
+        numyears += 1
+
+
+
+    return numyears, curramount
+
+
+# randomize the list parameters. used to modify the list of lists of parameters to combine (to make new parameters)
+# and to modify the list of the modifiers for each list of parameters to combine
+# combinedparams = [[param1, param2], [param3, param1,param5]]
+# combinedparamsmodifiers = [modifier1, modifier2]
+def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, range, lowvalueofrange,
+                            combinableparams,
+                            stopchangingparamsthreshold, removeparamsthreshold):
+        """
+        :param params: the parameter dictionary to be changed
+        :param keytochange: the key value to change
+        :param randcheck: the value used to set a range of random values to be used to determine if a parameter should be randomized
+        :param checkthreshold: the value that the random check value has to be higher than to allow the parameter to be randomized
+        :param range: the range used to make a random value to change the parameter
+        :param lowvalueofrange: the low value of that range of values to change the parameter by
+        :param combinableparams: the list of parameters that can be combined to form new parameters
+        :param stopchangingparamsthreshold: the randomized value must be above this to keep changing a set of parameters
+        to combine
+        :param removeparamsthreshold: the randomized value must be below this to remove a parameter and above it
+        to add one (implied that it is already above the stopchangingparamsthreshold)
+        :return: the modified parameter dictionary
+        """
+
+        # if the param list is the list of combined params
+        # this should be a list of lists where each list is made of the parameters to be combined
+        # the first letter of each parameter is whether it should be added (+) or multipled (*) to the
+        # rest of the parameters
+        if keytochange == 'COMBINED_PARAMS':
+
+            # the upperlimit of the range of random values (is not included in range)
+            upperlimitofrange = randcheckrange
+
+            # loop through the lists of the combined parameters
+            for listofcombinedparams in params[keytochange]:
+
+                # first generate a value to make a decision
+                modifiyparamdecision = int(random.uniform(0, 1) * upperlimitofrange)
+
+                # while the decision value is not to add or remove a parameter or when there are no parameters left in the list
+                while (modifiyparamdecision <= stopchangingparamsthreshold or len(listofcombinedparams) == 0):
+
+                    # if we choose to remove a parameter
+                    if modifiyparamdecision <= removeparamsthreshold:
+                        # generate a value corresponding to an index in the list of parameters to combined
+                        # the value is used to decide which parameter to remove
+                        indexofparamtoremove = int(random.uniform(0, 1) * len(listofcombinedparams))
+
+                        # remove the specified parameter
+                        listofcombinedparams.remove(indexofparamtoremove)
+
+                    # if we choose to add a parameter
+                    elif modifiyparamdecision > removeparamsthreshold:
+
+                        # the upper limit that is not included in the add or multiply or subtract parameter decision below
+                        rangeofdecision = 3
+
+                        # the three decisions that can be made about what to do with this parameter
+                        addition = 0
+                        subtraction = 1
+                        multiplication = 3
+
+                        # generate a value to determine if this parameter will be added or multipled or subtracted
+                        # so if added then paramtocombine + alltheothercombinedparams
+                        # and if multipled paramtocombine * alltheothercombinedparams
+                        # and if subtracted paramtocombine - alltheothercominedparams
+                        includeparamdecision = int(random.uniform(0, 1) * rangeofdecision)
+
+                        # generate a value corresponding to an index in the list of parameters that can be combined
+                        # the value is used to decide which parameter to add to the current list of combined parameters
+                        indexofparamtoinclude = int(random.uniform(0, 1) * len(combinableparams))
+
+                        # depending on what we want to do with this parameter we add it to the list
+                        # of parameters to combine for this particular new parameter and we add a symbol
+                        # to the front of the parameter name indicating what to do with this parameter
+                        if includeparamdecision == addition:
+                            listofcombinedparams.append("+ {}".format(combinableparams[indexofparamtoinclude]))
+                        elif includeparamdecision == multiplication:
+                            listofcombinedparams.append("* {}".format(combinableparams[indexofparamtoinclude]))
+                        elif includeparamdecision == subtraction:
+                            listofcombinedparams.append("- {}".format(combinableparams[indexofparamtoinclude]))
+
+                        else:
+                            print("not a valid decision {}".format(includeparamdecision))
+                            quit(-1)
+
+                        # instantiate a new modifier value in the corresponding list of combined parameters modifiers
+                        # each list of combined parameters gets one modifier
+                        # so combinedparams =  [[param1, param2], [param1, param3, param4]
+                        # would have combinedparamsmodifiers = [modifier1, modifier2]
+                        newmodifiervalue = (random.uniform(-1, 1) * range) + lowvalueofrange
+
+                        # add the new modifier value to the end of the parameter list of modifiers
+                        params['COMBINED_PARAMS_MODIFIERS'].append(newmodifiervalue)
+
+                    # generate a new value for the next decision
+                    modifiyparamdecision = int(random.uniform(0, 1) * upperlimitofrange)
+
+            # go through the list of lists of combined parameters and remove any lists that are empty
+            # simultaneously delete any entries from the list of the modifiers for the combined parameters
+            # that correspond to the empty combined parameter lists
+            # so if param1 = [[1,2],[]] and param2 = [1,2]
+            # then the method changes them to param1 = [[1,2]] and param2 = [1]
+            removeEmptyInnerLists(params[keytochange], params['COMBINED_PARAMS_MODIFIERS'])
+
+        # if the param list is the list of combined param modifiers
+        elif keytochange == 'COMBINED_PARAMS_MODIFIERS':
+
+            # ensure that the list of combined params modifiers has one modifier for every list in the list of lists
+            # of parameters to combine (to make new parameters)
+            if (len(params[keytochange]) != len(params['COMBINED_PARAMS'])):
+                print("the combined parameter list and the list of its modifiers are not equal length")
+                print("combined parameter list length {}".format(len(params['COMBINED_PARAMS'])))
+                print("combined parameter modifier list length {}".format(len(params[keytochange])))
+                exit(-1)
+
+            # iterate through the list of the combined params modifiers
+            # one modifier for each list of combined params
+            for modifierindex in range(len(params[keytochange])):
+
+                # generate a value to be used to determine if this modifier will be changed
+                randcheck = int(random.uniform(0, 1) * randcheckrange)
+
+                # if the random value is above the threshold set for allowing modification
+                if randcheck > checkthreshold:
+                    # generate the random value to modify the modifier with
+                    randval = (random.uniform(-1, 1) * range) + lowvalueofrange
+
+                    # modify the combined parameter modifier by that random value generated
+                    params[keytochange][modifierindex] += randval
+
+        else:
+            print("not a valid list key: {}".format(keytochange))
+            quit(-1)
+
+#test the modification of a dictionary
+def testmodifydict(dict):
+    """
+    :param dict: dict to modify
+    :return:
+    """
+
+    dict['first'] = 100
 
 # reads pickle from a file into the passed parameter dictionary
 def readParamPickle(directory, idnum):

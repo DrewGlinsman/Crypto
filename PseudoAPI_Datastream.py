@@ -3,7 +3,6 @@
 
 import pathlib
 import sqlite3
-from sqlite3 import Error
 import time
 import asyncio
 import os
@@ -12,6 +11,8 @@ import threading
 import PriceSymbolsUpdater
 import sys
 
+from sqlite3 import Error
+from Generics import ONE_SEC_MS, ONE_THIRD_DAY, ONE_THIRD_MIN, datastreamparamspassed
 
 #setup the relative file path
 dirname = os.path.dirname(os.path.realpath(__file__))
@@ -25,26 +26,6 @@ cryptoPaths = os.path.join(dirname + '/', 'databases')
 #makes the directorys in the path variable if they do not exist
 pathlib.Path(cryptoPaths).mkdir(parents=True, exist_ok=True)
 
-#two hours in ms
-TWO_HOURS = 7200000
-
-#two hours in min
-TWO_HOURS_MIN = 120
-
-#one day in ms
-ONE_DAY = 86400000
-
-#one third day in ms
-ONE_THIRD_DAY = 28800000
-
-#one third day in min
-ONE_THIRD_MIN = 480
-
-#one minute in ms
-ONE_MIN_MS = 60000
-
-#one second in ms
-ONE_SEC_MS = 1000
 
 class klinedataThread(threading.Thread):
     def __init__(self, symbol, starttime, endtime):
@@ -484,11 +465,11 @@ def delete_rows(conn, tablename):
     cur.execute(statement)
 
 #read in the parameters
-def readParams():
+def readParams(paramspassed):
     """
-    :return: the param passed return dictionary
+    :param paramspassed: the parameters passed to this file
+    :return: the updated params passed
     """
-    global datastreamparamspassed
 
     #the number of minutes that have passed
     mins = 0
@@ -498,18 +479,18 @@ def readParams():
 
 
     if len(sys.argv) == 1:
-        datastreamparamspassed.update({'website': 'binance'})
-        datastreamparamspassed.update({'mins': mins})
-        datastreamparamspassed.update({'minmax': minmax})
-        datastreamparamspassed.update({'hourrstoprime': 0})
-        datastreamparamspassed.update(({'freshrun': False}))
+        paramspassed.update({'website': 'binance'})
+        paramspassed.update({'mins': mins})
+        paramspassed.update({'minmax': minmax})
+        paramspassed.update({'hourrstoprime': 0})
+        paramspassed.update(({'freshrun': False}))
 
     elif(sys.argv[1] == 'Alone'):
-        datastreamparamspassed.update({'website': sys.argv[2]})
-        datastreamparamspassed.update({'mins': mins})
-        datastreamparamspassed.update({'minmax': sys.argv[3]})
-        datastreamparamspassed.update({'hourrstoprime': sys.argv[4]})
-        datastreamparamspassed.update(({'freshrun': sys.argv[5]}))
+        paramspassed.update({'website': sys.argv[2]})
+        paramspassed.update({'mins': mins})
+        paramspassed.update({'minmax': sys.argv[3]})
+        paramspassed.update({'hourrstoprime': sys.argv[4]})
+        paramspassed.update(({'freshrun': sys.argv[5]}))
 
     else:
         for line in sys.stdin:
@@ -519,11 +500,11 @@ def readParams():
 
                 #loops through the different values split from the input and stores them in a dictionary
                 count = 0
-                for key, value in datastreamparamspassed.items():
-                    datastreamparamspassed[key] = listSplits[count]
+                for key, value in paramspassed.items():
+                    paramspassed[key] = listSplits[count]
                     count += 1
 
-    return datastreamparamspassed
+    return paramspassed
 
 #returns the number of rows of a data base
 def getNumRows(cursor, tablename):
@@ -541,10 +522,17 @@ def getNumRows(cursor, tablename):
 def main():
     global priceSymbols
 
-    params = readParams()
+    #read in any passed parameters
+    params = readParams(datastreamparamspassed)
 
     #this price symbols is different and is just a list of the names
-    priceSymbols = PriceSymbolsUpdater.chooseUpdate(params['website'], list=True)
+    #we also store them so that any file needing the symbols can pull them from storage
+    #thus whatever symbols are used in making the table are also used by scripts requesting data from that table
+    priceSymbols = PriceSymbolsUpdater.chooseUpdate(params['website'], list=True, store=True)
+    #store the price symbols dictionary version as well
+    PriceSymbolsUpdater.chooseUpdate(params['website'], list=False,store=True)
+
+    quit()
 
     #the different table names
     tablenames = ['openprices', 'closeprices', 'highprices', 'lowprices', 'volumes']
@@ -566,7 +554,6 @@ def main():
         
     connection.commit()
     """
-
 
     numRows = getNumRows(cursor, 'openprices')
 

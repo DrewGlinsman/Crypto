@@ -318,3 +318,133 @@ PseudoAPIDataStream
 
 CryptoStats
 -now uses an absolute end time where all other endtimes are built off of that
+
+6/24/18
+CryptoTrainer
+-values related to the success/failure of the bots of a training class are recorded and stored in the
+passed parameter file for use by the SuperTrainer
+
+SuperTrainer
+-each trainer parameter file (called superParams) has an associated directory of evaluator parameters (called baseParams)
+-there is a minimum number of evaluator parameters in each associated directory and new ones will be created if needed
+-a random evaluator parameter file is chosen and told to the trainer so that it accesses and modifies only one
+of the stored evaluator files
+
+6/25/18
+CryptoTrainer
+-values recorded are scaled by the number of trades allowed and the number of minutes to be tested over
+
+SuperTrainer
+-pull the stored and trained parameter files of each bot for both trainer and evaluator
+-calls method to compare the parameters and return the best one
+
+7/3/18
+Generics
+-added a percenttodecimal value
+-added lossallowed into the parameters passed for the crypto evaluator
+-added a set of parameters designated as the parameters to check for which trainers are better
+-added a replacement value that determines how many of the trainer parameters have to be better
+to replace the original set of parameters
+
+CryptoEvaluator
+-incorporated the lossallowed
+
+CryptoStatAnalyis
+-added a loss allowed calculation to the money calculation
+
+SuperTrainer
+-now trainers are distinguished based on how many of the special parameters to be checked are better in the new set of trainer
+parameters than the old ones
+- randomize parameters now either adds or sets the new parameter value as the randVal generated
+
+7/4/18
+SuperTrainer
+-reads in stdin values in order of the default parameter dictionaries from Generics
+-now stores the recently trained trainer and evaluator id numbers
+
+CryptoTrainer
+-reads in stdin values in order of the default parameter dictionaries from Generics
+
+Generics
+-added a lossallowed to the parameters passed to both the super trainer and the crypto trainer
+-added explanations to each of the passed parameters in Generics
+-added parameters that can be combined
+-added in a list for combined parameters and their corresponding modifiers
+-added in
+
+Readme:
+updated to include an explanation of how the training process works
+
+7/5/18
+
+CryptoTrainer
+-added in functionality to randomize the list of the generated combined parameters as well as the
+modifiers that go with each new parameter (the set of old parameters to be combined)
+
+7/6/18
+CryptoEvaluator
+-fixed so that it uses the params and paramspassed instead of PARAMETERS and storedInput
+-filled out parameter descriptions and return statements for several functions
+-removed many global variables and restricted them to being passed to
+-made new dictionary to store the calculated values for all data required for calculating a score
+-made new dictionaries for storing all the values for all data required to calculate a score and to get the
+max of those datasets
+-made new dictionary to store all the calculated values for the combined parameters
+-made new dictionaries for storing all the values for all data for the combined parameters types and to get the
+max of those datasets
+
+7/7/18
+CryptoEvaluator
+-filled out method to find the maximum of all the stored values computed for the combined parameters
+-filled out method to compute the values for all the combined parameters
+
+7/8/18
+-CryptoEvaluator, CryptoTrainer, and SuperTrainer have a prefix and pass a prefix that determines where they look for files
+
+Generics
+-added the parameters to flesh out the old parameters and add new functionaltity
+-added the types of data for the score to be calculated to a list
+-added the list of data to be persistently stored that is used for calcualtions
+
+7/9/18
+
+CryptoEvaluator
+- updated updateCrypto to use the dataforscore dictionary and calculate values for all the new types of data for the score
+-made supporting methods for updateCrypto for the data values that need more than a few lines to calculate
+
+Generics
+-added in read and write pickle functions
+
+7/10/18
+
+CryptoEvaluator
+-removed the repeated score calculations
+-added in reading the most recently stored crypto symbols
+-stores a parameter dictionary in the solo evaluator directory if none currently is stored (assuming the evaluator is being run alone)
+
+Generics
+-removed the repeated score calculations
+-introduced a variable restricting special parameters to not be negative (but can be zero)
+
+CryptoTrainer
+-added in writing the symbols dictionary if run alone
+-added in reading the stored crypto symbols
+
+SuperTrainer
+-added in writing the symbols dictionary if run alone
+-added in reading the stored crypto symbols
+
+PseudoAPI_Datastream
+-added in a method call for when the database is remade we store the symbols used as the new crypto symbols (both dict and list versions)
+
+7/11/18
+
+CryptoEvaluator
+-in a working state
+
+CryptoTrainer
+-in a working state
+
+7/12/18
+SuperTrainer
+-in a working state

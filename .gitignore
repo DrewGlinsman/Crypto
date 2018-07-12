@@ -30,3 +30,4 @@ priceList.pkl
 *.db
 DistributionData/
 *.xml
+*.log

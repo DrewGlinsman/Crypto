@@ -18,21 +18,10 @@ import logging
 
 from subprocess import Popen, PIPE
 from PrivateData import api_key, secret_key
-from Generics import UNCHANGED_PARAMS, superParams, defaulttrainerparamspassed, PARAMETERS, priceSymbols, calcPercentChange
-
-# setup the relative file path
-dirname = os.path.dirname(os.path.realpath(__file__))
+from Generics import UNCHANGED_PARAMS, superParams, defaulttrainerparamspassed, PARAMETERS, priceSymbols, \
+    calcPercentChange, listparms, removeEmptyInnerLists, combinableparams, numFiles
 
 
-# Directory path (r makes this a raw string so the backslashes do not cause a compiler issue
-paramPaths = os.path.join(dirname, '')
-
-
-# makes the directorys in the path variable if they do not exist
-pathlib.Path(paramPaths).mkdir(parents=True, exist_ok=True)
-
-# joining path for the param pickle file
-paramCompletePath = os.path.join(paramPaths, "param.pickle")
 
 
 # will hold the specific parameter given to each list
@@ -101,14 +90,18 @@ def writeParamPickle(storeval, path, filename):
     with open(path + filename, "wb") as pickle_out:
         pickle.dump(storeval, pickle_out)
 
+
 def keyCheck(key):
     """
-    :param key:
-    :return:
+    :param key: param dictionary key
+    :return: 1 if the parameter cannot be randomized and 0 if it can and 3 if it needs to be altered specially
     """
-    for i in UNCHANGED_PARAMS:
-        if i == key:
-            return 1
+
+    if key in UNCHANGED_PARAMS: #check if the key is in the list of unchanageable parameters
+        return 1
+
+    if key in listparms: #check if this is a list parameter
+        return 3
 
     return 0
 
@@ -116,38 +109,212 @@ def keyCheck(key):
 # typeOfRandom determines what kinds of randomization occurs
 # type 0 means normal, type 1 means larger range of randomization
 # type 3 means none
-# TODO remember after to testing not to randomize stuff like cumulative percent change store (i.e data)
 
-
-def randomizeParams(paramDict, typeOfRandom, baseparams):
+def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
     """
     :param paramDict: the parameter dictionary
     :param typeOfRandom: the integer corresponding to the way to randomize
     :param baseparams: the parameters passed to the trainer
+    :param combinableparams: the list of parameters that can be combined to form new parameters
     :return:
     """
-    if(typeOfRandom == 3): #keep the default parameters
-        return 0
-    if (typeOfRandom == 0):
+
+    ####VALUES EXPLAINING THE PASSED TYPES OF RANDOM#################
+    keepdefaultparams = 3
+    usesmallerrangerandom = 0
+    uselargerangerandom = 1
+
+    ####################VALUES EXPLAINING THE KEYCHECK################
+    isalistparameter = 3
+    isanunchangeableparameter = 1
+
+    if(typeOfRandom == keepdefaultparams): #keep the default parameters
+        return paramDict
+
+    if (typeOfRandom == usesmallerrangerandom):
         for key, value in paramDict.items():
+            #generate a value that will be used to determine whether this parameter will be randomized
             randcheck = int(random.uniform(0, 1) * baseparams['randcheckrangeone'])
 
 
-            if(keyCheck(key) != 1 and randcheck > baseparams['lowercheckthreshold']):
+            #check if this is a list parameter in which case it has to be modified specially
+            check = keyCheck(key)
+
+            #if the parameter is a list
+            if check == isalistparameter:
+
+                randomizeParamsList(paramDict, key, baseparams['randcheckrangeone'], baseparams['lowercheckthreshold'],
+                                    baseparams['smallrange'], baseparams['lowoffirstrange'],
+                                    combinableparams, baseparams['lowerstopcheckthreshold'],
+                                    baseparams['lowerremovecheckthreshold'])
+
+            #if this is not an unchangeable parameter and the random value generated is above the
+            #randomized threshold (meaning this parameter will be randomized)
+            elif(check != isanunchangeableparameter and randcheck > baseparams['lowercheckthreshold']):
                 randVal = paramDict[key]
-                randVal += random.uniform(-1, 1) * baseparams['smallrange'] + baseparams['lowoffirstrange']
+                randVal += (random.uniform(-1, 1) * baseparams['smallrange']) + baseparams['lowoffirstrange']
                 paramDict[key] = randVal
 
-    # todo add a normal kind of randomization
-    if(typeOfRandom == 1):
+    if(typeOfRandom == uselargerangerandom):
         for key, value in paramDict.items():
             randcheck = int(random.uniform(0, 1) * baseparams['randcheckrangetwo'])
 
-            if(keyCheck(key) != 1 and randcheck > baseparams['uppercheckthreshold']): #if the key is not in the unchangeable params list and
-                                                       #the random number generated clears the threshold for modifying it
+            #check if this is a list parameter in which case it has to be modified specially
+            check = keyCheck(key)
+
+            #if the parameter is a list
+            if check == isalistparameter:
+
+                randomizeParamsList(paramDict, key, baseparams['randcheckrangetwo'], baseparams['uppercheckthreshold'],
+                                    baseparams['bigrange'], baseparams['lowofsecondrange'],
+                                    combinableparams, baseparams['upperstopcheckthreshold'],
+                                    baseparams['upperremovecheckthreshold'])
+
+            # if the key is not in the unchangeable params list and
+            # the random number generated clears the threshold for modifying it
+            elif(check != isanunchangeableparameter and randcheck > baseparams['uppercheckthreshold']):
                 randVal = paramDict[key]
-                randVal += random.uniform(-1, 1) * baseparams['bigrange'] + baseparams['lowofsecondrange']
+                randVal += (random.uniform(-1, 1) * baseparams['bigrange']) + baseparams['lowofsecondrange']
                 paramDict[key] = randVal
+
+
+    return paramDict
+
+# randomize the list parameters. used to modify the list of lists of parameters to combine (to make new parameters)
+# and to modify the list of the modifiers for each list of parameters to combine
+# combinedparams = [[param1, param2], [param3, param1,param5]]
+# combinedparamsmodifiers = [modifier1, modifier2]
+def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, rangevals, lowvalueofrange, combinableparams,
+                        stopchangingparamsthreshold, removeparamsthreshold):
+    """
+    :param params: the parameter dictionary to be changed
+    :param keytochange: the key value to change
+    :param randcheck: the value used to set a range of random values to be used to determine if a parameter should be randomized
+    :param checkthreshold: the value that the random check value has to be higher than to allow the parameter to be randomized
+    :param rangevals: the range used to make a random value to change the parameter
+    :param lowvalueofrange: the low value of that range of values to change the parameter by
+    :param combinableparams: the list of parameters that can be combined to form new parameters
+    :param stopchangingparamsthreshold: the randomized value must be above this to keep changing a set of parameters
+    to combine
+    :param removeparamsthreshold: the randomized value must be below this to remove a parameter and above it
+    to add one (implied that it is already above the stopchangingparamsthreshold)
+    :return: the modified parameter dictionary
+    """
+
+
+    #if the param list is the list of combined params
+    #this should be a list of lists where each list is made of the parameters to be combined
+    #the first letter of each parameter is whether it should be added (+) or multipled (*) to the
+    # rest of the parameters
+    if keytochange == 'COMBINED_PARAMS':
+
+        #the upperlimit of the range of random values (is not included in range)
+        upperlimitofrange = randcheckrange
+
+        #loop through the lists of the combined parameters
+        for listofcombinedparams in params[keytochange]:
+
+            #first generate a value to make a decision
+            modifiyparamdecision = int(random.uniform(0,1) * upperlimitofrange)
+
+
+            #while the decision value is not to add or remove a parameter or when there are no parameters left in the list
+            while(modifiyparamdecision <= stopchangingparamsthreshold or len(listofcombinedparams) == 0):
+                #if we choose to remove a parameter
+                if modifiyparamdecision <= removeparamsthreshold:
+                    #generate a value corresponding to an index in the list of parameters to combined
+                    #the value is used to decide which parameter to remove
+                    indexofparamtoremove = int(random.uniform(0,1) * len(listofcombinedparams))
+
+                    #remove the specified parameter
+                    listofcombinedparams.remove(indexofparamtoremove)
+
+                #if we choose to add a parameter
+                elif modifiyparamdecision > removeparamsthreshold:
+
+                    #the upper limit that is not included in the add or multiply or subtract parameter decision below
+                    rangeofdecision = 3
+
+                    #the three decisions that can be made about what to do with this parameter
+                    addition = 0
+                    subtraction = 1
+                    multiplication = 3
+
+                    #generate a value to determine if this parameter will be added or multipled or subtracted
+                    #so if added then paramtocombine + alltheothercombinedparams
+                    #and if multipled paramtocombine * alltheothercombinedparams
+                    #and if subtracted paramtocombine - alltheothercominedparams
+                    includeparamdecision = int(random.uniform(0,1) * rangeofdecision)
+
+
+                    #generate a value corresponding to an index in the list of parameters that can be combined
+                    #the value is used to decide which parameter to add to the current list of combined parameters
+                    indexofparamtoinclude = int(random.uniform(0,1) * len(combinableparams))
+
+                    #depending on what we want to do with this parameter we add it to the list
+                    # of parameters to combine for this particular new parameter and we add a symbol
+                    # to the front of the parameter name indicating what to do with this parameter
+                    if includeparamdecision == addition:
+                        listofcombinedparams.append("+ {}".format(combinableparams[indexofparamtoinclude]))
+                    elif includeparamdecision == multiplication:
+                        listofcombinedparams.append("* {}".format(combinableparams[indexofparamtoinclude]))
+                    elif includeparamdecision == subtraction:
+                        listofcombinedparams.append("- {}".format(combinableparams[indexofparamtoinclude]))
+
+                    else:
+                        logging.error("not a valid decision {}".format(includeparamdecision))
+                        quit(-1)
+
+                    #instantiate a new modifier value in the corresponding list of combined parameters modifiers
+                    # each list of combined parameters gets one modifier
+                    # so combinedparams =  [[param1, param2], [param1, param3, param4]
+                    # would have combinedparamsmodifiers = [modifier1, modifier2]
+                    newmodifiervalue = (random.uniform(-1,1) * rangevals) + lowvalueofrange
+
+                    #add the new modifier value to the end of the parameter list of modifiers
+                    params['COMBINED_PARAMS_MODIFIERS'].append(newmodifiervalue)
+
+                #generate a new value for the next decision
+                modifiyparamdecision = int(random.uniform(0, 1) * upperlimitofrange)
+
+
+        #go through the list of lists of combined parameters and remove any lists that are empty
+        #simultaneously delete any entries from the list of the modifiers for the combined parameters
+        #that correspond to the empty combined parameter lists
+        #so if param1 = [[1,2],[]] and param2 = [1,2]
+        #then the method changes them to param1 = [[1,2]] and param2 = [1]
+        removeEmptyInnerLists(params[keytochange], params['COMBINED_PARAMS_MODIFIERS'])
+
+    #if the param list is the list of combined param modifiers
+    elif keytochange == 'COMBINED_PARAMS_MODIFIERS':
+
+        #ensure that the list of combined params modifiers has one modifier for every list in the list of lists
+        # of parameters to combine (to make new parameters)
+        if (len(params[keytochange]) != len(params['COMBINED_PARAMS'])):
+            logging.error("the combined parameter list and the list of its modifiers are not equal length")
+            logging.error("combined parameter list length {}".format(len(params['COMBINED_PARAMS'])))
+            logging.error("combined parameter modifier list length {}".format(len(params[keytochange])))
+            exit(-1)
+
+        #iterate through the list of the combined params modifiers
+        #one modifier for each list of combined params
+        for modifierindex in range(len(params[keytochange])):
+
+            #generate a value to be used to determine if this modifier will be changed
+            randcheck = int(random.uniform(0,1) * randcheckrange)
+
+            #if the random value is above the threshold set for allowing modification
+            if randcheck > checkthreshold:
+
+                #generate the random value to modify the modifier with
+                randval = (random.uniform(-1,1) * rangevals) + lowvalueofrange
+
+                #modify the combined parameter modifier by that random value generated
+                params[keytochange][modifierindex] += randval
+
+    else:
+        logging.error("not a valid list key: {}".format(keytochange))
+        quit(-1)
 
 
 # converts the given string to a Dict. Used to parse the returned string from the bots being trained
@@ -200,15 +367,17 @@ def reformatLine(line, attDict):
 # pickles the different input files for each bot run
 
 
-def pickleInput(paramDict, paramspassed):
+def pickleInput(paramDict, paramspassed, dirname):
     """
     :param paramDict: dictionary to be pickled
     :param paramspassed: parameters that have been passed to this trainer
+    :param dirname: the base directory name
     :return:
     """
 
-    pickleDirect = "{}/{}/{}/{}/{}/{}/{}/{}/variations/".format(dirname, 'training', paramspassed['website'],paramspassed['day'],
-                                                                  paramspassed['hour'], paramspassed['min'], paramspassed['idnum'], paramDict['CLASS_NUM'])
+    pickleDirect = "{}/{}/{}/{}/{}/{}/{}/{}/".format(dirname, 'training', paramspassed['website'],paramspassed['day'],
+                                                                  paramspassed['hour'], paramspassed['min'],
+                                                     paramspassed['idnum'], paramDict['CLASS_NUM'])
 
     # passing the parameters to the processes by pickling!
     with open(pickleDirect + str(int(paramDict['VARIATION_NUMBER'])) + "param.pkl", "wb") as pickle_file:
@@ -233,51 +402,61 @@ def strToFloat(paramDict):
     return newDict
 
 #read the parameters passed to the file
-def readParamsPassed():
+def readParamsPassed(dirname, baseparams, paramspassed):
 
     """
+    :param dirname: the relative directory for the files
+    :param baseparams: the params used by this trainer file
+    :param paramspassed: the params given to this trainer with information about how it should run
     :return: the parameters passed and the base parameters (the ones used to generate the evaluators)
     """
 
 
-    if len(sys.argv) == 1:
-
-        paramspassed = defaulttrainerparamspassed
-        baseparams = superParams
-    elif sys.argv[1] == "Alone":
-        paramspassed = {'website': sys.argv[2], 'day': sys.argv[3], 'hour': sys.argv[4], 'min': sys.argv[5],
-                        'idnum': int(sys.argv[6]), 'originalid': sys.argv[9]}
-        baseparams = superParams
+    if sys.argv[1] == "CryptoTrainer": #parameters have been passed through console or run configuration (i.e. this is run on its own)
+        paramspassed = {'directoryprefix': sys.argv[1],'website': sys.argv[2], 'day': sys.argv[3], 'hour': sys.argv[4], 'min': sys.argv[5],
+                        'idnum': int(sys.argv[6]), 'originalid': sys.argv[9], 'evalID': sys.argv[10],
+                        'lossallowed': sys.argv[11]}
         baseparams['classes'] = sys.argv[7]
         baseparams['variations'] = sys.argv[8]
-    else:
+
+        #true directory accounts for what script is running this (or rather what is running the chain of scripts if there are multiple levels)
+        truedirectory = "{}/{}".format(dirname, sys.argv[1])
+
+    elif len(sys.argv) != 3:  #there are no paramters passed so use default
+        # true directory accounts for what script is running this (or rather what is running the chain of scripts if there are multiple levels)
+        truedirectory = "{}/CryptoTrainer".format(dirname)
+
+    else: #the parameters have been passed from another script that is running this one
         for line in sys.stdin:
             if line != '':
                 params = line.split()
-                paramspassed = {'website': params[0], 'day': params[1], 'hour': params[2], 'min': params[3],
-                                'idnum': int(params[4]), 'originalid': int(params[5])}
-                directory = "{}/{}/{}/{}/{}/{}/".format(dirname, 'training', paramspassed['website'], paramspassed['day'], paramspassed['hour']
-                                          , paramspassed['min'])
-                # makes the directorys in the path variable if they do not exist
-                pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
-                baseparams = readParamPickle(directory, str(int(paramspassed['idnum']))+"superparam.pkl")
+
+                paramcount = 0
+                for key, value in paramspassed.items():
+                    paramspassed.update({key: params[paramcount]})
+                    paramcount += 1
+                # true directory accounts for what script is running this (or rather what is running the chain of scripts if there are multiple levels)
+                truedirectory = "{}/{}".format(dirname, (paramspassed['directoryprefix']))
 
 
-    return paramspassed, baseparams
+
+    return paramspassed, truedirectory
 
 #builds the logs for the trainer file if none is created and prepares the logs for the evaluator files
 # makes a log file for this instance of the trainer that is sorted into a folder by the date it was run
 # and its name is just its timestamp
-def initdirectories(paramspassed, baseparams, typedirec='storage'):
+def initdirectories(paramspassed, baseparams, dirname, evaluatorparams, typedirec='storage'):
     """
     :param paramspassed: the parameters passed from the command line or the superTrainer
     :param baseparams: the parameter of this trainer file
+    :param dirname: the base directory relative to the file system
+    :param evaluatorparams: the evaluator params used to setup an evaluator in case this is a single cryptoTrainer file
     :param typedirec: the type of the directory (storage, training)
     :return:
     """
 
-    directory = "{}/{}/{}/{}/{}/{}".format(dirname, typedirec, paramspassed['website'], paramspassed['day'], paramspassed['hour']
-                                          , paramspassed['min'])
+    directory = "{}/{}/{}/{}/{}/{}/".format(dirname, typedirec, paramspassed['website'], paramspassed['day'],
+                                           paramspassed['hour'], paramspassed['min'])
 
     # makes the directorys in the path variable if they do not exist
     pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
@@ -285,12 +464,32 @@ def initdirectories(paramspassed, baseparams, typedirec='storage'):
     #makes the directory of the associated idnum exist if it does not already
     pathlib.Path("{}/{}".format(directory, paramspassed['idnum'])).mkdir(parents=True, exist_ok=True)
 
+
+    #if we are running a CryptoTrainer by itself it must make a param file for its evaluators if none exists
+    #also make the super param file for the trainer if none exists
+    if paramspassed['directoryprefix'] == 'CryptoTrainer':
+
+        #if we are initializing the training directory  and there are no parameter files
+        # for the crypto trainer to use we store one
+        if typedirec == 'training':
+
+            if numFiles(directory) == 0:
+                #make the super param file for this trainer
+                writeParamPickle(baseparams,directory,'{}superparam.pkl'.format(paramspassed['idnum']))
+
+        # the storage directory to write the evaluator (base) params
+        storagedirectory = "{}{}/".format(directory, paramspassed['originalid'])
+
+        if numFiles(directory) == 0 and typedirec == 'storage':
+            #make the evalautor params file
+            writeParamPickle(evaluatorparams, storagedirectory, '{}baseparams.pkl'.format(paramspassed['evalID']))
+
     #if this is a training directory then make a class file for the param variaitons to be picked by the evaluator bots
     #and make log directory for each class
     if typedirec == 'training':
         for numclass in range(int(baseparams['classes'])):
             # makes the param directory of the associated class exist if it does not already
-            pathlib.Path("{}/{}/{}/variations".format(directory, paramspassed['idnum'], numclass)).mkdir(parents=True, exist_ok=True)
+            pathlib.Path("{}/{}/trainerlogs".format(directory, paramspassed['idnum'])).mkdir(parents=True, exist_ok=True)
 
             # makes the log directory of the associated class exist if it does not already
             pathlib.Path("{}/{}/{}/logs".format(directory, paramspassed['idnum'], numclass)).mkdir(parents=True, exist_ok=True)
@@ -304,7 +503,7 @@ def createBots(baseparams, classnum):
     :return: dictionary of subprocesses (bots)
     """
     procs = []
-    for j in range(baseparams['variations']):
+    for j in range(int(baseparams['variations'])):
         proc = Popen([sys.executable, 'CryptoEvaluator.py', '{}in.txt'.format(classnum), '{}out.txt'.format(classnum)], stdout=PIPE,
                      stdin=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
         procs.append(proc)
@@ -312,10 +511,11 @@ def createBots(baseparams, classnum):
     return procs
 
 #get the correct dictionary using the parameters passed
-def buildDirectory(botparams, passparams, typedirec='storage', typefile='variations'):
+def buildDirectory(botparams, passparams, dirname, typedirec='storage', typefile='variations'):
     """
     :param botparams: the parameters for the bot
     :param passparams: the parameters passed to this trainer
+    :param dirname: the base directory relative to the file system
     :param typedirec: the type of the directory (storage or training)
     :param typefile: the type of the file being looked for (variations or logs)
     :return: the directory string
@@ -325,28 +525,122 @@ def buildDirectory(botparams, passparams, typedirec='storage', typefile='variati
                                        passparams['min'] , passparams['idnum'],botparams['CLASS_NUM'], typefile,
                           )
 
+#changes and returns parameter values passed to reflect the success/failure of this trainer's run
+def updateParams(baseparams, defaultbaseparams, valuesrecorded):
+    """
+    :param baseparams: the "super params" read in from the pickle file corresponding to this trainer
+    :param defaultbaseparams: the default parameters used prior to any randomization or optimization
+    :param valuesrecorded: the values recorded that detail how this trainer's bot classes performed
+    :return: updated baseparams
+    """
+
+
+    #scale the percent changes to make the percentages relative to 1 trade per hour for a day timeframe
+    scaleby = (baseparams['INTERVAL_TO_TEST']/baseparams['MAX_CYCLES'])/(defaultbaseparams['INTERVAL_TO_TEST']/
+                                                                         defaultbaseparams['MAX_CYCLES'])
+
+    updateparams = baseparams
+
+    # the percentage of the bots generated that were positive
+    updateparams.update({'percentpositivebots': valuesrecorded['numposbots'] / valuesrecorded['numbots'] * 100})
+
+    # the percentage of the bots generated that were negative
+    updateparams.update({'percentnegativebots': valuesrecorded['numnegbots'] / valuesrecorded['numbots'] * 100})
+
+    # the average bot return
+    updateparams.update({'averagebotreturnsaved': (valuesrecorded['totalbotreturn'] / valuesrecorded['numbots']) * scaleby})
+
+    # the worst bot return
+    updateparams.update({'worstbotreturnsaved': (valuesrecorded['worstbotreturn']) * scaleby})
+
+    # the best bot return
+    updateparams.update({'bestbotreturnsaved': (valuesrecorded['bestbotreturn']) * scaleby})
+
+    return updateparams
+
+#checks if the parameters of the same name in the trainer param file have the same value as their associated
+#evaluator param file and write back the evaluator file to the storage directory if anything was changed
+def checksharedparams(trainerparams, evaluatorparmas, paramspassed, storagedirectory):
+    """
+    :param trainerparams: the parameters used by the trainer
+    :param evaluatorparmas: the parameters used as the base for all the training of the bots
+    :param paramspassed: the parameters passed to this trainer
+    :param storagedirectory: the directory where all the original parameters are stored
+    :return:
+    """
+
+    #counter for the number of parameters we change if they do not match the trainer's values
+    counterchangedparams = 0
+
+    #loop through the trainer parameters
+    for key, value in trainerparams.items():
+
+        #if this key is also in the evaluator param dict
+        if key in evaluatorparmas:
+            #if the values are not the same
+            if trainerparams[key] != evaluatorparmas[key]:
+                #rewrite the evaluator params value with the trainer params value
+                evaluatorparmas.update({key: value})
+                #increment counter
+                counterchangedparams += 1
+
+
+    #if we change any parameter, rewrite the evaluator params file to the storage directory so
+    #that any future uses of the evaluator will have the correct shared parameters
+    if counterchangedparams > 0:
+        writeParamPickle(evaluatorparmas, storagedirectory, '{}baseparams.pkl'.format(paramspassed['evalID']))
+
 def main():
     global final_Dict
     global reform
     global minInDay
     global runTime
 
-    #counters for the number of total bots and the bots that had positive returns
-    numbots = 0
-    numposbots = 0
+    # setup the relative file path
+    homedirectory = os.path.dirname(os.path.realpath(__file__))
 
+    #values to be recorded by this trainer for storage in its passed parameter file
+    valuesrecorded =  {'numbots': 0, 'numposbots': 0, 'numnegbots': 0, 'totalbotreturn': 0.0,
+                       'worstbotreturn': 0.0, 'bestbotreturn': 0.0}
 
     # keeps track of how many times the parameters are changed
     newParamCount = 0
 
+    #grab the run time and turn it into milliseconds
     runTime = int(time.time() * 1000)
 
-    paramspassed, baseparams = readParamsPassed()
-    initdirectories(paramspassed, baseparams)
-    initdirectories(paramspassed, baseparams,  typedirec='training')
+    #get the params passed and the base params
+    paramspassed, dirname = readParamsPassed(homedirectory, superParams, defaulttrainerparamspassed)
 
+    #simple evaluator parameters that will be used to setup a base param file in case this is a single cryptoTrainer run
+    evaluatorparams = PARAMETERS
+
+    #initialize (or check that they are) the directories for storing and training
+    #we use the default trainer params because they are changed enough for the initialization to work)
+    initdirectories(paramspassed, superParams, dirname, evaluatorparams)
+    initdirectories(paramspassed, superParams, dirname, evaluatorparams, typedirec='training')
+
+    # the directory for the corresponding storage space for this evaluator and trainer
+    storagedirectory = "{}/{}/{}/{}/{}/{}/{}/".format(dirname, 'storage', paramspassed['website'], paramspassed['day'],
+                                                      paramspassed['hour'],
+                                                      paramspassed['min'], paramspassed['originalid'])
+    #training directory corresponding to this trainer file (houses evaluator files)
     direc = "{}/{}/{}/{}/{}/{}/{}/".format(dirname, 'training', paramspassed['website'], paramspassed['day'], paramspassed['hour'],
                                         paramspassed['min'], paramspassed ['idnum'])
+
+    #training directory corresponding to this trainer file (houses the used trainer param file)
+    trainingdirec = "{}/{}/{}/{}/{}/{}/".format(dirname, 'training', paramspassed['website'], paramspassed['day'], paramspassed['hour'],
+                                        paramspassed['min'])
+
+    # makes the directorys in the path variable if they do not exist
+    pathlib.Path(storagedirectory).mkdir(parents=True, exist_ok=True)
+    # read the parameters used by this trainer from the training directory
+    baseparams = readParamPickle(trainingdirec, "{}superparam.pkl".format(paramspassed['idnum']))
+
+    # ensure that baseparams have the correct number of classes and variations since they are stored in the superParams passed
+    # to readParamsPassed
+    baseparams['classes'] = superParams['classes']
+    baseparams['variations'] = superParams['variations']
 
     #directory name where the log file is stored
     logdirectory = direc + 'trainerlogs/'
@@ -357,33 +651,40 @@ def main():
     #setup up the log file for this trainer
     setUpLog(logdirectory, logfilename)
 
-    #the directory for the corresponding storage space for this evaluator and trainer
-    storagedirectory = "{}/{}/{}/{}/{}/{}/{}/".format(dirname, 'storage', paramspassed['website'], paramspassed['day'], paramspassed['hour'],
-                                        paramspassed['min'], paramspassed['originalid'])
-
     #get the stored evaluator parameters relevant to this trainer from storage
-    params = readParamPickle(storagedirectory, 'baseparams.pkl')
+    params = readParamPickle(storagedirectory, '{}baseparams.pkl'.format(paramspassed['evalID']))
+
+    #ensure that the shared parameters that the trainer file has are the same as the evaluator file serving as its
+    #base for all future trades
+    checksharedparams(baseparams, params, paramspassed, storagedirectory)
 
     #setup a reference parameter file to edit
     writeParamPickle(params, direc, 'baseparams.pkl')
 
+    #the absolute max and min % returned by a bot in any class
+    absolute_Max = 0
+    absolute_Min = 0
 
     # store the multiple processes
-    for i in range(baseparams['classes']):
+    for i in range(int(baseparams['classes'])):
+        #read the newly updated stored parameters
+        params = readParamPickle(direc, 'baseparams.pkl')
+
         typeOfRandom = 3
-        current_Max = 0.0
+        current_Max = -10000
+        current_Min = 10000
         count = 0
         variationNum = 0.0
         minInDay = 1440.0
 
         procs = createBots(baseparams, i)
 
-         # randomizes parameters and runs different instances of the bot using the different starting parameters
+        # randomizes parameters and runs different instances of the bot using the different starting parameters
         for proc in procs:
             reform = ''
-
             # randomize parameters and send the bot their class and variation num
-            randomizeParams(params, typeOfRandom, baseparams)
+            params = randomizeParams(params, typeOfRandom, baseparams, combinableparams)
+
             params['CLASS_NUM'] = i
             params['VARIATION_NUMBER'] = int(variationNum)
 
@@ -397,54 +698,90 @@ def main():
                 typeOfRandom = 0
 
             # store parameters and other variables in pickle files for this bot
-            pickleInput(params, paramspassed)
+            pickleInput(params, paramspassed, dirname)
 
             # make one bot run with the input stream of runtime, mode, directory path, classnum, and variationum
-            out = proc.communicate(input="{} {} {} {} {} {} {}".format(paramspassed['website'], paramspassed['day'], paramspassed['hour'],
-                                   paramspassed['min'], params['CLASS_NUM'], params['VARIATION_NUMBER'], paramspassed['idnum']))
-            print(str(out))
+            out = proc.communicate(input="{} {} {} {} {} {} {} {} {}".format(paramspassed['directoryprefix'],
+                                                                             paramspassed['website'], paramspassed['day'],
+                                                                       paramspassed['hour'], paramspassed['min'],
+                                                                       params['CLASS_NUM'], params['VARIATION_NUMBER'],
+                                                                       paramspassed['idnum'], paramspassed['lossallowed']))
 
             #build the directory string for the parameter dictionary
-            directory = buildDirectory(params, paramspassed, typedirec='training')
+            directory = buildDirectory(params, paramspassed, dirname, typedirec='training')
 
             #get the parameter file from the recently finished evaluator bot
-            params = readParamPickle(directory + 'variations/'
-                                                 , str(int(params['VARIATION_NUMBER'])) + 'param.pkl')
+            params = readParamPickle(directory
+                                                 ,'{}param.pkl'.format(params['VARIATION_NUMBER']))
 
+            #store the percentage change from the money started with to the money ended with
             cumulativePerentChangeStore = calcPercentChange(params['START_MONEY'], params['END_MONEY'])
 
+
+            #add the cumulative percent change of the current bot to the total % returned
+            valuesrecorded.update({'totalbotreturn': valuesrecorded['totalbotreturn'] + cumulativePerentChangeStore})
+
+            #add the change store into the list of returns
             returns.append(cumulativePerentChangeStore)
 
-            # if the cumulative Percent Stored is greater than the current Max store it and the line of parsed input that it was from
-            if (cumulativePerentChangeStore >= current_Max and params['CYCLES'] > superParams['MIN_CYCLES'] and
-                    cumulativePerentChangeStore != 0.0 or count == 0):
-                #add up the number of positive bots
-                if(cumulativePerentChangeStore > 0.0):
-                    numposbots += 1
+            # add up the number of positive bots
+            if (cumulativePerentChangeStore > 0.0):
+                valuesrecorded.update({'numposbots': valuesrecorded['numposbots'] + 1})
+
+            #add up the number of negative bots
+            if(cumulativePerentChangeStore < 0.0):
+                valuesrecorded.update({'numnegbots': valuesrecorded['numnegbots'] + 1})
+
+            # if the cumulative Percent Stored is greater than the current Max store it and the parameters it was from
+            if (cumulativePerentChangeStore >= current_Max and params['CYCLES'] > baseparams['MIN_CYCLES']):
 
                 current_Max = cumulativePerentChangeStore
-                stored_output = params
+                bestparams = params
                 newParamCount += 1
+
+                #if the current maximum % is higher than the absolute one
+                #or if this is the first bot of the first class
+                if current_Max > absolute_Max or (count == 0 and i == 0):
+                    absolute_Max = current_Max
+
+            # if the cumulative Percent Stored is less than the current Min store it and the parameters it was from
+            if (cumulativePerentChangeStore <= current_Min and params['CYCLES'] > baseparams['MIN_CYCLES']):
+                current_Min = cumulativePerentChangeStore
+
+                #if the current minimum % is higher than the absolute one
+                #or if this is the first bot of the first class
+                if current_Min < absolute_Min or (count == 0 and i == 0):
+                    absolute_Min = current_Min
+
+
             #load the stored base parameters for this class before the next variation is made
             params = readParamPickle(direc, "baseparams.pkl")
             variationNum += 1
             #add up the number of total bots
-            numbots+=1
+            valuesrecorded.update({'numbots': valuesrecorded['numbots'] + 1})
 
+        count += 1
         logging.info('Current Max: {}'.format(current_Max))
-        final_Dict = stored_output
+
         for z in procs:
             z.wait()
 
         # rewrite the parameter file with the final Dict
-        writeParamPickle(final_Dict, direc, 'baseparams.pkl')
+        writeParamPickle(bestparams, direc, 'baseparams.pkl')
 
-    paramspassed['percentpositivebots'] = numposbots / numbots * 100
+    #set the last max recorded as the best bot % returned
+    valuesrecorded.update({'bestbotreturn': absolute_Max})
 
-    #update the original training super param file
-    writeParamPickle(paramspassed, direc, str(paramspassed['idnum']) + 'superparam.pkl')
+    #set the last min recorded as the worst bot % returned
+    valuesrecorded.update({'worstbotreturn': absolute_Min})
 
-    print(paramspassed['percentpositivebots'])
+    #update the params passed with the calculated values relating to the success/failure of the bots
+    baseparams = updateParams(baseparams, superParams, valuesrecorded)
+
+    #update the original training "super param" file
+    writeParamPickle(baseparams, trainingdirec,'{}superparam.pkl'.format(paramspassed['idnum']))
+
+
 
 if __name__ == "__main__":
     main()

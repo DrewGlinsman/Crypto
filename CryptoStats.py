@@ -36,18 +36,15 @@ pathlib.Path(cryptoPaths).mkdir(parents=True, exist_ok=True)
 logPath = os.path.join(dirname + '/', 'CryptoDataDebug.txt')
 
 
-
-
 file = open(logPath, "w")
 
 #one day in ms
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
-COUNT = 2
+COUNT = 3
 
 def getDataBinance(numDays):
     """
-
     :param numDays:
     :return:
     """
