@@ -159,7 +159,7 @@ def getcurrentmindata(connection, pricesymbols):
     add_row(connection, 'volumes', volumes, priceSymbols)
 
 #gives the databases 2 hours of data for each datatype
-def primeDatabase(connections, priceSymbols):
+def primeDatabase(connections, priceSymbols, params):
     """
     :param connections:
     :param priceSymbols: the price symbols to use
@@ -201,30 +201,31 @@ def primeDatabase(connections, priceSymbols):
 
     x = ONE_THIRD_MIN
     
+    buffertimestart = time.time()
+
     # set up the dicts to be made of lists where the index is the minute associated with the list of values
     # and the values of each list correspond to the currencies in order from price symbols
     # these are made this way to facilitate easy transfer to the tables of the database
-    for minute in range(ONE_DAY_MIN):
+    for minute in range(params['minutestoprime']):
         openpricedict.update({minute: []})
         closepricedict.update({minute: []})
         highpricedict.update({minute: []})
         lowpricedict.update({minute: []})
         volumedict.update({minute: []}) 
 
-    while(x <= ONE_DAY_MIN):
+    while(x <= params['minutestoprime']):
         minute = x - ONE_THIRD_MIN
 
         print('Minute: {}, X: {}'.format(minute, x))
        
-        logging.info('Open Price Dict before currencyname for loop: {}'.format(openpricedict))
         #iterate through the dictionary of price symbols and store the five kinds of data in their corresponding dictionaries
         for currencyname in priceSymbols:
-            #store 1 day of data for the five categories to prime the database
+            #store 2 hours of data for the five categories to prime the database
             parameters = {'symbol': currencyname, 'startTime': startTime, 'endTime': endTime, 'interval': '1m'}
             data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
             data = data.json()
 
-            #iterate through the 2 hours of data and store it in ascending order (oldest to newest)
+            #iterate through the data and store it in ascending order (oldest to newest)
             minute = x - ONE_THIRD_MIN
             for interval in data:
                 openpricedict[minute].append(interval[1])
@@ -238,22 +239,71 @@ def primeDatabase(connections, priceSymbols):
         x += ONE_THIRD_MIN
         endTime = startTime
         startTime -= ONE_THIRD_DAY
-
-        logging.info('Open Price Dict: {}'.format(str(openpricedict)))
-        
+    
     #grabbing the time after the last set of data is stored
-    buffertimestart = time.time()
+    buffertimeend = time.time()
+    
+    #calculate the time difference in seconds between when we started and ended priming the database
+    secondsTaken = buffertimeend - buffertimestart
+
+    #convert these two to milliseconds so they can be used by binance
+    buffertimestart = int(buffertimestart) * 1000
+    buffertimeend = int(buffertimeend) * 1000        
+
+
+    for currencyname in priceSymbols:
+        #store the overflow minute data for the five categories to prime the database
+        parameters = {'symbol': currencyname, 'startTime': buffertimestart, 'endTime': buffertimeend, 'interval': '1m'}
+        data = requests.get("https://api.binance.com/api/v1/klines", params=parameters)
+        data = data.json()
+
+        #how many minutes binance says has passed
+        binanceMin = len(data)
+
+        #this program takes between 2 and 3 minutes sometimes binance returns 3 so if they returned 3 we need to wait to reflect 3 minutes passing 
+        if(len(data) == 3):
+            delta = 180 - secondsTaken
+            time.sleep(delta)
+            secondsTaken = 180
+
+        #add the minutes to prime so that we can add to the end of the dictionary
+        binanceMin += params['minutestoprime']
+
+        #if the new keys haven't been created create them
+        if(params['minutestoprime'] not in openpricedict):
+            for minute in range(params['minutestoprime'], binanceMin):
+                openpricedict[minute] = []
+                closepricedict[minute] = []
+                highpricedict[minute] = []
+                lowpricedict[minute] = []
+                volumedict[minute] = []
+
+        print('Length returned: {}'.format(len(data)))
+        x = 0
+        #iterate through and append the actual data to the dictionaries
+        for minute in range(params['minutestoprime'], binanceMin):
+            openpricedict[minute].append(data[x][1])
+            closepricedict[minute].append(data[x][4])
+            highpricedict[minute].append(data[x][2])
+            lowpricedict[minute].append(data[x][3])
+            volumedict[minute].append(data[x][5])
+
+            x += 1
+    
+    print('exited loop')
+    logging.info('Open Price Dict: {}'.format(str(openpricedict)))
+
     #print('Open Price Dict: {}'.format(openpricedict))
     #add each row of data to the five tables of the database
-    for rownum in range(ONE_DAY_MIN):
-        #storre the list of values for the current row (minute) in the format used to create a new table row
+    for rownum in range(params['minutestoprime']): 
+       #storre the list of values for the current row (minute) in the format used to create a new table row
         opens = (openpricedict[rownum]);
         closes = (closepricedict[rownum]);
         highs = (highpricedict[rownum]);
         lows = (lowpricedict[rownum]);
         volumes = (volumedict[rownum]);
 
-        print('Open Price Dict: {}'.format(opens))
+        #print('Open Price Dict: {}'.format(opens))
 
         #pass the new lists of values to the functions that append them as new rows to each database
         add_row(connections, 'openprices', opens, priceSymbols)
@@ -262,6 +312,8 @@ def primeDatabase(connections, priceSymbols):
         add_row(connections, 'lowprices', lows, priceSymbols)
         add_row(connections, 'volumes', volumes, priceSymbols)
     
+    connections.commit()
+
 #creates a connection with the specified database file
 def create_connection_db(db_file):
     """
@@ -427,7 +479,6 @@ def add_row(conn, tablename, values, colnames):
     """
     sqlstatement = buildAddRow(tablename, colnames)
 
-    print('Values: {}'.format(values)) 
     cur = conn.cursor()
     cur.execute(sqlstatement, values)
 
@@ -597,12 +648,12 @@ def main():
     cursor = connection.cursor()
 
     #uncomment if you want to clear the database before using
-    """
-    for name in tablenames:
-        delete_rows(connection, name)
-        
-    connection.commit()
-    """
+    if(params['freshrun']):
+        for name in tablenames:
+            delete_rows(connection, name)
+            
+        connection.commit()
+    
 
     '''
     numRows = getNumRows(cursor, 'openprices')

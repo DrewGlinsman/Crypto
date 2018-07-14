@@ -133,7 +133,7 @@ defaulttrainerparamspassed = {'website': 'binance', 'day': 'monday', 'hour': 9, 
 storedInput = {'website': 'binance', 'day': 'monday', 'hour': 9, 'min': 0, 'classNum': -1, 'variationNum': -1,  'idnum': 0}
 
 #parameters passed to the datastream pseudo api
-datastreamparamspassed = {'website': 'binance',  'mins': 0, 'minmax': 1440, 'hourstoprime': 0, 'freshrun': False}
+datastreamparamspassed = {'website': 'binance',  'mins': 0, 'minmax': 1440, 'minutestoprime': 0, 'freshrun': False}
 
 ################################# GENERIC FUNCTIONS ##########################################
 #just calculates the percent change between two values
