@@ -8,7 +8,7 @@ import pathlib
 import PriceSymbolsUpdater
 import random
 from AutoTrader import getbinanceprice
-from Generics import PARAMETERS, superParams, priceSymbols, removeEmptyInnerLists, combinableparams, normalizationValuesToStore
+from Generics import PARAMETERS, superParams, priceSymbols, removeEmptyInnerLists, paramsthatcanbecombined, normalizationValuesToStore, calcPercentOfTotal
 
 
 basesource = r'wss://stream.binance.com:9443'
@@ -48,28 +48,23 @@ def main():
     global  priceSymbols
     priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
 
-    randnum = 1000000
-    num = 0
-    while(num <15):
-        randnum = int(random.uniform(0, 1) * 6)
+    percent = calcPercentOfTotal(100, 60)
 
-
-        print(randnum)
-
-        num+=1
+    print(percent)
 
     quit()
 
+class testclass():
+
+    def funmethod(self):
+       return 'yay!'
 
 
-    randomizeParamsList(PARAMETERS, 'COMBINED_PARAMS', 100, 10, 50, 0, combinableparams, 10, 20)
+    def printinnerscript(self):
 
-    print(PARAMETERS)
+        result = getattr(self, 'funmethod')()
 
-    randomizeParamsList(PARAMETERS, 'COMBINED_PARAMS_MODIFIERS', 100, 10, 50, 0, combinableparams, 10, 20)
-
-    print(PARAMETERS)
-
+        print(result)
 
 # setup the stored crypto calculations dictionary of lists and the corresponding dictionary with the max calcualted values
 # for each of the combined parameters
