@@ -11,6 +11,7 @@ import requests
 import threading
 import PriceSymbolsUpdater
 import sys
+import logging
 from Generics import datastreamparamspassed
 
 #setup the relative file path
@@ -655,7 +656,7 @@ def main():
         connection.commit()
     
 
-    '''
+    
     numRows = getNumRows(cursor, 'openprices')
 
     if(isinstance(numRows, int)):
@@ -665,14 +666,14 @@ def main():
     #uncommon if you want to prime the database (TODO use to prime with params['hourprime'] = hourstoprime and params['freshrun'] = true
 
     #set the database up with 240 minutes of data
-    primeDatabase(connection, priceSymbols)
+    primeDatabase(connection, priceSymbols, params)
 
     #set the mins passed to reflect the new data
-    params['mins']+=240
+    params['mins'] += params['minutestoprime']
 
 
 
-    
+    '''
     #waits for one minute - time spent priming database with 2 hours of data so that the next data we grab is a full minute
     #after we have primed
     time.sleep(60.0 - ((time.time() - buffertimestart) % 60.0))
