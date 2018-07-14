@@ -31,3 +31,5 @@ priceList.pkl
 DistributionData/
 *.log
 *.pyc
+__pycache__/PrivateData.cpython-36.pyc
+databases/binance.db-journal
