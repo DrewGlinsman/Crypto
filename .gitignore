@@ -31,3 +31,6 @@ priceList.pkl
 DistributionData/
 *.xml
 *.log
+*.txt
+*.txt
+*.pyc
