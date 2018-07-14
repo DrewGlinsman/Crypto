@@ -745,7 +745,7 @@ def main():
     absolute_Min = 0
 
     # store the multiple processes
-    for i in range(int(baseparams['classes'])):
+    for classnum  in range(int(baseparams['classes'])):
         #read the newly updated stored parameters
         params = readParamPickle(direc, 'baseparams.pkl')
 
@@ -757,7 +757,7 @@ def main():
         minInDay = 1440.0
 
         #make a list of subprocesses that will act as our bots
-        procs = createBots(baseparams, i)
+        procs = createBots(baseparams, classnum)
 
         #set the best parameters to be whatever the current value for params is
         #if this is the first run then it will be the base params and thereafter it will be whatever bot was best
@@ -770,7 +770,7 @@ def main():
             # randomize parameters and send the bot their class and variation num
             params = randomizeParams(params, typeOfRandom, baseparams, paramsthatcanbecombined)
 
-            params['CLASS_NUM'] = i
+            params['CLASS_NUM'] = classnum
             params['VARIATION_NUMBER'] = int(variationNum)
 
             # make the max cycles equal to the number of days of the interval in hours
@@ -792,6 +792,12 @@ def main():
                                                                        params['CLASS_NUM'], params['VARIATION_NUMBER'],
                                                                        paramspassed['idnum'], paramspassed['lossallowed'],
                                                                              paramspassed['startmoney']))
+
+            #the standard output from the subprocess
+            evaluatoroutput = out[0]
+
+            #the standard error from the subprocess
+            evaluatorerror = out[1]
 
             #build the directory string for the parameter dictionary
             directory = buildDirectory(params, paramspassed, dirname, typedirec='training')
@@ -827,7 +833,7 @@ def main():
 
                 #if the current maximum % is higher than the absolute one
                 #or if this is the first bot of the first class
-                if current_Max > absolute_Max or (count == 0 and i == 0):
+                if current_Max > absolute_Max or (count == 0 and classnum == 0):
                     absolute_Max = current_Max
 
             # if the cumulative Percent Stored is less than the current Min store it and the parameters it was from
@@ -836,7 +842,7 @@ def main():
 
                 #if the current minimum % is higher than the absolute one
                 #or if this is the first bot of the first class
-                if current_Min < absolute_Min or (count == 0 and i == 0):
+                if current_Min < absolute_Min or (count == 0 and classnum == 0):
                     absolute_Min = current_Min
 
 

@@ -5,6 +5,9 @@ import os
 import pathlib
 import pickle as pkl
 
+#divide by this to turn a percent into a decimal
+percenttodecimal = 100
+
 # the name of each crypto as the key and the value is the Binance ticker symbol
 priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
                 'ethereum': 'ETHBTC', 'BCC': 'BCCBTC',
@@ -286,11 +289,11 @@ defaultsuperparamspassed = {'directoryprefix': 'SuperTrainer','website': 'binanc
 #hour: the hour this was trained on
 #min: the min this was trained on
 #idnum: the id number that this trainer is stored with IN THE TRAINING DIRECTORY (so this could differ from its original id
-# since trainers are essentially grabbed at random by the super trainer)
+    #since trainers are essentially grabbed at random by the super trainer)
 #originalid: the id number that this trainer came from (i.e. the id its original version is stored under in the STORAGE DIRECTORY)
 #evalID: the id number of the evaluator that this trainer will use to generate its classes and variations for training
-# so essentially in the storage each trainer gets a set of evaluator parameter files and with each training session it will
-# choose one to vary and optimize
+    #so essentially in the storage each trainer gets a set of evaluator parameter files and with each training session it will
+    #choose one to vary and optimize
 #lossallowed: the percentage loss allowed for every buy/sell decision
 #startmoney: the amount of starting money the bots will use to train with
 defaulttrainerparamspassed = {'directoryprefix': 'CryptoTrainer','website': 'binance', 'day': 'monday', 'hour': 9,
@@ -305,19 +308,27 @@ defaulttrainerparamspassed = {'directoryprefix': 'CryptoTrainer','website': 'bin
 #classNum: the class number that this bot is stored in THE TRAINING DIRECTORY
 #variationNum: the number indicating what number has been assigned to it in the TRAINING DIRECTORY within a particular class
 #idnum: the id number that this trainer is stored with IN THE TRAINING DIRECTORY (so this could differ from its original id
-# since trainers are essentially grabbed at random by the super trainer), used by the evaluators to help store them under
-# the right trainer file
+    #since trainers are essentially grabbed at random by the super trainer), used by the evaluators to help store them under
+    #the right trainer file
 #lossallowed: the percentage loss allowed for every buy/sell decision
 #startmoney: the amount of starting money the bots will use to train with
-storedInput = {'directoryprefix': 'CryptoEvaluator', 'website': 'binance', 'day': 'monday', 'hour': 9, 'min': 0,
+defaultcryptoevaluatorparamspassed = {'directoryprefix': 'CryptoEvaluator', 'website': 'binance', 'day': 'monday', 'hour': 9, 'min': 0,
                'classNum': -1, 'variationNum': -1,  'idnum': 0,
                'lossallowed': -1, 'startmoney': 100}
 
-#parameters passed to the datastream pseudo api
-datastreamparamspassed = {'website': 'binance',  'mins': 0, 'minmax': 1440, 'hourstoprime': 0, 'freshrun': False}
+#parameters passed to PseudoAPI-Datastream
+#website: the website used to gather data, train on, and buy/sell on
+#mins: the number of minutes that have passed
+#minmax: the maximum number of minutes that data will be gathered for
+#minstoprime: the number of minutes of data to prime with
+#freshrun: whether we wipe the databases prior to gathering data
+defaultdatastreamparamspassed = {'website': 'binance',  'mins': 0, 'minmax': 1440, 'minstoprime': 1440, 'freshrun': False}
 
-#divide by this to turn a percent into a decimal
-percenttodecimal = 100
+#parameters passed to the CryptoDistribution
+defaultcryptodistributionparamspassed = {'website': 'binance', 'lossallowed': -1}
+
+
+
 
 ######################VALUES RELATED TO TIME
 
@@ -360,6 +371,21 @@ def calcPercentChange(startVal, endVal):
         return float(endVal) * 100.0
 
     return (((float(endVal) - float(startVal))/float(startVal) ) * 100)
+
+#calculate what percent one value makes up of another
+# ex: 100, 40 = 40 %
+def calcPercentOfTotal(total, valtocheck):
+    """
+    :param total: the total value
+    :param valtocheck: the value to find as a percentage of the total
+    :return:
+    """
+
+    if (valtocheck == 0):
+        return 0.0
+
+    return (float(valtocheck) / float(total) ) * 100.0
+
 
 #set either the key to lower case, the values to lower case, or both
 

@@ -448,3 +448,24 @@ CryptoTrainer
 7/12/18
 SuperTrainer
 -in a working state
+
+CryptoTrainer
+-fixed combining parameters so new ones are added but there are limits on the number of combined parameters as well
+as the number of parameters that can be combined per combiend parameter
+
+CryptoTradingEnvironment
+-created
+-is a class to encapsulate the required subprocesses to gather data, train evaluator bots, and run evaluator bots to trade
+
+CryptoTradingManager
+-created
+
+CryptoDistribution
+-added a function to read in parameters passed to it
+
+7/14/18
+
+CryptoTradingEnvironement
+-added functionality to run SuperTrainers
+-added functionality to run CrypotEvaluators that trade (hot/cold)
+

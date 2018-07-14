@@ -221,6 +221,11 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
                                                            paramspassed['min'], numprocs, curridnum,
                                                            evaluatorusedid, paramspassed['lossallowed'],
                                                            paramspassed['startmoney']))
+        #the standard output returned from the bot
+        traineroutput = out[0]
+
+        #the standard error returned from the bot
+        trainererror = out[1]
 
         #add the trainer and evaluator id as a key: value pair where the value is a list of evaluator files that have
         # been trained because multiple versions of the same trainer can be used with different evaluator use ids

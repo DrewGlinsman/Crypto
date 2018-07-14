@@ -4,16 +4,14 @@ import threading
 import ast
 import pytz
 import pickle
-import requests
 import os
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib import style
-import numpy as np
 import time
 import datetime
+import sys
+
+from matplotlib import style
 from pathlib import Path
-from Generics import priceSymbols, maxVolume
+from Generics import priceSymbols, maxVolume, defaultcryptodistributionparamspassed
 from PriceSymbolsUpdater import updatePriceSymbolsBinance
 
 style.use("ggplot")
@@ -299,7 +297,12 @@ def readPickle(symbol, weekday, timestamp):
     return buyVolume, sellVolume
 
 
-def main():
+#run this as using the Binance code
+def getbinancedistribution(lossallowed):
+    """
+    :param lossallowed: the percentage loss allowed
+    :return:
+    """
     priceSymbols = updatePriceSymbolsBinance()
     # start of the main code
     # compare current time against 4 pm to see if its within a ten minute interval
@@ -325,7 +328,7 @@ def main():
 
             for key, currency in priceSymbols.items():
                 currency = currency.lower()
-                thread = volumeThread(currency, currentTime, -1, pThread)
+                thread = volumeThread(currency, currentTime, lossallowed, pThread)
                 thread.start()
                 threads.append(thread)
 
@@ -333,6 +336,55 @@ def main():
                 thread.join()
         time.sleep(1)
 
+#read in the parameters passed
+def readparamspassed(defaultparams):
+    """
+    :param defaultparams: the default parameters used for a CryptoDistribution
+    :return: the parameters passed to this function
+    """
+    #if there are exactly three arguments and the first argument is not the name of the file
+    # which would indicate this script is being run on its own
+    if len(sys.argv) == 3 and sys.argv[1] != 'CryptoDistribution':
+        for line in sys.stdin:
+            if line != '':
+                #the line of input split up by spaces
+                linesplitupbyparams = line.split()
+
+                #counter for the param we will grab from input
+                paramcount = 0
+
+                #the dictionary of new parameters
+                newparams = {}
+
+                for key, value in defaultparams.items():
+                    newparams.update({key: linesplitupbyparams[paramcount]})
+                    paramcount += 1
+
+                return newparams
+
+    else:
+        return defaultparams
+
+#runs a gather data method according to the specified website
+def choosefunctiontogatherdata(paramspassed):
+    """
+    :param paramspassed:
+    :return:
+    """
+
+    if paramspassed['website'] == 'binance':
+        getbinancedistribution(paramspassed['lossallowed'])
+    else:
+        print("Not a valid website")
+        quit(-1)
+
+def main():
+
+    #read the parameters passed
+    paramspassed = readparamspassed(defaultcryptodistributionparamspassed)
+
+    #run the method that will continuously gather data
+    choosefunctiontogatherdata(paramspassed)
 
 if __name__ == "__main__":
     main()

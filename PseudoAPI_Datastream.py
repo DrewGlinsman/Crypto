@@ -12,7 +12,7 @@ import PriceSymbolsUpdater
 import sys
 
 from sqlite3 import Error
-from Generics import ONE_SEC_MS, ONE_THIRD_DAY, ONE_THIRD_MIN, datastreamparamspassed
+from Generics import ONE_SEC_MS, ONE_THIRD_DAY, ONE_THIRD_MIN,defaultdatastreamparamspassed
 
 #setup the relative file path
 dirname = os.path.dirname(os.path.realpath(__file__))
@@ -479,18 +479,15 @@ def readParams(paramspassed):
 
 
     if len(sys.argv) == 1:
-        paramspassed.update({'website': 'binance'})
-        paramspassed.update({'mins': mins})
-        paramspassed.update({'minmax': minmax})
-        paramspassed.update({'hourrstoprime': 0})
-        paramspassed.update(({'freshrun': False}))
+        return paramspassed
 
-    elif(sys.argv[1] == 'Alone'):
-        paramspassed.update({'website': sys.argv[2]})
-        paramspassed.update({'mins': mins})
-        paramspassed.update({'minmax': sys.argv[3]})
-        paramspassed.update({'hourrstoprime': sys.argv[4]})
-        paramspassed.update(({'freshrun': sys.argv[5]}))
+    elif(sys.argv[1] == 'PseudoAPI_Datastream'):
+        paramnum = 2
+
+        for key, value in paramspassed.items():
+            paramspassed.update({key: sys.argv[paramnum]})
+
+            paramnum += 1
 
     else:
         for line in sys.stdin:
@@ -501,7 +498,7 @@ def readParams(paramspassed):
                 #loops through the different values split from the input and stores them in a dictionary
                 count = 0
                 for key, value in paramspassed.items():
-                    paramspassed[key] = listSplits[count]
+                    paramspassed.update({key: listSplits[count]})
                     count += 1
 
     return paramspassed
@@ -523,7 +520,7 @@ def main():
     global priceSymbols
 
     #read in any passed parameters
-    params = readParams(datastreamparamspassed)
+    params = readParams(defaultdatastreamparamspassed)
 
     #this price symbols is different and is just a list of the names
     #we also store them so that any file needing the symbols can pull them from storage
@@ -583,7 +580,7 @@ def main():
         getcurrentmindata(connection, priceSymbols)
         connection.commit()
         time.sleep(60.0 - ((time.time() - starttime) % 60.0))
-        params['mins'] +=1
+        params['mins'] += 1
 
     connection.commit()
     close_connection(connection)

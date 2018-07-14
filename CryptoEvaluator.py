@@ -14,7 +14,7 @@ import logging
 from PriceSymbolsUpdater import getStoredSymbols
 from CryptoDistribution import readPickle
 from CryptoTrainer import  minInDay
-from Generics import PARAMETERS, storedInput, calcPercentChange, mininhour, hourinday, nextDay, implicitcryptodivisions, \
+from Generics import PARAMETERS, defaultcryptoevaluatorparamspassed, calcPercentChange, mininhour, hourinday, nextDay, implicitcryptodivisions, \
     normalizationValuesToStore, persistentdataforscoretypenames, numFiles, percenttodecimal
 
 try:
@@ -1545,7 +1545,7 @@ def main():
     ######################END OF OLD GLOBAL VARIABLES ###########################################################
 
     #reads in the input, usually from the cryptotrainer
-    passedparams, dirname = readTheInput(storedInput, PARAMETERS, homedirectory)
+    passedparams, dirname = readTheInput(defaultcryptoevaluatorparamspassed, PARAMETERS, homedirectory)
 
     #get the currently stored symbols
     cryptosymbols = getStoredSymbols(passedparams['website'], homedirectory, list=False)
