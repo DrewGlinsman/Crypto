@@ -3,6 +3,7 @@
 
 import pathlib
 import sqlite3
+from sqlite3 import Error
 import time
 import asyncio
 import os
@@ -11,10 +12,7 @@ import threading
 import PriceSymbolsUpdater
 import sys
 import logging
-
-from sqlite3 import Error
-from Generics import ONE_SEC_MS, ONE_THIRD_DAY, ONE_THIRD_MIN,defaultdatastreamparamspassed
-
+from Generics import datastreamparamspassed
 
 #setup the relative file path
 dirname = os.path.dirname(os.path.realpath(__file__))
@@ -300,11 +298,11 @@ def primeDatabase(connections, priceSymbols, params):
     #add each row of data to the five tables of the database
     for rownum in range(params['minutestoprime']): 
        #storre the list of values for the current row (minute) in the format used to create a new table row
-        opens = (openpricedict[rownum])
-        closes = (closepricedict[rownum])
-        highs = (highpricedict[rownum])
-        lows = (lowpricedict[rownum])
-        volumes = (volumedict[rownum])
+        opens = (openpricedict[rownum]);
+        closes = (closepricedict[rownum]);
+        highs = (highpricedict[rownum]);
+        lows = (lowpricedict[rownum]);
+        volumes = (volumedict[rownum]);
 
         #print('Open Price Dict: {}'.format(opens))
 
@@ -482,9 +480,10 @@ def add_row(conn, tablename, values, colnames):
     """
     sqlstatement = buildAddRow(tablename, colnames)
 
-
     cur = conn.cursor()
     cur.execute(sqlstatement, values)
+
+    conn.commit()
 
 
 
@@ -546,14 +545,18 @@ def select_by_crypto(conn, tablename, crypto, id=-1):
     if id != -1:
         statement = "SELECT " + crypto + " FROM " + tablename + " WHERE id=?"
         cur.execute(statement, (id,))
+        row = cur.fetchall()
+
+        print(row)
+
+        if len(row) >= 1:
+            return row[0]
+        return row
     else:
-        statement = "SELECT * FROM  " + tablename
+        statement = "SELECT " + crypto + " FROM " + tablename
         cur.execute(statement)
 
     rows = cur.fetchall()
-
-    for row in rows:
-        print(row)
 
     return rows
 
@@ -571,11 +574,11 @@ def delete_rows(conn, tablename):
     cur.execute(statement)
 
 #read in the parameters
-def readParams(paramspassed):
+def readParams():
     """
-    :param paramspassed: the parameters passed to this file
-    :return: the updated params passed
+    :return: the param passed return dictionary
     """
+    global datastreamparamspassed
 
     #the number of minutes that have passed
     mins = 0
@@ -585,15 +588,18 @@ def readParams(paramspassed):
 
 
     if len(sys.argv) == 1:
-        return paramspassed
+        datastreamparamspassed.update({'website': 'binance'})
+        datastreamparamspassed.update({'mins': mins})
+        datastreamparamspassed.update({'minmax': minmax})
+        datastreamparamspassed.update({'hourrstoprime': 0})
+        datastreamparamspassed.update(({'freshrun': False}))
 
-    elif(sys.argv[1] == 'PseudoAPI_Datastream'):
-        paramnum = 2
-
-        for key, value in paramspassed.items():
-            paramspassed.update({key: sys.argv[paramnum]})
-
-            paramnum += 1
+    elif(sys.argv[1] == 'Alone'):
+        datastreamparamspassed.update({'website': sys.argv[2]})
+        datastreamparamspassed.update({'mins': mins})
+        datastreamparamspassed.update({'minmax': sys.argv[3]})
+        datastreamparamspassed.update({'hourrstoprime': sys.argv[4]})
+        datastreamparamspassed.update(({'freshrun': sys.argv[5]}))
 
     else:
         for line in sys.stdin:
@@ -603,11 +609,11 @@ def readParams(paramspassed):
 
                 #loops through the different values split from the input and stores them in a dictionary
                 count = 0
-                for key, value in paramspassed.items():
-                    paramspassed.update({key: listSplits[count]})
+                for key, value in datastreamparamspassed.items():
+                    datastreamparamspassed[key] = listSplits[count]
                     count += 1
 
-    return paramspassed
+    return datastreamparamspassed
 
 #returns the number of rows of a data base
 def getNumRows(cursor, tablename):
@@ -619,23 +625,15 @@ def getNumRows(cursor, tablename):
 
     dataCopy = cursor.execute("select count(*) from " + tablename)
     values = dataCopy.fetchone()
-    print
-    values[0]
+    return values[0]
 
 def main():
     global priceSymbols
 
-    #read in any passed parameters
-    params = readParams(defaultdatastreamparamspassed)
+    params = readParams()
 
     #this price symbols is different and is just a list of the names
-    #we also store them so that any file needing the symbols can pull them from storage
-    #thus whatever symbols are used in making the table are also used by scripts requesting data from that table
-    priceSymbols = PriceSymbolsUpdater.chooseUpdate(params['website'], list=True, store=True)
-    #store the price symbols dictionary version as well
-    PriceSymbolsUpdater.chooseUpdate(params['website'], list=False,store=True)
-
-    quit()
+    priceSymbols = PriceSymbolsUpdater.chooseUpdate(params['website'], list=True)
 
     #the different table names
     tablenames = ['openprices', 'closeprices', 'highprices', 'lowprices', 'volumes']
@@ -650,6 +648,7 @@ def main():
 
     cursor = connection.cursor()
 
+    #uncomment if you want to clear the database before using
     if(params['freshrun']):
         for name in tablenames:
             delete_rows(connection, name)
@@ -657,6 +656,7 @@ def main():
         connection.commit()
     
 
+    
     numRows = getNumRows(cursor, 'openprices')
 
     if(isinstance(numRows, int)):
@@ -687,10 +687,7 @@ def main():
         getcurrentmindata(connection, priceSymbols)
         connection.commit()
         time.sleep(60.0 - ((time.time() - starttime) % 60.0))
-
-        params['mins'] += 1
-
-
+        params['mins'] +=1
     '''
     connection.commit()
     close_connection(connection)

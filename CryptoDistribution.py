@@ -314,6 +314,8 @@ def getbinancedistribution(lossallowed):
     pThread = priceThread(price)
     pThread.start()
 
+    buffertimestart = time.time()
+
     while(True):
         # get the date current time and set it to US Eastern time
         currentTime = datetime.datetime.now(tz=pytz.UTC)
@@ -321,7 +323,7 @@ def getbinancedistribution(lossallowed):
 
         # find time delta between current time and the base timestamp
         timedelta = currentTime.minute - baseTS.minute
-        print('Time delta = ' + str(timedelta))
+        print('Time delta = {}'.format(timedelta))
         if (timedelta % 10 == 0):
             print("Time Difference is 10 minutes")
             threads = []
@@ -334,7 +336,8 @@ def getbinancedistribution(lossallowed):
 
             for thread in threads:
                 thread.join()
-        time.sleep(1)
+
+        time.sleep(60.0 - ((time.time() - buffertimestart) % 60.0))
 
 #read in the parameters passed
 def readparamspassed(defaultparams):
