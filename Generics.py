@@ -24,7 +24,6 @@ intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', '
  PERCENT_TO_SPEND: the amount of the balance of bitcoin to spend. Should be calculated by how many bots are made
  MINIMUM_PERCENT_INCREASE: lowest percent increase for a cryptocurrency to be considered in the start of the bot
  MINIMUM_SCORE: the lowest score for a crypto to be addded to the list of scores to be checked for the remaineder of a run
- MINIMUM_MOVING_AVERAGE: the lowest moving average for a crypto score to be considered
  MAX_DECREASE: the maximum allowed decrease over a short (<15m) interval
  MAX_TIME_CYCLE: the maximum time the bot will run for in ticks (they are counted by a incrementing variable)
  MAX_CYCLES: the maximum amount of times the bot will buy and sell
@@ -73,6 +72,7 @@ intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', '
  FLOOR_PRICE_MODIFIER: the lowest % change above the original price the crypto was bought at before the bot auto sells it 
     (calculated later than the other failure conditions to catch a decreasing price)
  MODIFIED_VOLUME_MODIFIER: the cumulative volume change based on the % change by interval scale
+ MOVING_AVERAGE_MODIFIER: the modifier for the calculated moving average for a crypto when scoring 
  CUMULATIVE_PRICE_MODIFIER: the cumulative price change modifier for the weighted moving average
  PRIMARY_MODIFIED_VOLUME_SCALER: the scaler to make more volume traded have the same sign as the percent change in the 
     price than the amount that is counted as having the opposite sign
@@ -88,9 +88,18 @@ intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', '
  MINUTES_IN_PAST: how far back you want the end point of the test to be
  START_MONEY: the amount of money in $ the bot starts with
  END_MONEY: the amount of money in $ the bot ends with #TODO ADD IN MODIFIERS FOR OPEN PRICE AND CLOSE PRICE
+ COMBINED_PARAMS: the combined parameters list where each inner list has a set of normal parameters to be combined
+    to then create a new parameter value 
+ COMBINED_PARAMS_MODIFIERS: the modifier used for each combined parameter created by combining several parameters
+    in the COMBINED_PARAMS lists
+ PARAMS_CHECKED_FOR_MINIMUM_VALUES: the dictionary of parameters and their minimum values used to determine 
+    which cryptos can have their scores considered
+ minnumberofparameterminimumstopassforconsideration: the minimum number of the parameter minimums to be higher than in 
+    in order for a crypto to be considered in the scoring process (if this number is higher than the number of 
+    parameters used as minimums then it is treated as saying that all minimums are important)
 """
 PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0,
-              'MINIMUM_SCORE': 0.000001,'MINIMUM_MOVING_AVERAGE': .000001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0,
+              'MINIMUM_SCORE': 0.000001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0,
               'MAX_CYCLES': 24, 'CYCLES': 0, 'MAX_PERCENT_CHANGE': 100.0,
               'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
               'MODIFIED_VOLUME_NEGATIVE_MODIFIER': 1.0,
@@ -111,28 +120,38 @@ PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMU
               'VOLUME_PERCENT_BY_HOUR_MODIFIER': 1.0, 'MINS_SINCE_LAST_HIGH_PRICE_MODIFIER': 1.0,
               'MINS_SINCE_LAST_LOW_PRICE_MODIFIER': 1.0, 'TIMES_REACH_OR_SURPASS_HIGH_PRICE_MODIFIER': 1.0,
               'TIMES_REACH_OR_FALL_BELOW_LOW_PRICE_MODIFIER': 1.0, 'DIFF_HIGH_AND_LOW_PRICE_OVERALL_MODIFIER': 1.0,
-              'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0,
+              'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'MOVING_AVERAGE_MODIFIER': 1.0,
               'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0,
               'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 120.0,
               'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0, 'START_MONEY': 100, 'END_MONEY': 100,
-              'COMBINED_PARAMS': [], 'COMBINED_PARAMS_MODIFIERS': []}
+              'COMBINED_PARAMS': [], 'COMBINED_PARAMS_MODIFIERS': [], 'PARAMS_CHECKED_FOR_MINIMUM_VALUES': {},
+              'minnumberofparameterminimumstopassforconsideration': 1.0}
 
 
 #any lists stored in the parameters that have to be iterated through and randomized individually
 listparms = ['COMBINED_PARAMS', 'COMBINED_PARAMS_MODIFIERS']
+
+#any dicts stored in the parameters that have to be itereated through and randomized individually
+dictparams = ['PARAMS_CHECKED_FOR_MINIMUM_VALUES']
 
 #parameters used by CryptoEvaluator that are specifically ignored when randomizing
 UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND' , 'MAX_DECREASE', 'MAX_TIME_CYCLE', 'MAX_CYCLES',
                     'CYCLES','MAX_PERCENT_CHANGE', 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE',
                     'CUMULATIVE_PERCENT_CHANGE','CUMULATIVE_PERCENT_CHANGE_STORE',
                     'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW','VARIATION_NUMBER', 'CLASS_NUM','MIN_OFFSET',
-                    'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'START_MONEY', 'END_MONEY']
+                    'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'START_MONEY', 'END_MONEY',
+                    'minnumberofparameterminimumstopassforconsideration']
+
+#parameters to be changed by specific amounts (each inner list has a corresponding range specified in the list below)
+SPECIAL_PARAMS = [['MINIMUM_SCORE']]
+
+#the range of the special params to be changed by
+SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION = [1]
 
 #names for different calculations to be stored and used to find the max in the bots with each update
 #the max of each of these values is used to normalize each value for scoring (and for the scores themselves)
 #any new calculation to be included in the score for a crypto MUST be added here so that they can be normalized
 #i.e. make each value relative to the maximum value for each calculation
-#TODO if not work add 'Score' back in (should not be necessary)
 normalizationValuesToStore = ['PERCENT_BY_HOUR_OPEN_CLOSE', 'PERCENT_BY_HOUR_HIGH_LOW',
                               'PERCENT_BY_HOUR_OPEN_HIGH', 'PERCENT_BY_HOUR_OPEN_LOW',
                               'PERCENT_BY_HOUR_HIGH_CLOSE', 'PERCENT_BY_HOUR_LOW_CLOSE',
@@ -141,7 +160,7 @@ normalizationValuesToStore = ['PERCENT_BY_HOUR_OPEN_CLOSE', 'PERCENT_BY_HOUR_HIG
                               'VOLUME_TIME_INCREASING_UNWEIGHTED', 'MINS_SINCE_LAST_HIGH_PRICE',
                               'MINS_SINCE_LAST_LOW_PRICE', 'TIMES_REACH_OR_SURPASS_HIGH_PRICE',
                               'TIMES_REACH_OR_FALL_BELOW_LOW_PRICE', 'DIFF_HIGH_AND_LOW_PRICE_OVERALL',
-                              'MODIFIED_VOLUME']
+                              'MODIFIED_VOLUME', 'MOVING_AVERAGE']
 
 #parameters that can be combined and considered (set to the normalization values stored for the score because
 # those should be the only ones that can be combined)
@@ -218,6 +237,12 @@ NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE: the number of times that an crypto 
     or a failure flag is set off and it is auto sold
 maxcombinedparams: the maximum number of combined parameters
 maxparameterscombinedpercombinedparam:the maximum number of parameters that can be combined per combined parameter
+maxparameterstouseasminimums: the maximum number of parameters that can be used to distinguish between 
+    what cryptos can have their scores considered when selecting a crypto to buy. so essentially any data type parameter
+    chosen will have a minimum value that each crypto is checked to be over in order to get consideration for purchase
+minnumberofparameterminimumstopassforconsideration: the minimum number of the parameter minimums to be higher than in 
+    in order for a crypto to be considered in the scoring process (if this number is higher than the number of 
+    parameters used as minimums then it is treated as saying that all minimums are important)
 """
 # the parameters used by the supertrainer given to each trainer
 superParams = {'smallrange': 2,'bigrange': 15, 'lowoffirstrange': 0, 'lowofsecondrange': 0, 'randcheckrangeone': 10,
@@ -228,7 +253,8 @@ superParams = {'smallrange': 2,'bigrange': 15, 'lowoffirstrange': 0, 'lowofsecon
                'MAX_CYCLES': 24, 'MIN_CYCLES': 4, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0,
                'MAX_PERCENT_CHANGE': 100.0, 'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0,
                'MAX_DECREASE': -10.0, 'replacementvalue': 0, 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
-               'maxcombinedparams': 3, 'maxparameterscombinedpercombinedparam': 3}
+               'maxcombinedparams': 3, 'maxparameterscombinedpercombinedparam': 3, 'maxparameterstouseasminimums': 1.0,
+               'minnumberofparameterminimumstopassforconsideration': 1.0}
 
 # parameters that the superTrainer should not change
 unchangedSuperParams = ['MIN_OFFSET', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'percentpositivebots',
@@ -241,17 +267,20 @@ checkCryptoTrainerPerformance = [ 'percentpositivebots',
 maxVolume = 7000
 
 #superparameters that have to be changed specially (the inner lists are the groups that get changed by the same value at the same time)
-specialSuperParams = [['smallrange', 'bigrange', 'lowoffirstrange', 'lowofsecondrange', 'randcheckrangeone', 'randcheckrangetwo',
-                      'lowercheckthreshold', 'uppercheckthreshold', 'upperstopcheckthreshold', 'upperremovecheckthreshold',
-                       'lowerstopcheckthreshold', 'lowerremovecheckthreshold'],['classes'],['variations'], ['MIN_CYCLES', 'MAX_CYCLES'],
-                      ['replacementvalue'], ['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE']]
+specialSuperParams = [['smallrange', 'bigrange', 'lowoffirstrange', 'lowofsecondrange', 'randcheckrangeone',
+                       'randcheckrangetwo','lowercheckthreshold', 'uppercheckthreshold', 'upperstopcheckthreshold',
+                       'upperremovecheckthreshold','lowerstopcheckthreshold', 'lowerremovecheckthreshold'],
+                      ['classes'],['variations'], ['MIN_CYCLES', 'MAX_CYCLES'], ['replacementvalue'],
+                      ['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE'], ['maxparameterstouseasminimums'],
+                                                                ['minnumberofparameterminimumstopassforconsideration']]
 
 #each group of special params has the range that is used to vary them here
-specialRange = [10,10,10,2,5,10]
+specialRange = [10,10,10,2,5,10,5,5]
 
 #special parameters used by the trainers that can be neither negative nor zero (only need to identify the first
 # parameter in the corresponding inner list within the specialSuperParams list)
-nonnegorzero = ['classes', 'variations', 'replacementvalue']
+nonnegorzero = ['classes', 'variations', 'replacementvalue', 'maxparameterstouseasminimums',
+                'minnumberofparameterminimumstopassforconsideration']
 
 #special parameters used by the trainers that cannot be negative (only need to identify the first parameter
 # in the corresponding inner list within the specialSuperParams list)

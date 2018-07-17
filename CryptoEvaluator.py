@@ -253,7 +253,7 @@ def setWeightedMovingAverage(currency, startMinute, endMinute, params, openPrice
 
     return cumulativePrice
 
-# this function will update the weighted moving average every second the program runs todo
+#TODO this function will update the weighted moving average every second the program runs
 # def updateWeightedMovingAverage(currency, interval, starttime, endtime):
 
 
@@ -358,7 +358,7 @@ def getbinanceprice(currency, currentMinute, closePriceData):
 def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, closePriceData, volumeData,
                  highPriceData, lowPriceData, cryptoSymbols, dataForScore, combinedParamData, cryptosSeperated,
                  persistentancillarydataforscore, maxdataforscore, percentChanges, volumeAmounts, volumePercentChanges,
-                 weightedMovingAverage, scores, currencyToTrade, namesofvaluestostore, maxdataforcombinedparams):
+                 scores, currencyToTrade, namesofvaluestostore, maxdataforcombinedparams):
     """
     :param startMinute: the start minute of the interval to evaluate
     :param endMinute: the end minute of the interval to evaluate
@@ -381,7 +381,6 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
     :param volumeAmounts: the dictionary of volumes amounts traded by minute
     :param volumePercentChanges: the volume percent changes by minute
     :param dataForScore: the dictionary with any data needed to calcualate the score
-    :param weightedMovingAverage: the dictionary of weighted moving averages
     :param scores: the dictionary used to store the score of each crypto for this updateCrypto run
     :param currencyToTrade: the dictionary of currencies we can trade
     :param namesofvaluestostore: the list with names of values to store for the score
@@ -516,7 +515,7 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
                                                                       percentChanges[currency], volumeAmounts[currency])
 
         # calculate a weightedMovingAverage
-        weightedMovingAverage[currency] = setWeightedMovingAverage(currency, startMinute, endMinute, params,
+        dataForScore[currency]['MOVING_AVERAGE'] = setWeightedMovingAverage(currency, startMinute, endMinute, params,
                                                                    closePriceDataLocal
                                                                    , openPriceDataLocal)
 
@@ -544,13 +543,8 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
         new_score = {currencyname: calc_score}
         scores.update(new_score)
 
-        # calculate a weightedMovingAverage
-        weightedMovingAverage[currencyname] = setWeightedMovingAverage(currencyname, startMinute, endMinute, params,
-                                                                       closePriceData[currencyname],
-                                                                       openPriceData[currencyname])
 
     # add cryptos and their scores to dictionary of currencies to trade if they are above the minimum score
-    # record which cryptos were not chosen, and which were chosen that had the right score or had the right score and mean
     for currencyname, scoreforcurrency in scores.items():
 
         #make a dictioanry entry for this score and crypto
@@ -563,12 +557,6 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
 
             #add the current crypto into the list of cryptos chosen to be considered for buying
             cryptosSeperated['Chosen'].append(currencyname)
-
-            #if the crypto had a higher moving average than our minimum
-            if(weightedMovingAverage[currencyname] < params['MINIMUM_MOVING_AVERAGE']):
-                cryptosSeperated['chosenButCut'].append(currencyname)
-            else:
-                cryptosSeperated['chosenNotCut'].append(currencyname)
 
         #if the crypto did not have a score sufficient for consideration
         else:
@@ -935,32 +923,36 @@ def findlowpriceandupdatehighestoverall(lowprices, persistentdata, startminute, 
 
     return lowestprice
 
-# finds the next currency to buy
-def priceChecker(params, currencyToTrade, scores, weightedMovingAverage, cryptosSeperated):
+# finds the next currency to buy by first whittling down the list of cryptos to those that pass a certain number
+# of the minimum values and then find the one with the highest score of those
+def priceChecker(params, currencyToTrade, scores, dataforscore, combinedparamdata, cryptosSeperated):
     """
     :param params: the parameters used by the bot to buy
     :param currencyToTrade: the dictionary of potential currencies to trade (can only choose one)
     :param scores: the dictionary with the scores for all the crypto currencies
-    :param weightedMovingAverage: the dictionary with the weighted moving average for each crypto
+    :param dataforscore: the dictionary with the data that is stored for all the cryptos
+    :param combinedparamdata: the data used to calculate score from the combined parameters
     :param cryptosSeperated: the crypto currency separations that are implicitly made when calculatingg scores
     and selecting the one to buy
     :return: the currency we have decide to buy
     """
     currencyToBuy = ''
 
+    #whittle down the list to just the cryptos that have elements higher than the minimum amounts specified in
+    # our minimum params dictionary
+    currencyToTrade = removecryptoswithoutadequateminimumvalues(params, currencyToTrade, dataforscore, combinedparamdata)
+
     # Compares the two price lists and sets the currencyToBuy to be
     # the coin with the highest score that also is above the minimum moving average
     maxScore = 0
     for key, value in currencyToTrade.items():
-
         try:
-            if(maxScore < scores[key] and float(weightedMovingAverage[key]) > float(params['MINIMUM_MOVING_AVERAGE'])):
+            if(maxScore < scores[key]):
                 maxScore = scores[key]
-                #logging.info('CURRENT HIGH SCORE: The score of ' + str(key) +  ' is ' + str( scores[key]) + '\n')
                 currencyToBuy = key
 
         except KeyError:
-            logging.info(" LINE 550 key error " + str(key) + " scores[key] " + weightedMovingAverage[key]  + '\n')
+            logging.info(" key error " + str(key) + " scores[key] " + dataforscore[key]['MOVING_AVERAGE'] + '\n')
 
     #logging.info('Coin with the highest score is ' + str(currencyToBuy) + ' which is ' + str(maxScore) + '\n' )
 
@@ -969,6 +961,80 @@ def priceChecker(params, currencyToTrade, scores, weightedMovingAverage, cryptos
 
     return currencyToBuy  # potential runtime error if all negative todo
 
+#iterate through the currency to trade dictionary and remove cryptos that do not have the minimum values for each
+# data type specified
+def removecryptoswithoutadequateminimumvalues(params, dictofcurrenciespossibletotradefor, dataforscore,
+                                              combinedparamdata):
+    """
+    :param params: params used for this bot
+    :param dictofcurrenciespossibletotradefor: dictionary with the possible crypto currencies to buy
+    :param dataforscore: the data stored to calculate the score
+    :param combinedparamdata: the data used to calculate score from the combined parameters
+    :return: a new dictionary with only the cryptos that are qualified stay
+    """
+
+    finaldictionaryofcryptostotrade = {}
+
+    #check that the stored minimum number of datatypes is a valid number
+    checkminimumnumberofdatatypestopassiscorrect(params)
+
+    #loop through each crypto in the list
+    for currencyname, score in dictofcurrenciespossibletotradefor.items():
+
+        #if the current crypto has data values above the minimum valus in the params dictionary for
+        #datatype minimum values
+        if(cryptohasadequateminimumvalues(params, dataforscore, combinedparamdata, currencyname)):
+            finaldictionaryofcryptostotrade.update({currencyname: score})
+
+    return finaldictionaryofcryptostotrade
+
+#check if the minimum number of datatypes that a crypto needs to be higher than when comparing against
+#the dict of data types used as minimums is a value not greater than the maximum number of minimums considered
+def checkminimumnumberofdatatypestopassiscorrect(params):
+    """
+    :param params: the params used by this bot
+    :return:
+    """
+
+    if params['minnumberofparameterminimumstopassforconsideration'] > len(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES']):
+        params['minnumberofparameterminimumstopassforconsideration'] = len(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'])
+
+#checks if the current crypto has data type values above the minimums set in the params dict
+def cryptohasadequateminimumvalues(params, dataforscore, combinedparamdata, currencyname):
+    """
+    :param params: params used for this bot
+    :param dataforscore: the data stored to calculate the score
+    :param combinedparamdata: the data used to calculate score from the combined parameters
+    :param currencyname: the current crypto being evaluated
+    :return:
+    """
+
+    #counter to track how many of the set minimum data values the current crypto has a data value higher than
+    minimumdatavaluesbetterthan = 0
+
+    #if there are no set minimum values
+    if len(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES']) == 0:
+        return True
+
+    for datatype, datavalue in params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].items():
+
+        #if this is a normal data type
+        if datatype in dataforscore:
+            if dataforscore[currencyname][datatype] > datavalue:
+                minimumdatavaluesbetterthan += 1
+        #otherwise check if this is within the combined params list
+        elif int(datatype) < len(params['COMBINED_PARAMS']):
+            if combinedparamdata[currencyname][datatype] > datavalue:
+                minimumdatavaluesbetterthan += 1
+        else:
+            logging.error("Not a valid datatype")
+            quit(-1)
+
+
+    if minimumdatavaluesbetterthan >= params['minnumberofparameterminimumstopassforconsideration']:
+        return True
+
+    return False
 
 # checks if the current crypto has been decreasing the past ten minutes
 # if yes it forces a new check to see if there is a better crypto
@@ -1131,7 +1197,7 @@ def increasingOrDecreasing(currency, startMinute, endMinute, openPriceData, clos
 
 
 def createStatsDict(statsDictSetup, percentChanges, volumePercentChanges, volumeAmounts, storedDataForScore,
-                    weightedMovingAverage):
+                    ):
     """
     :param statsDictSetup: the statistics dictionary to be updated
     :param percentChanges: the dictionary of the percent changes between the open and close prices for each minute
@@ -1141,7 +1207,6 @@ def createStatsDict(statsDictSetup, percentChanges, volumePercentChanges, volume
     statsDictSetup.update({'volumePercentChanges': volumePercentChanges})
     statsDictSetup.update({'volumeAmounts': volumeAmounts})
     statsDictSetup.update({'storedDataForScore': storedDataForScore})
-    statsDictSetup.update({'weightedMovingAverage': weightedMovingAverage})
 
 
 # sets all the list of how the cryptos were seperated back to being empty
@@ -1246,13 +1311,12 @@ def buildDirectory(paramspassed, dirname, typedirec='storage'):
 
 # setup the data dictionaries
 
-def setUpData(paramspassed, percentChanges, volumePercentChanges, volumeAmounts, weightedMovingAverage, cryptoSymbols):
+def setUpData(paramspassed, percentChanges, volumePercentChanges, volumeAmounts, cryptoSymbols):
     """
     :param paramspassed: the params passed to this function
     :param percentChanges: the dictionary of percent changes between open and close price
     :param volumePercentChanges: the dictionary of percent changes between volumes traded
     :param volumeAmounts: the dictionary of the volume amounts traded
-    :param weightedMovingAverage: the dictionary storing the moving averages
     :param cryptoSymbols: the dictionary of crypto tickers
     :return:
     """
@@ -1261,8 +1325,6 @@ def setUpData(paramspassed, percentChanges, volumePercentChanges, volumeAmounts,
         percentChanges.update({currency:[]})
         volumePercentChanges.update({currency:[]})
         volumeAmounts.update({currency:[]})
-        weightedMovingAverage.update({currency: []})
-
 
 #setup the data dictionary so that each crypto currency has its data relevant to scoring stored
 #also used to reset
@@ -1468,7 +1530,7 @@ def main():
     RESTART_LOW = 0
     EXIT = 0
 
-    # crypto being bouhgt and held
+    # crypto being bought and held
     currencyToTrade = {}
 
     # temporary variable that holds currently held crypto right before the logic to test if
@@ -1498,9 +1560,6 @@ def main():
 
     # holds the percent volume change over an hour, the number of intervals the volume increased, and the weighted time where the crypto increased
     volumePercentData = {}
-
-    # stores the calculated weightedMovingAverage
-    weightedMovingAverage = {}
 
     # the modified cumulative volume over a period (a negative percent change will result in the volume change being counted as negative towards the
     # cumulative volume stored here
@@ -1557,7 +1616,7 @@ def main():
     setuppersistentancillaryscoredata(persistentancillarydataforscore, persistentdataforscoretypenames, cryptosymbols)
 
     #setup the normal data dictionaries and get an updated price symbol dictionary
-    setUpData(passedparams, percentChanges, volumePercentChanges, volumeAmounts, weightedMovingAverage, cryptosymbols)
+    setUpData(passedparams, percentChanges, volumePercentChanges, volumeAmounts, cryptosymbols)
 
     #get the directory of the class
     classdirectory = buildDirectory(passedparams, dirname, typedirec='training')
@@ -1645,7 +1704,7 @@ def main():
         updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, closePriceData, volumeData,
                  highPriceData, lowPriceData, cryptosymbols, dataforscore, combinedparamdata, cryptosSeparated,
                  persistentancillarydataforscore, maxdataforscore, percentChanges, volumeAmounts, volumePercentChanges,
-                 weightedMovingAverage, scores, currencyToTrade, normalizationValuesToStore, maxcombinedparamdata)
+                 scores, currencyToTrade, normalizationValuesToStore, maxcombinedparamdata)
 
         # reset the old currency to be equal to whatever the current crypto currency is
         if currentCurrency == '':
@@ -1655,7 +1714,8 @@ def main():
 
         # set the current currency to be whatever the price checker returns
         # can be a nothing string, the same crypto, or a new one
-        currentCurrency = priceChecker(params, currencyToTrade, scores, weightedMovingAverage, cryptosSeparated)
+        currentCurrency = priceChecker(params, currencyToTrade, scores, dataforscore, combinedparamdata,
+                                       cryptosSeparated)
 
         # sell the current crypto if you want to buy a new one
         if (oldCurrency != currentCurrency) and (currentCurrency != '') and currentCurrency != ownCrypto:

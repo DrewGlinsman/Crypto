@@ -468,4 +468,22 @@ CryptoDistribution
 CryptoTradingEnvironement
 -added functionality to run SuperTrainers
 -added functionality to run CrypotEvaluators that trade (hot/cold)
+-added functionality to check and update the stored amount of money in our accounts
 
+
+7/17/18
+
+Generics
+-added in dictionary parameter to hold the data types to be checked against as minimum values when
+    deciding which crypto can be considered for choosing
+-added a parameter to the super params (trainer params) so that the number of parameters allowed to be checked against as
+    minimum values is set to a max number of params
+
+CryptoEvaluator
+-now checks minimum values for any cryptos with scores above the minimum scores
+-checks if a certain number of minimum values are exceeded for consideration as the crypto with the right score for purchase
+
+CryptoTrainer
+-removes combined parameters when the list of combined parameters is too high
+-added randomization for any parameters listed as special parameters for an evalutor (they use a specified special range)
+-added randomization for any dictionary parameters (only one supported is the dictionary of minimum values to be checked against)

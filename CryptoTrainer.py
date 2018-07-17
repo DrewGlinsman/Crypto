@@ -1,11 +1,6 @@
 # Copyright (c) 2018 A&D
 # Auto trading tester that runs multiple versions of the trader with different parameters
 
-# todo add a function to randomize the parameters when requested
-# todo make the randomize parameters function implement the different types of randomization
-# todo make it so that every test having extremely negative output does not still overwrite best parameters
-# todo add in on/off switches and make them do different things for different parameters (i.e. something like negative weight should get treated like a 1.0 not a 0.0 since it is used in necessary calculations)
-# todo add in different negative weights depending on which is used.
 
 import sys
 import random
@@ -17,9 +12,9 @@ import logging
 
 
 from subprocess import Popen, PIPE
-from PrivateData import api_key, secret_key
 from Generics import UNCHANGED_PARAMS, superParams, defaulttrainerparamspassed, PARAMETERS, priceSymbols, \
-    calcPercentChange, listparms, removeEmptyInnerLists, paramsthatcanbecombined, numFiles
+    calcPercentChange, listparms, removeEmptyInnerLists, paramsthatcanbecombined, numFiles, \
+    SPECIAL_PARAMS,  dictparams, SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION
 
 
 
@@ -91,31 +86,22 @@ def writeParamPickle(storeval, path, filename):
         pickle.dump(storeval, pickle_out)
 
 
-def keyCheck(key):
-    """
-    :param key: param dictionary key
-    :return: 1 if the parameter cannot be randomized and 0 if it can and 3 if it needs to be altered specially
-    """
-
-    if key in UNCHANGED_PARAMS: #check if the key is in the list of unchanageable parameters
-        return 1
-
-    if key in listparms: #check if this is a list parameter
-        return 3
-
-    return 0
 
 # randomizes the parameters before sending them to a subprocess
 # typeOfRandom determines what kinds of randomization occurs
 # type 0 means normal, type 1 means larger range of randomization
 # type 3 means none
 
-def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
+def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams, specialparameterslist,
+                    specialparametersrandomizationranges):
     """
     :param paramDict: the parameter dictionary
     :param typeOfRandom: the integer corresponding to the way to randomize
     :param baseparams: the parameters passed to the trainer
     :param combinableparams: the list of parameters that can be combined to form new parameters
+    :param specialparameterslist: the list of the lists of parameters that have special ranges to be randomized with
+    :param specialparametersrandomizationranges: the list of ranges that each special parameter list of parameters
+        is randomized using.
     :return:
     """
 
@@ -125,7 +111,9 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
     uselargerangerandom = 1
 
     ####################VALUES EXPLAINING THE KEYCHECK################
+    isaspecialparameter = 4
     isalistparameter = 3
+    isadictparameter = 2
     isanunchangeableparameter = 1
 
     if(typeOfRandom == keepdefaultparams): #keep the default parameters
@@ -148,6 +136,16 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
                                     combinableparams, baseparams['lowerstopcheckthreshold'],
                                     baseparams['lowerremovecheckthreshold'], baseparams['maxcombinedparams'],
                                     baseparams['maxparameterscombinedpercombinedparam'])
+            #if the parameter is a dict
+            elif check == isadictparameter:
+
+                randomizeParamsDict(paramDict, baseparams, key, combinableparams, 'lower')
+
+            #if the parameter is a special parameter with its own range value
+            elif check == isaspecialparameter:
+
+                randomizeSpecialParam(paramDict, key, specialparameterslist, specialparametersrandomizationranges,
+                                      randcheck, baseparams['lowercheckthreshold'])
 
             #if this is not an unchangeable parameter and the random value generated is above the
             #randomized threshold (meaning this parameter will be randomized)
@@ -172,6 +170,17 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
                                     baseparams['upperremovecheckthreshold'], baseparams['maxcombinedparams'],
                                     baseparams['maxparameterscombinedpercombinedparam'])
 
+            # if the parameter is a dict
+            elif check == isadictparameter:
+
+                randomizeParamsDict(paramDict, baseparams, key, combinableparams, 'upper')
+
+            #if the param is a special param with its own range values
+            elif check == isaspecialparameter:
+
+                randomizeSpecialParam(paramDict, key, specialparameterslist, specialparametersrandomizationranges,
+                                      randcheck, baseparams['uppercheckthreshold'])
+
             # if the key is not in the unchangeable params list and
             # the random number generated clears the threshold for modifying it
             elif(check != isanunchangeableparameter and randcheck > baseparams['uppercheckthreshold']):
@@ -181,6 +190,32 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams):
 
 
     return paramDict
+
+
+#looks to see if the passsed parameter key is one of the kinds that requires a non-default kind of randomizatiom
+def keyCheck(key):
+    """
+    :param key: param dictionary key
+    :return:
+    """
+
+    if key in UNCHANGED_PARAMS: #check if the key is in the list of unchanageable parameters
+        return 1
+
+    #check if the key is in the list of dictionary parameters
+    if key in dictparams:
+        return 2
+
+    if key in listparms: #check if this is a list parameter
+        return 3
+
+    #loop through the lists of the list of lists of parameters to modify by specific ranges
+    for list in SPECIAL_PARAMS:
+        if key in list:
+            return 4
+
+    return 0
+
 
 # randomize the list parameters. used to modify the list of lists of parameters to combine (to make new parameters)
 # and to modify the list of the modifiers for each list of parameters to combine
@@ -215,6 +250,9 @@ def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, ran
 
         #the upperlimit of the range of random values (is not included in range)
         upperlimitofrange = randcheckrange
+
+        #remove the extra combined parameters if we have too many
+        removeextracombinedparams(params, maxcombinedparams)
 
         #loop and add new combined parameter lists until we stop
         #and we have not exceeded this trainer's max length of allowed combined parameters
@@ -297,6 +335,23 @@ def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, ran
     else:
         logging.error("not a valid list key: {}".format(keytochange))
         quit(-1)
+
+#remove the combined parameter lists starting from the end if there are too many
+# mirror the removes in the combined parameter modifier list
+def removeextracombinedparams(params, maxcombinedparams):
+    """
+    :param params: parameters used by the evaluator bots to trade
+    :param maxcombinedparams: the maximum number of combined parameters
+    :return:
+    """
+
+    while(len(params['COMBINED_PARAMS']) > maxcombinedparams):
+        #remove the last list of combined parameters
+        params['COMBINED_PARAMS'] = params['COMBINED_PARAMS'][:-1]
+
+        #remove the corresponding modifier from the list of modifiers
+        params['COMBINED_PARAMS_MODIFIERS'] = params['COMBINED_PARAMS_MODIFIERS'][:-1]
+
 
 #return true if we should add a new combined parameter
 def checkaddnewcombinedparamlist(upperlimitrange, stopchangingparamsthreshold):
@@ -395,6 +450,296 @@ def addmodifiertocombinedparammodifierlist(listofcombinedparametermodifiers, ran
 
     # add the new modifier value to the end of the parameter list of modifiers
     listofcombinedparametermodifiers.append(newmodifiervalue)
+
+#randomize the parameter that is a dictionary by selecting the right dictionary randomization function
+def randomizeParamsDict(params, baseparams, key, normaparamslist, upperorlowervalues):
+
+
+    if key == 'PARAMS_CHECKED_FOR_MINIMUM_VALUES':
+        randomizeParamDictofMinimumParameterValues(params, baseparams,normaparamslist, upperorlowervalues)
+    else:
+        logging.error("Not a valid key {}".format(key))
+        quit(-1)
+
+#randomize the key, value pairs for the dictionary of parameter minimum values
+def randomizeParamDictofMinimumParameterValues(params, baseparams, normalparamslist, upperorlowervalues):
+    """
+    :param params: the parameter dictionary used by the evaluator bots to trade with
+    :param baseparams: the base parameters used by this trainer
+    :param normalparamslist: the list of parameters considered normal
+    :param upperorlowervalues: whether we are changing this parameter dictionary upper (bigger) or lower (smaller)
+        ranges of values for both the decision to change each value and the amount to change each value by
+    :return:
+    """
+
+    #ensure that the parameter dictionary of minimum parameters values is not too long
+    checkparamdictofminumumsisappropriatelength(params, baseparams)
+
+    #only run the code to choose a new parameter to add as a minimum value if there is room for another parameter
+    if len(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES']) < baseparams['maxparameterstouseasminimums']:
+
+        #decide if we will grab a combined parameter or a normal parameter to use as a minimum
+        nameofparamtype = normalparameterorcombinedparameter(params)
+
+        addanewparametertouseasaminimum(params, normalparamslist, nameofparamtype)
+
+    #loop through the parameters used as minimum values and randomize them
+    randomizethevaluesofthedictionaryofdatatypeminimumvalues(params, baseparams, upperorlowervalues)
+
+    #remove a parameter used as a minimum value
+    removeparameterusedasaminimum(params)
+
+#removes the last parameter key, value pair if the dictionary has more pairs than is allowed for this trainer
+def checkparamdictofminumumsisappropriatelength(params, baseparams):
+    """
+    :param params: the parameter dictionary used by the evaluator bots to trade
+    :param baseparams: the base parameter dictionary used by this trainer
+    :return:
+    """
+
+    while(len(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES']) > baseparams['maxparameterstouseasminimums']):
+
+        #pick a key to be removed
+        keychosentoberemoved = choosekeyofdicttoremove(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'])
+
+        #remove the key from the dictionary
+        params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].pop(keychosentoberemoved)
+
+#returns a key in the dictionary to be removed
+def choosekeyofdicttoremove(dict):
+    """
+    :param dict: the dictionary
+    :return: the removed key
+    """
+
+    #generate a random key index to be removed
+    randomkeyindex = int(random.uniform(-1,1) * len(dict))
+
+    #the counter for the current index
+    currkeyindex = 0
+
+    #loop through the dictionary until you reach the key
+    for key, value in dict.items():
+
+        if currkeyindex == randomkeyindex:
+            return key
+
+        currkeyindex += 1
+
+#decide and return whether a combined parameter type or a normal parameter type will be used for the next
+#minimum parameter value
+def normalparameterorcombinedparameter(params):
+    """
+    :param params: the parameter dictionary used by the evaluators
+    :return: whether we are using normal parameters or combined parameters
+    """
+
+    #if there are no combined parameters we use normal parameters by default
+    if len(params['COMBINED_PARAMS']) == 0:
+        return 'NORMAL_PARAMS'
+    #otherwise we flip a coin
+    else:
+        usenormalparam = 0
+        usecombinedparam = 1
+
+        #flip a coin
+        paramtypetousenumber = int(random.uniform(0, 2))
+
+        if paramtypetousenumber == usenormalparam:
+            return 'NORMAL_PARAMS'
+        elif paramtypetousenumber == usecombinedparam:
+            return 'COMBINED_PARAMS'
+        else:
+            logging.error("Not a valid decision for a param type to use {}".format(paramtypetousenumber))
+            quit(-1)
+
+#add a new parameter to the dictionary of parameters used as minimum values from either the combined parameter list
+# or the normal parameter list
+def addanewparametertouseasaminimum(params, normalparameterlist, listtypetogetparamfrom):
+    """
+    :param params: the evaluator parameters used by the bots to trade
+    :param normalparameterlist: the list of the parameters considered normal parameters
+    :param listtypetogetparamfrom: the decision about which type of list to add a parameter from
+    :return:
+    """
+
+    if listtypetogetparamfrom == 'NORMAL_PARAMS':
+        addanormaparametertouseasaminimum(params, normalparameterlist)
+
+    elif listtypetogetparamfrom == 'COMBINED_PARAMS':
+        addacombinedparametertouseasaminimum(params)
+
+    else:
+        logging.error("Not a valid kind of parameter {}".format(listtypetogetparamfrom))
+        quit(-1)
+
+#select a parameter from the list of normal parameters and add it to the dictionary of parameters used as minimum values
+def addanormaparametertouseasaminimum(params, normalparameterlist):
+    """
+    :param params: the evaluator parameters used by the bots to trade
+    :param normalparameterlist: the list of normal parameters
+    :return:
+    """
+
+    #generate an index for the normal parameter to add
+    indexofnormalparameter = int(random.uniform(0,1) * len(normalparameterlist))
+
+    #get the key (name) for this normal parameter
+    nameofnormalparameter = normalparameterlist[indexofnormalparameter]
+
+    #add the normal parameter to the dictionary of parameters used as minimum values
+    params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].update({nameofnormalparameter: 0.00001})
+
+
+#select a parameter from the list of combined parameters and add it to the dictionary of parameters used
+# as minimum values
+def addacombinedparametertouseasaminimum(params):
+    """
+    :param params: the dictionary of parameters used by the evaluators to trade
+    :return:
+    """
+
+    #generate the index of the combined parameter to add
+    indexofcombinedparameter = int(random.uniform(0,1) * len(params['COMBINED_PARAMS']))
+
+    #add the normal parameter to the dictionary of parameters used as minimum values
+    params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].update({indexofcombinedparameter: 0.00001})
+
+#loop through the dictionary of parameter data types used as minimum values and randomize each value
+def randomizethevaluesofthedictionaryofdatatypeminimumvalues(params, baseparams, upperorlowervalues):
+    """
+    :param params: the parameter dictionary used by the evaluators to trade
+    :param baseparams: the base parameter dictionary used by this trainer
+    :param upperorlowervalues: determine whether the ranges used to generate random numbers
+        will use the upper or lower ranges as detailed in the baseparams
+    :return:
+    """
+
+    for parameterdatatype, minimumvaluefordatatype in params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].items():
+
+        if upperorlowervalues == 'upper':
+            randomizevaluewithcorrectrandomizationtype(params, baseparams['randcheckrangetwo'],
+                                                       baseparams['uppercheckthreshold'], baseparams['bigrange'],
+                                                       parameterdatatype)
+        elif upperorlowervalues == 'lower':
+            randomizevaluewithcorrectrandomizationtype(params, baseparams['randcheckrangeone'],
+                                                       baseparams['lowercheckthreshold'], baseparams['smallrange'],
+                                                       parameterdatatype)
+        else:
+            logging.error("Not a valid type of randomization {}".format(upperorlowervalues))
+
+#randomizes the parameter datatype for the dictionary of data types to use as minimum values using the correct
+# ranges according to the whether they are in the bigger range (upper) or the smaller range (lower)
+def randomizevaluewithcorrectrandomizationtype(params, checkrange, checkthreshold, rangeofrandomvaluestogenerate,
+                                               nameofparameterdatatypetoalter):
+    """
+    :param params: the parameters used by the evaluator bots
+    :param checkrange: the range of random values generated to use to see if the current parameter should be changed
+    :param checkthreshold: the threshold to check if the parameter should be changed
+    :param rangeofrandomvaluestogenerate: the range of values to generate the number to modify the current param
+    :param nameofparameterdatatypetoalter: the name of the parameter data type to change
+    :return:
+    """
+
+    randcheck = int(random.uniform(0,1) * checkrange)
+
+    if randcheck > checkthreshold:
+
+        #generate a random value to alter the current parameter value by (we divide the range by itself here
+        # because we only want to change the minimums by tiny amounts)
+        randomvaluetochangetheparametervalue = int(random.uniform(-1,1) *
+                                                   rangeofrandomvaluestogenerate/rangeofrandomvaluestogenerate)
+
+        #get the value fo the current parameter from the dictionary of datatypes used as minimums
+        valueofcurrentparameter = params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'][nameofparameterdatatypetoalter]
+
+        #add the random value and the current value together
+        randomvalueplusthecurrentparamvalue = randomvaluetochangetheparametervalue + valueofcurrentparameter
+
+        #update the current parameter
+        params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].update\
+            ({nameofparameterdatatypetoalter: randomvalueplusthecurrentparamvalue})
+
+
+#remove a parameter used as a minimum
+def removeparameterusedasaminimum(params):
+    """
+    :param params: the parameter dictionary used by the evaluators to trade
+    :return:
+    """
+
+    #if there is only one minimum parameter left do nothing
+    if len(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES']) <= 1:
+        return
+
+    removeparam = 1
+    donothing = 0
+
+    #flip a coin
+    decisiononwhethertoremove = int(random.uniform(0,2))
+
+    if decisiononwhethertoremove == removeparam:
+        keytoremove = choosekeyofdicttoremove(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'])
+
+        params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].pop(keytoremove)
+
+    elif decisiononwhethertoremove == donothing:
+        return
+    else:
+        logging.error("Not a valid remove decision {}".format(decisiononwhethertoremove))
+        quit(-1)
+
+
+
+#randomizes the special parameters. each has a special range corresponding to it.
+def randomizeSpecialParam(params, paramkey, specialparameterslist, specialparametersrandomizationranges, randcheck,
+                          checkthreshold):
+    """
+    :param params: the parameter dictionary of parameters used by the evaluator bots
+    :param paramkey: the key of the current parameter to change
+    :param specialparameterslist: the list of the lists of parameters that have special ranges to be randomized with
+    :param specialparametersrandomizationranges: the list of ranges that each special parameter list of parameters
+        is randomized using.
+    :param randcheck: the random value generated to determine if this parameter will be changed
+    :param checkthreshold: the value that the randcheck must be higher than in order for this parameter to be altered
+    :return:
+    """
+
+    #get the index of the special param
+    indexofspecialparam = getindexofspecialparam(specialparameterslist, paramkey)
+
+    #if the random value is higher than the threshold to change it
+    if randcheck > checkthreshold:
+
+        #get the current value
+        currentvalueofparam = params[paramkey]
+
+        #generate a random value
+        randomvalue = (random.uniform(-1,1) * specialparametersrandomizationranges[indexofspecialparam])
+
+        #add them together
+        randomvalueaddedtocurrentvalueofparam = currentvalueofparam + randomvalue
+
+        #reset the original parameter value
+        params.update({paramkey: randomvalueaddedtocurrentvalueofparam})
+
+
+#get the index of the passed param key in the special parameters list
+def getindexofspecialparam(specialparameterslist, paramkey):
+    """
+    :param specialparameterslist: the list of lists of special parameters
+    :param paramkey: the parameter key to find in the list
+    :return:
+    """
+    indexinlist = 0
+
+    for list in specialparameterslist:
+
+        if paramkey in list:
+
+            return indexinlist
+
+        indexinlist += 1
 
 # converts the given string to a Dict. Used to parse the returned string from the bots being trained
 def stringToDict(stringToChange):
@@ -768,7 +1113,8 @@ def main():
         for proc in procs:
             reform = ''
             # randomize parameters and send the bot their class and variation num
-            params = randomizeParams(params, typeOfRandom, baseparams, paramsthatcanbecombined)
+            params = randomizeParams(params, typeOfRandom, baseparams, paramsthatcanbecombined, SPECIAL_PARAMS,
+                                     SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION)
 
             params['CLASS_NUM'] = classnum
             params['VARIATION_NUMBER'] = int(variationNum)
