@@ -238,11 +238,14 @@ def primeDatabase(connections, priceSymbols, params):
                 volumedict[minute].append(interval[5])
 
                 minute += 1
+            minute = x - 1    
+        print('Length of Row {}: {}'.format(minute, len(openpricedict[minute])))
 
         x += ONE_THIRD_MIN
         endTime = startTime
         startTime -= ONE_THIRD_DAY
-    
+
+    minute = params['minstoprime']
     #grabbing the time after the last set of data is stored
     buffertimeend = time.time()
     
@@ -269,10 +272,6 @@ def primeDatabase(connections, priceSymbols, params):
             delta = 180 - minsTakenFloat
             time.sleep(delta)
             minsTakenFloat = 180
-            binanceMin = 3
-
-        else:
-            binanceMin = 2
             
         binanceMin += params['minstoprime']
 
@@ -296,7 +295,6 @@ def primeDatabase(connections, priceSymbols, params):
 
             x += 1
     
-    print('exited loop')
     logging.info('Open Price Dict: {}'.format(str(openpricedict)))
 
     #print('Open Price Dict: {}'.format(openpricedict))
@@ -309,6 +307,7 @@ def primeDatabase(connections, priceSymbols, params):
         lows = (lowpricedict[rownum])
         volumes = (volumedict[rownum])
 
+        print('Row Number: {} Opens length: {}'.format(rownum, len(opens)))
         #print('Open Price Dict: {}'.format(opens))
 
         #pass the new lists of values to the functions that append them as new rows to each database
@@ -556,8 +555,8 @@ def select_by_crypto(conn, tablename, crypto, id=-1):
 
     rows = cur.fetchall()
 
-    for row in rows:
-        print(row)
+    #for row in rows:
+        #print(row)
 
     return rows
 
@@ -623,8 +622,8 @@ def getNumRows(cursor, tablename):
 
     dataCopy = cursor.execute("select count(*) from " + tablename)
     values = dataCopy.fetchone()
-    print
-    values[0]
+
+    return values[0]
 
 def main():
     global priceSymbols

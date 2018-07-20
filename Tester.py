@@ -56,9 +56,71 @@ def main():
     global  priceSymbols
     priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance', list=True)
 
-    clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+     #create path to connect to database and create a cursor object to the database
+    dirname = os.path.dirname(os.path.realpath(__file__))
+    filename = os.path.join(dirname + '/', '')
+    databasePath = os.path.join(dirname + '/', 'databases/' + 'binance.db')
+    conn = sqlite3.connect(databasePath, timeout=720)
+    cursor = conn.cursor()
 
-    print(clsmembers)
+    openP, close, volume, highP, lowP = getDataDatabase(0, 60)
+    print("Open Price: {} Open Price ETHBTC Length: {}".format(openP, len(openP['ETHBTC'])))
+
+def getDataDatabase(startMinuteBack, endMinuteBack):
+    """
+    :param startMinuteBack: first minute of the interval you want
+    :param endMinuteBack: end minute of the interval desired
+    :return:
+    """
+    global priceSymbols
+
+    priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
+
+    #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
+    dirname = os.path.dirname(os.path.realpath(__file__))
+    filename = os.path.join(dirname + '/', '')
+    databasePath = os.path.join(dirname + '/', 'databases/' + 'binance.db')
+    conn = sqlite3.connect(databasePath)
+    cur = conn.cursor()
+
+    openPriceDict = {}
+    closePriceDict = {}
+    volumeDict = {}
+    highPriceDict = {}
+    lowPriceDict = {}
+
+    length = getNumRows(cur, 'openprices')
+    print(length)
+
+    startIndex = length - startMinuteBack - 1
+    endIndex = length - endMinuteBack - 1
+    index = startIndex
+
+    for key, crypto in priceSymbols.items():
+        openPriceDict[crypto] = []
+        closePriceDict[crypto] = []
+        volumeDict[crypto] = []
+        highPriceDict[crypto] = []
+        lowPriceDict[crypto] = []
+
+    while(endIndex < index <= startIndex):
+        for key, crypto in priceSymbols.items():
+            openPrice = select_by_crypto(conn, 'openprices', crypto, index)[0][0]
+            closePrice = select_by_crypto(conn, 'closeprices', crypto, index)[0][0]
+            volume = select_by_crypto(conn, 'volumes', crypto, index)[0][0]
+            highPrice = select_by_crypto(conn, 'highprices', crypto, index)[0][0]
+            lowPrice = select_by_crypto(conn, 'lowprices', crypto, index)[0][0]
+
+            openPriceDict[crypto].append(openPrice)
+            closePriceDict[crypto].append(closePrice)
+            volumeDict[crypto].append(volume)
+            highPriceDict[crypto].append(highPrice)
+            lowPriceDict[crypto].append(lowPrice)
+
+        index -= 1
+        
+    return openPriceDict, closePriceDict, volumeDict, highPriceDict, lowPriceDict
+
 
 #return the binance server time
 def getbinanceservertime():
@@ -182,12 +244,13 @@ def primeDatabase(connections, priceSymbols, params):
                 volumedict[minute].append(interval[5])
 
                 minute += 1
-                
+            minute = x - 1    
+        print('Length of Row {}: {}'.format(minute, len(openpricedict[minute])))
 
         x += ONE_THIRD_MIN
         endTime = startTime
         startTime -= ONE_THIRD_DAY
-    
+
     minute = params['minstoprime']
     #grabbing the time after the last set of data is stored
     buffertimeend = time.time()
