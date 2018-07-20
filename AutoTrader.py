@@ -23,7 +23,6 @@ import datetime
 import os
 
 
-from PrivateData import api_key, secret_key, solume_api_key
 import CryptoStatAnalysis
 
 try:

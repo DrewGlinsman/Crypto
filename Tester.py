@@ -1,6 +1,7 @@
 # Copyright (c) 2018 A&D
 # Small tester to measure the effectiveness of the CryptoTrainer
 import sys
+import inspect
 import time
 import os
 import pickle
@@ -12,9 +13,18 @@ import pytz
 import logging
 import requests
 from AutoTrader import getbinanceprice
+import PrivateData
+import hmac
+import hashlib
+
+try:
+    from urlib import urlencode
+
+except ImportError:
+    from urllib.parse import urlencode
 
 from PriceSymbolsUpdater import chooseUpdate
-from Generics import PARAMETERS, superParams, priceSymbols, calcPercentOfTotal, removeEmptyInnerLists
+from Generics import PARAMETERS, superParams, priceSymbols, calcPercentOfTotal, removeEmptyInnerLists, calcPercentChange
 from PseudoAPI_Datastream import select_by_crypto, getNumRows, add_row, select_all_rows
 
 
@@ -54,24 +64,50 @@ colors = ['008fd5', 'fc4f30', 'e5ae38', '6d904f', '8b8b8b', '810f7c', 'f2d4b6', 
 datastreamparamspassed = {'website': 'binance',  'mins': 0, 'minmax': 1440, 'minutestoprime': 1440, 'freshrun': False}
 
 def main():
-    global  priceSymbols
-    priceSymbols = chooseUpdate('binance', list=True)
+    clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
 
-    #create path to connect to database and create a cursor object to the database
-    dirname = os.path.dirname(os.path.realpath(__file__))
-    filename = os.path.join(dirname + '/', '')
-    databasePath = os.path.join(dirname + '/', 'databases/' + 'binance.db')
-    conn = sqlite3.connect(databasePath, timeout=720)
-    cursor = conn.cursor()
+    print(clsmembers)
 
-    logdirectory = os.path.dirname(os.path.realpath(__file__))
-    logfilename = '/randomshit.log'
+#return the binance server time
+def getbinanceservertime():
+        timestamp = requests.get("https://api.binance.com/api/v1/time")
+        timestamp = timestamp.json()
+        timestamp = timestamp['serverTime']
 
-    #select_all_rows(conn, 'closeprices')
+        return timestamp
 
-    setUpLog(logdirectory, logfilename)
+# get the amount of money currently in the account using binance
+def binancegetcurrmoneyinaccount():
+        # the time of our request
+        timestamp = getbinanceservertime()
 
-    primeDatabase(conn, priceSymbols, datastreamparamspassed)
+        # get the query string
+        querystring = getbinanceaccountinfoquerystring(timestamp)
+
+        # get the list of the balances
+        balanceslist = getbinancebalancelist(querystring)
+
+        print(balanceslist)
+
+# return a query string used to get the account info from biannce
+def getbinanceaccountinfoquerystring(timestamp):
+
+        params = {'timestamp': timestamp}
+        query = urlencode(sorted(params.items()))
+        signature = hmac.new(PrivateData.websiteaccountkeys['binance'][0]['secret_key'].encode('utf-8'), query.encode('utf-8'), hashlib.sha256).hexdigest()
+        query += "&signature=" + signature
+
+        return query
+
+# return a list of the balances from a binance account
+def getbinancebalancelist(querystring):
+        headers = {'X-MBX-APIKEY': PrivateData.websiteaccountkeys['binance'][0]['api_key']}
+
+        accountinfo = requests.get("https://api.binance.com/api/v3/account?" + querystring, headers=headers)
+
+        accountinfodict = accountinfo.json()
+
+        return accountinfodict["balances"]
 
 #setup the log file for this evaluator
 def setUpLog(logdirectory, logfilename):

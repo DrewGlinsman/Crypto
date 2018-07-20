@@ -487,3 +487,38 @@ CryptoTrainer
 -removes combined parameters when the list of combined parameters is too high
 -added randomization for any parameters listed as special parameters for an evalutor (they use a specified special range)
 -added randomization for any dictionary parameters (only one supported is the dictionary of minimum values to be checked against)
+
+7/18/18
+
+CryptoEvaluator
+-all max values are operated off of absolutes so that the magnitude is used and 0 is not considered the max value for
+    values that are all negative
+-system now looks into the past not the future when making decisions
+-system assumes any data being passed to the algorithmic functions is a set slice of data
+
+7/19/18
+
+SuperTrainer
+-added in support for making parameters nonpositive
+-added in support for any parameter (special or normal) to be affected by placing their name in one of the
+    special lists in Generics (the lists that make them non-negative or added value etc...)
+
+Generics
+-added new parameters to remove more magic failure numbers from CryptoEvaluator
+
+CryptoEvaluator
+-all the four restart error flags are now booleans
+-the exit simulation error flag is its own thing now
+
+CryptoTradingEnvironment
+-moved all specific items over to a specific trading environment file
+-now serves as an almost abstract class
+
+BinanceTradingEnvironment
+-created
+
+ErrorFlags
+-created
+
+ErrorFlagsCryptoEvaluator
+-handles the error flags for the crypto evaluator specifically

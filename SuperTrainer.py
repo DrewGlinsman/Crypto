@@ -9,8 +9,8 @@ import sys
 import random
 import logging
 from Generics import PARAMETERS, priceSymbols, modes, websites, superParams, unchangedSuperParams, minSuperFiles, \
-    defaultsuperparamspassed, specialSuperParams, specialRange, nonnegorzero, minEvaluatorFiles, calcPercentChange, addRandVal\
-    , numFiles, nonnegative
+    defaultsuperparamspassed, specialSuperParams, specialRange, nonnegorzero, minEvaluatorFiles, calcPercentChange, setrandvalueequaltocurrentvalue\
+    , numFiles, nonnegative, nonpositive
 from subprocess import Popen, PIPE
 
 
@@ -138,6 +138,10 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
     """
     numprocs = 0
 
+    #number to account for an extra file when calculating the max id number for a superparam file that can be chosen
+    # for the randomization or trainer process
+    extrafilenum = -1
+
     #dicitonary that has each trainerid : evaluatorid to indicate which have been trained recently
     recentlytrained = {}
 
@@ -151,9 +155,10 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
             while True:
                 #get a random id number
                 curridnum = int(random.uniform(0, 1) * idnummax)
-                if(curridnum != idnummax):
+                if(curridnum != idnummax + extrafilenum):
                     break
-
+            print("Curr id {}".format(curridnum))
+            print("Id max {}".format(idnummax))
             #the directory to look in for a param file to randomize
             storagedirectory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'],
                                              paramspassed['min'], relativedirectory)
@@ -186,9 +191,10 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
             while True:
                 #get a random id number
                 curridnum = int(random.uniform(0, 1) * idnummax)
-                if(curridnum != idnummax):
+                if(curridnum != idnummax + extrafilenum):
                     break
-
+            print("Curr id {}".format(curridnum))
+            print("Id max {}".format(idnummax))
             # the directory to look in for a param file to randomize
             storagedirectory = getDirectory(paramspassed['website'], paramspassed['day'], paramspassed['hour'],
                                              paramspassed['min'], relativedirectory)
@@ -212,6 +218,7 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
                 evaluatorusedid = int(random.uniform(0, 1) * (numevaluatorfiles))
                 if (evaluatorusedid != numevaluatorfiles):
                     break
+        print("Params {}".format([paramstouse]))
 
         ###############################START THIS BOT##################################################################
         #start this bot
@@ -235,7 +242,6 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
             recentlytrained.update({curridnum: []})
             recentlytrained[curridnum].append(evaluatorusedid)
 
-        print("Bot number {} output: {}".format(numprocs, out))
 
         #######################################AFTER THE BOT IS RUN ####################################################
         #get the original storage trainer file
@@ -265,11 +271,11 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
                          '{}baseparams.pkl'.format(evaluatorusedid))
 
         logging.info(out)
-        print(out)
         numprocs += 1
 
     for proc in procs:
         proc.wait()
+
 
     return recentlytrained
 
@@ -395,7 +401,7 @@ def checkSpecial(keyname):
     return False
 
 #randomize the parameters passed of the given parameter dictionary
-def randomizeParams(paramDict, rangeVals = 100):
+def randomizeParams(paramDict, rangeVals = 20):
     """
     :param paramDict: the dictionary of the parameters to be changed
     :param rangeVals: the range of values to choose from
@@ -409,34 +415,147 @@ def randomizeParams(paramDict, rangeVals = 100):
         # if the current parameter does not need special changes
         # and it is not marked as unchanging
         if key not in unchangedSuperParams and checkSpecial(key) == False:
-            if key in addRandVal:
+            if key not in setrandvalueequaltocurrentvalue:
                 paramDict[key] += randVal
             else:
                 paramDict[key] = randVal
 
+            changeparamvalueifthecurrentvalueisnonvalid(paramDict, key, rangeVals)
+
+
     groupnum = 0
     for group in specialSuperParams: #change each group of special parameters together
-        # if this parameter is allowed to be non-negative or zero
-        if group[0] not in nonnegorzero and group[0] not in nonnegative:
-            randVal = int(random.uniform(-1, 1) * specialRange[groupnum])
-        #if these special parameters can be zero but not negative
-        elif group[0] in nonnegative:
-            randVal = int(random.uniform(0, 1) * specialRange[groupnum])
-        #if these special parameters cannot be negative or zero
-        else:
-            randVal = int(random.uniform(0, 1) * specialRange[groupnum] + 1)
+        # generate a random value to change the special param group members by
+        randVal = int(random.uniform(-1, 1) * specialRange[groupnum])
 
         #go through each parameter key in that special param group list and change all the values by the same amount
         for paramkey in group:
             # if we identify that we only want to add to this random value instead of just setting the value to the rand value
-            if group[0] in addRandVal:
+            if group[0] not in setrandvalueequaltocurrentvalue:
                 paramDict[paramkey] += randVal
             else:
                 paramDict[paramkey] = randVal
+
+            changeparamvalueifthecurrentvalueisnonvalid(paramDict, paramkey, rangeVals, group, groupnum)
+
+
         #advance to the next group
         groupnum+=1
 
+    print("Randomize params {}".format(paramDict))
+
     return paramDict
+
+#changes the current param key value if it is supposed to be non-negative or non-negative/non-zero
+def changeparamvalueifthecurrentvalueisnonvalid(paramDict, paramkey, rangevals, group=[], groupnum=None):
+    """
+    :param paramDict: the parameter dictionary for the trainers
+    :param paramkey: the current parameter key
+    :param rangevals: the range of values to modify the parameter by
+    :param group: the current group of parameters if this is a special group
+    :param groupnum: the current group index if the parameters are from a special group
+    :return:
+    """
+
+    #if there is no specified group we assume that this is a non-group param
+    if len(group) == 0:
+        changeparamvalueifthecurrentvalueisnonvalidandisnotpartofspecialgroup(paramDict, paramkey, rangevals)
+    else:
+        changeparamvalueifthecurrentvalueisnonvalidandispartofspecialgroup(paramDict, paramkey, group, groupnum)
+
+#changes the current param key value if it is supposed to be non-negative or non-negative/non-zero
+# and the parameters are not part of a special group
+def changeparamvalueifthecurrentvalueisnonvalidandisnotpartofspecialgroup(paramDict, paramkey, rangevals):
+    """
+    :param paramDict: the parameter dictionary for the trainers
+    :param paramkey: the current parameter key
+    :param rangevals: the range of values to modify the parameter by
+    :return:
+    """
+
+    # get the current value
+    currentvalue = paramDict[paramkey]
+
+    # if the current group is not allowed to be negative
+    if paramkey in nonnegative:
+
+        absolutevalueofcurrentvalue = abs(currentvalue)
+
+        paramDict.update({paramkey: absolutevalueofcurrentvalue})
+
+    # if the current group is not allowed to be negative or zero
+    elif paramkey in nonnegorzero:
+        # if the current value is 0 then add a non negative random number to it to make it positive
+        if currentvalue == 0:
+            modifiedcurrentvalue = currentvalue + int(random.uniform(0, 1) * rangevals)
+        # if the current value is negative then change the current value to its absolute value
+        elif currentvalue < 0:
+            modifiedcurrentvalue = abs(currentvalue)
+        # otherwise do nothing
+        else:
+            modifiedcurrentvalue = currentvalue
+
+        paramDict.update({paramkey: modifiedcurrentvalue})
+
+    #if the current group is not allowed to be positive
+    elif paramkey in nonpositive:
+        absolutevalueofcurrentvalue = abs(currentvalue)
+
+        negativeofcurrentvalue = absolutevalueofcurrentvalue * -1
+
+        paramDict.update({paramkey: negativeofcurrentvalue})
+
+    # if the current group can be either
+    else:
+        paramDict.update({paramkey: currentvalue})
+
+
+#changes the current param key value if it is supposed to be non-negative or non-negative/non-zero
+# and the parameters are part of a special group
+def  changeparamvalueifthecurrentvalueisnonvalidandispartofspecialgroup(paramDict, paramkey, group, groupnum):
+    """
+    :param paramDict: the parameter dictionary for the trainers
+    :param paramkey: the current parameter key
+    :param group: the current group of parameters
+    :param groupnum: the current group index
+    :return:
+    """
+    # get the current value
+    currentvalue = paramDict[paramkey]
+
+    # if the current group is not allowed to be negative
+    if group[0] in nonnegative:
+
+        absolutevalueofcurrentvalue = abs(currentvalue)
+
+        paramDict.update({paramkey: absolutevalueofcurrentvalue})
+
+    # if the current group is not allowed to be negative or zero
+    elif group[0] in nonnegorzero:
+        # if the current value is 0 then add a non negative random number to it to make it positive
+        if currentvalue == 0:
+            modifiedcurrentvalue = currentvalue + int(random.uniform(0, 1) * specialRange[groupnum])
+        # if the current value is negative then change the current value to its absolute value
+        elif currentvalue < 0:
+            modifiedcurrentvalue = abs(currentvalue)
+        # otherwise do nothing
+        else:
+            modifiedcurrentvalue = currentvalue
+
+        paramDict.update({paramkey: modifiedcurrentvalue})
+
+    # if the current group is not allowed to be positive
+    elif group[0] in nonpositive:
+        absolutevalueofcurrentvalue = abs(currentvalue)
+
+        negativeofcurrentvalue = absolutevalueofcurrentvalue * -1
+
+        paramDict.update({paramkey: negativeofcurrentvalue})
+
+    # if the current group can be either
+    else:
+        paramDict.update({paramkey: currentvalue})
+
 
 def main():
     # setup the relative file path

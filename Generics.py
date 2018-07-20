@@ -17,6 +17,17 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
 # the binance intervals, their symbols, and their time in milliseconds
 intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', 'inMS': 180000}, '5m': {'symbol': '5m', 'inMS': 300000}, '15m': {'symbol': '15m', 'inMS': 900000}, '30m': {'symbol': '30m', 'inMS': 1800000}, '1h': {'symbol': '1h', 'inMS': 3600000}, '2h': {'symbol': '2h', 'inMS': 7200000}, '4h': {'symbol': '4h', 'inMS': 14400000}, '6h': {'symbol': '6h', 'inMS': 21600000}, '8h': {'symbol': '8h', 'inMS': 28800000}, '12h': {'symbol': '12h', 'inMS': 43200000}, '1d': {'symbol': '1d', 'inMS': 86400000}, '3d': {'symbol': '3d', 'inMS': 259200000}, '1w': {'symbol': '1w', 'inMS': 604800000}, '1M': {'symbol': '1M', 'inMS': 2629746000}}
 
+#The parameters used to make a CryptoTradingEnvironment
+"""
+"""
+defaultcryptotradingenvironmentparams = {'directoryprefix': 'CryptoTradingManager', 'website': 'binance',
+                                         'lossallowed': -1, 'minstartmoney': 50, 'maxstartmoney': 100,
+                                         'currmoneyinaccount': 200, 'maxmoneyinuse': 100,
+                                         'minsofdatagatheredsofar': 0, 'maxminutestograbdata': 10000000,
+                                         'minutesofdatatoprimedatabase': 1440, 'wipedatabaseatstart': False,
+                                         'userid': 0}
+
+
 # EXPLANATION OF THE PARAMETERS
 #todo remember that the wait parameters for this one should be different from the ones in auto trader where they are in seconds not minutes
 """
@@ -28,8 +39,14 @@ intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', '
  MAX_TIME_CYCLE: the maximum time the bot will run for in ticks (they are counted by a incrementing variable)
  MAX_CYCLES: the maximum amount of times the bot will buy and sell
  CYCLES: the actual number of times the bot bought and sold
- MAX_PERCENT_CHANGE: the highest % increase and the lowest % decrease a crypto can have over the life of owning it 
-    before an auto reevaluation
+MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD: the positive percentage that will set off this failure flag (corresponds to a positive 
+    value reached) (corresponds to the period when holding a crypto)
+MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD: the negative percentage that will set off this failure flag (corresponds to a negative 
+    value reached) (corresponds to the period when holding a crypto)
+MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD: the positive percentage that will set off this failure flag (corresponds to a positive 
+    value reached) (corresponds to the entire simulation to a point)
+MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD: the negative percentage that will set off this failure flag (corresponds to a negative 
+    value reached) (corresponds to the entire simulation to a point)
  NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE: the number of times that an crypto price must be increasing  (at least)
     or a failure flag is set off and it is auto sold
  MODIFIED_VOLUME_NEGATIVE_MODIFIER: weight applied to negative modified volume values  
@@ -72,14 +89,19 @@ intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', '
  FLOOR_PRICE_MODIFIER: the lowest % change above the original price the crypto was bought at before the bot auto sells it 
     (calculated later than the other failure conditions to catch a decreasing price)
  MODIFIED_VOLUME_MODIFIER: the cumulative volume change based on the % change by interval scale
- MOVING_AVERAGE_MODIFIER: the modifier for the calculated moving average for a crypto when scoring 
+ MOVING_AVERAGE_MODIFIER: the modifier for the calculated moving average for a crypto when scoring
+ OWNED_BEFORE_MODIFIER: the modifier for whether this crypto has been owned before
+ OWNED_BEFORE_EACH_TIME_MODIFIER: the modifier used for the number of times this crypto has been owned before 
  CUMULATIVE_PRICE_MODIFIER: the cumulative price change modifier for the weighted moving average
  PRIMARY_MODIFIED_VOLUME_SCALER: the scaler to make more volume traded have the same sign as the percent change in the 
     price than the amount that is counted as having the opposite sign
- WAIT_FOR_CHECK_FAILURE: the number of ticks before the failure condition is checked (the crypto is decreasing over 
-    the past 10 minutes)
- WAIT_FOR_CHECK_TOO_LOW: the number of ticks before ethe program checks to see if a crypto has decreased too low to 
-    its starting point
+ WAIT_FOR_CHECK_FAILURE: the time in minutes before we check if the currency has incurred too much loss in the 
+    specified time (too many decreasing periods)
+ WAIT_FOR_CHECK_TOO_LOW: the time in minutes before we check if the item purchased is too near its starting value
+ WAIT_FOR_CHECK_TOO_NEGATIVE: the time in minutes before we check if the item purchased has gone too far negative in its
+    value since the start of the holding
+ WAIT_FOR_CHECK_TOO_EXTREME: the time in minutes before we check if the item purchased has changed too much in its value
+    either positive or negative
  VARIATION_NUMBER: number stored for what variation on the bot this is, 0 base
  CLASS_NUM: number stored for the class, 0 means no class, 1 and up are the actual classes
  MINOFFSET: the number of minutes before the beginning of the interval of data that the bot can look back to
@@ -97,11 +119,17 @@ intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', '
  minnumberofparameterminimumstopassforconsideration: the minimum number of the parameter minimums to be higher than in 
     in order for a crypto to be considered in the scoring process (if this number is higher than the number of 
     parameters used as minimums then it is treated as saying that all minimums are important)
+ valueaddedforapositivepercentchangeforcheckfailureflag: the value added to the counter inside of the check failure
+    flag so that each bot treats the error flag summations differently (so that a positive change could be worth
+    0.5 in one or 1.0 in the other and their goal is to get to a value over the interval of 5.0)
+ valueaddedforazeropercentchangeforcheckoffailureflag: the value added to the counter inside of the check failure flag
+    so that each bot treats the error flag summations differently
 """
 PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0,
-              'MINIMUM_SCORE': 0.000001, 'MAX_DECREASE': -10.0, 'MAX_TIME_CYCLE': 60.0,
-              'MAX_CYCLES': 24, 'CYCLES': 0, 'MAX_PERCENT_CHANGE': 100.0,
-              'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
+              'MINIMUM_SCORE': 0.000001, 'MAX_DECREASE': -2.0, 'MAX_TIME_CYCLE': 60.0,
+              'MAX_CYCLES': 24, 'CYCLES': 0, 'MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD': 5.0,
+              'MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD': -5.0, 'MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD': 50,
+              'MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD': -50, 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
               'MODIFIED_VOLUME_NEGATIVE_MODIFIER': 1.0,
               'PRICE_TIME_INCREASING_NEGATIVE_WEIGHTED_MODIFIER': 1.0,
               'PRICE_TIME_INCREASING_NEGATIVE_UNWEIGHTED_MODIFIER': 1.0,
@@ -121,11 +149,15 @@ PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMU
               'MINS_SINCE_LAST_LOW_PRICE_MODIFIER': 1.0, 'TIMES_REACH_OR_SURPASS_HIGH_PRICE_MODIFIER': 1.0,
               'TIMES_REACH_OR_FALL_BELOW_LOW_PRICE_MODIFIER': 1.0, 'DIFF_HIGH_AND_LOW_PRICE_OVERALL_MODIFIER': 1.0,
               'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'MOVING_AVERAGE_MODIFIER': 1.0,
+              'OWNED_BEFORE_MODIFIER': 1.0, 'OWNED_BEFORE_EACH_TIME_MODIFIER': 1.0,
               'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0,
-              'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 120.0,
+              'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'WAIT_FOR_CHECK_TOO_NEGATIVE': 4.0, 'WAIT_FOR_CHECK_TOO_EXTREME': 6.0,
+              'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 120.0,
               'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0, 'START_MONEY': 100, 'END_MONEY': 100,
               'COMBINED_PARAMS': [], 'COMBINED_PARAMS_MODIFIERS': [], 'PARAMS_CHECKED_FOR_MINIMUM_VALUES': {},
-              'minnumberofparameterminimumstopassforconsideration': 1.0}
+              'minnumberofparameterminimumstopassforconsideration': 1.0,
+              'valueaddedforapositivepercentchangeforcheckfailureflag': 1.0,
+              'valueaddedforazeropercentchangeforcheckoffailureflag': 0.1}
 
 
 #any lists stored in the parameters that have to be iterated through and randomized individually
@@ -136,11 +168,17 @@ dictparams = ['PARAMS_CHECKED_FOR_MINIMUM_VALUES']
 
 #parameters used by CryptoEvaluator that are specifically ignored when randomizing
 UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND' , 'MAX_DECREASE', 'MAX_TIME_CYCLE', 'MAX_CYCLES',
-                    'CYCLES','MAX_PERCENT_CHANGE', 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE',
+                    'CYCLES','MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD', 'MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD',
+                    'MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD', 'MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD',
+                    'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE',
                     'CUMULATIVE_PERCENT_CHANGE','CUMULATIVE_PERCENT_CHANGE_STORE',
-                    'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW','VARIATION_NUMBER', 'CLASS_NUM','MIN_OFFSET',
+                    'WAIT_FOR_CHECK_FAILURE', 'WAIT_FOR_CHECK_TOO_LOW', 'WAIT_FOR_CHECK_TOO_NEGATIVE',
+                    'WAIT_FOR_CHECK_TOO_EXTREME',
+                    'VARIATION_NUMBER', 'CLASS_NUM','MIN_OFFSET',
                     'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'START_MONEY', 'END_MONEY',
-                    'minnumberofparameterminimumstopassforconsideration']
+                    'minnumberofparameterminimumstopassforconsideration',
+                    'valueaddedforapositivepercentchangeforcheckfailureflag',
+                    'valueaddedforazeropercentchangeforcheckoffailureflag']
 
 #parameters to be changed by specific amounts (each inner list has a corresponding range specified in the list below)
 SPECIAL_PARAMS = [['MINIMUM_SCORE']]
@@ -160,7 +198,7 @@ normalizationValuesToStore = ['PERCENT_BY_HOUR_OPEN_CLOSE', 'PERCENT_BY_HOUR_HIG
                               'VOLUME_TIME_INCREASING_UNWEIGHTED', 'MINS_SINCE_LAST_HIGH_PRICE',
                               'MINS_SINCE_LAST_LOW_PRICE', 'TIMES_REACH_OR_SURPASS_HIGH_PRICE',
                               'TIMES_REACH_OR_FALL_BELOW_LOW_PRICE', 'DIFF_HIGH_AND_LOW_PRICE_OVERALL',
-                              'MODIFIED_VOLUME', 'MOVING_AVERAGE']
+                              'MODIFIED_VOLUME', 'MOVING_AVERAGE', 'OWNED_BEFORE', 'OWNED_BEFORE_EACH_TIME']
 
 #parameters that can be combined and considered (set to the normalization values stored for the score because
 # those should be the only ones that can be combined)
@@ -170,7 +208,8 @@ paramsthatcanbecombined = normalizationValuesToStore
 #it is passed to CryptoStatAnalysis
 persistentdataforscoretypenames = ['HIGHEST_HIGH_PRICE', 'LOWEST_LOW_PRICE', 'MINS_SINCE_LAST_HIGH_PRICE',
                                    'MINS_SINCE_LAST_LOW_PRICE', 'TIMES_REACH_OR_SURPASS_HIGH_PRICE',
-                                   'TIMES_REACH_OR_FALL_BELOW_LOW_PRICE']
+                                   'TIMES_REACH_OR_FALL_BELOW_LOW_PRICE', 'OWNED_BEFORE',
+                                   'OWNED_BEFORE_EACH_TIME']
 
 # cryptos seperated by decision into those disregarded, those chosen but not making final cut because of their mean,
 # those selected that have the appropriate mean, and the crypto that is chosen, has the right mean, and is the max
@@ -219,11 +258,21 @@ averagebotreturnsaved: the return % of the average bot produced in the last run
 MAX_TIME_CYCLE: the maximum minutes a cycle (one trade) can run for
 MAX_CYCLES: the maximum number of cycles that will occur before the bot quits trading
 MIN_CYCLES: the minimum number of cycles for a bot variation to be chosen over the current best bot variation
-WAIT_FOR_CHECK_FAILURE: the time in minutes before we check if the currency has incured too much loss in the 
-    specified time
+WAIT_FOR_CHECK_FAILURE: the time in minutes before we check if the currency has incurred too much loss in the 
+    specified time (too many decreasing periods)
 WAIT_FOR_CHECK_TOO_LOW: the time in minutes before we check if the item purchased is too near its starting value
-MAX_PERCENT_CHANGE: the percentage that will set off this failure flag (corresponds to a positive value reached or 
-    a low value reached at any point in the life of holding an item)
+WAIT_FOR_CHECK_TOO_NEGATIVE: the time in minutes before we check if the item purchased has gone too far negative in its
+    value since the start of the holding
+WAIT_FOR_CHECK_TOO_EXTREME: the time in minutes before we check if the item purchased has changed too much in its value
+    either positive or negative
+MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD: the positive percentage that will set off this failure flag (corresponds to a positive 
+    value reached) (corresponds to the period when holding a crypto)
+MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD: the negative percentage that will set off this failure flag (corresponds to a negative 
+    value reached) (corresponds to the period when holding a crypto)
+MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD: the positive percentage that will set off this failure flag (corresponds to a positive 
+    value reached) (corresponds to the entire simulation to a point)
+MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD: the negative percentage that will set off this failure flag (corresponds to a negative 
+    value reached) (corresponds to the entire simulation to a point)
 MIN_OFFSET: the minutes in the past we will collect data for high and low prices to be checked against (useful when 
     we have to check an x number of minutes in past and cannot because the simulation just started running and 
     there is no data gathered)
@@ -243,22 +292,32 @@ maxparameterstouseasminimums: the maximum number of parameters that can be used 
 minnumberofparameterminimumstopassforconsideration: the minimum number of the parameter minimums to be higher than in 
     in order for a crypto to be considered in the scoring process (if this number is higher than the number of 
     parameters used as minimums then it is treated as saying that all minimums are important)
+valueaddedforapositivepercentchangeforcheckfailureflag: the value added to the counter inside of the check failure
+    flag so that each bot treats the error flag summations differently (so that a positive change could be worth
+    0.5 in one or 1.0 in the other and their goal is to get to a value over the interval of 5.0)
+valueaddedforazeropercentchangeforcheckoffailureflag: the value added to the counter inside of the check failure flag
+    so that each bot treats the error flag summations differently
 """
 # the parameters used by the supertrainer given to each trainer
-superParams = {'smallrange': 2,'bigrange': 15, 'lowoffirstrange': 0, 'lowofsecondrange': 0, 'randcheckrangeone': 10,
+superParams = {'smallrange': 2,'bigrange': 10, 'lowoffirstrange': 0, 'lowofsecondrange': 0, 'randcheckrangeone': 10,
                'randcheckrangetwo': 50, 'lowercheckthreshold': 5,'uppercheckthreshold': 7, 'upperstopcheckthreshold': 2,
                'upperremovecheckthreshold' : 4, 'lowerstopcheckthreshold' : 2, 'lowerremovecheckthreshold' : 4,
                'classes': 1, 'variations': 1, 'percentpositivebots': 0, 'percentnegativebots': 0,
                'worstbotreturnsaved': 0, 'bestbotreturnsaved': 0, 'averagebotreturnsaved': 0, 'MAX_TIME_CYCLE': 60.0,
                'MAX_CYCLES': 24, 'MIN_CYCLES': 4, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0,
-               'MAX_PERCENT_CHANGE': 100.0, 'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0,
-               'MAX_DECREASE': -10.0, 'replacementvalue': 0, 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
+               'WAIT_FOR_CHECK_TOO_NEGATIVE': 4.0, 'WAIT_FOR_CHECK_TOO_EXTREME': 6.0,
+               'MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD': 5.0, 'MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD': -5.0,
+                'MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD': 50, 'MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD': -50,
+               'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0,
+               'MAX_DECREASE': -1.0, 'replacementvalue': 0, 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
                'maxcombinedparams': 3, 'maxparameterscombinedpercombinedparam': 3, 'maxparameterstouseasminimums': 1.0,
-               'minnumberofparameterminimumstopassforconsideration': 1.0}
+               'minnumberofparameterminimumstopassforconsideration': 1.0,
+               'valueaddedforapositivepercentchangeforcheckfailureflag': 1.0,
+               'valueaddedforazeropercentchangeforcheckoffailureflag': 0.1}
 
 # parameters that the superTrainer should not change
 unchangedSuperParams = ['MIN_OFFSET', 'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'percentpositivebots',
-                        'percentnegativebots','worstbotreturnsaved', 'bestbotreturnsaved', 'averagebotreturnsaved']
+                        'percentnegativebots', 'worstbotreturnsaved', 'bestbotreturnsaved', 'averagebotreturnsaved']
 
 #the parameters checked to determine which cryptoTrainer is better between a set of two
 checkCryptoTrainerPerformance = [ 'percentpositivebots',
@@ -272,23 +331,40 @@ specialSuperParams = [['smallrange', 'bigrange', 'lowoffirstrange', 'lowofsecond
                        'upperremovecheckthreshold','lowerstopcheckthreshold', 'lowerremovecheckthreshold'],
                       ['classes'],['variations'], ['MIN_CYCLES', 'MAX_CYCLES'], ['replacementvalue'],
                       ['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE'], ['maxparameterstouseasminimums'],
-                                                                ['minnumberofparameterminimumstopassforconsideration']]
+                      ['minnumberofparameterminimumstopassforconsideration'],
+                      ['MAX_TIME_CYCLE'],['WAIT_FOR_CHECK_FAILURE'], ['WAIT_FOR_CHECK_TOO_LOW'],
+                      ['WAIT_FOR_CHECK_TOO_NEGATIVE'], ['WAIT_FOR_CHECK_TOO_EXTREME'],
+                      ['MAX_DECREASE'], ['MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD'],
+                      ['MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD'],
+                      ['MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD'],
+                      ['MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD'],
+                      ['maxcombinedparams'], ['maxparameterscombinedpercombinedparam'],
+                      ['valueaddedforapositivepercentchangeforcheckfailureflag'],
+                      ['valueaddedforazeropercentchangeforcheckoffailureflag']]
 
 #each group of special params has the range that is used to vary them here
-specialRange = [10,10,10,2,5,10,5,5]
+specialRange = [10,10,10,2,5,10,5,5,3,2,2,2,2,2,2,2,2,2,2,2,1,1]
 
 #special parameters used by the trainers that can be neither negative nor zero (only need to identify the first
-# parameter in the corresponding inner list within the specialSuperParams list)
+# parameter in the corresponding inner list within the specialSuperParams list) (does not have to be a special param)
 nonnegorzero = ['classes', 'variations', 'replacementvalue', 'maxparameterstouseasminimums',
-                'minnumberofparameterminimumstopassforconsideration']
+                'minnumberofparameterminimumstopassforconsideration', 'MAX_TIME_CYCLE', 'WAIT_FOR_CHECK_FAILURE',
+                'WAIT_FOR_CHECK_TOO_NEGATIVE', 'WAIT_FOR_CHECK_TOO_LOW', 'MAX_DECREASE']
 
 #special parameters used by the trainers that cannot be negative (only need to identify the first parameter
-# in the corresponding inner list within the specialSuperParams list)
-nonnegative = ['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE']
+# in the corresponding inner list within the specialSuperParams list) (Does not have to be a special param)
+nonnegative = ['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE', 'maxcombinedparams',
+               'maxparameterscombinedpercombinedparam', 'MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD',
+               'MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD']
 
-#parameters identified to add the random value when randomizing instead of setting the new value to the random value
+#special paraemters used by the trainers that cannnot be positive (only need to identify the first parameter
+# in the corresponding inner list within specialSuperParams list) (Does not have to be a special param)
+nonpositive = ['MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD', 'MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD']
+
+#parametersidentified to be set to the random value generated rather than added to the value
 #(only need to identify the first parameter in the corresponding inner list within the specialSuperParams list)
-addRandVal = ['smallrange', 'MIN_CYCLES']
+# (does not have to be a special param)
+setrandvalueequaltocurrentvalue = []
 
 #the minimum amount of Trainer files (superParams)
 minSuperFiles = 10
@@ -387,6 +463,27 @@ mininhour = 60
 
 #hours in a day
 hourinday = 24
+
+
+##############################Error Flags############################################################
+
+# Error flags for CryptoEvaluator
+"""
+    RESTART_PRICE_DECREASING_TOO_OFTEN_HOLDING_PERIOD: when the current crypto has been decreasing too often
+    RESTART_PRICE_DROPPED_TOO_CLOSE_TO_ORIGINAL_HOLDING_PERIOD: when the current crypto has dropped too close
+        to its original price
+    RESTART_PRICE_DROPPED_TOO_MUCH_VALUE_HOLDING_PERIOD: when the current crypto dropped too much value too quickly
+    RESTART_PRICE_CHANGED_TOO_EXTREME_HOLDING_PERIOD: when the current crypto dropped too much or rose too much
+        over the time period of holding the crypto
+    EXIT_MONEY_CHANGED_TOO_EXTREME_WHOLE_PERIOD: when the money used by the bot has become too much or too little
+"""
+defaulterrorflagsforcryptoevaluator = {'RESTART_PRICE_DECREASING_TOO_OFTEN_HOLDING_PERIOD': False,
+         'RESTART_PRICE_DROPPED_TOO_CLOSE_TO_ORIGINAL_HOLDING_PERIOD': False,
+         'RESTART_PRICE_DROPPED_TOO_MUCH_VALUE_HOLDING_PERIOD': False,
+         'RESTART_PRICE_CHANGED_TOO_EXTREME_HOLDING_PERIOD': False,
+         'EXIT_MONEY_CHANGED_TOO_EXTREME_WHOLE_PERIOD': False}
+
+
 
 ################################# GENERIC FUNCTIONS ##########################################
 #just calculates the percent change between two values

@@ -381,8 +381,6 @@ def addnewcombinedparamlist(combinedparamslist):
     #index of the new list will be the length of the old list
     indexofnewcombinedparamlist = len(combinedparamslist)
 
-
-
     #add a new list to the combined parameter list
     combinedparamslist.append([])
 
@@ -898,13 +896,15 @@ def initdirectories(paramspassed, baseparams, dirname, evaluatorparams, typedire
         if typedirec == 'training':
 
             if numFiles(directory) == 0:
+                print("REWROTE SUPER PARAMS")
                 #make the super param file for this trainer
                 writeParamPickle(baseparams,directory,'{}superparam.pkl'.format(paramspassed['idnum']))
 
         # the storage directory to write the evaluator (base) params
         storagedirectory = "{}{}/".format(directory, paramspassed['originalid'])
 
-        if numFiles(directory) == 0 and typedirec == 'storage':
+        if numFiles(storagedirectory) == 0 and typedirec == 'storage':
+            print("REWROTE PARAMS")
             #make the evalautor params file
             writeParamPickle(evaluatorparams, storagedirectory, '{}baseparams.pkl'.format(paramspassed['evalID']))
 
@@ -958,10 +958,16 @@ def updateParams(baseparams, defaultbaseparams, valuesrecorded):
     :return: updated baseparams
     """
 
-
-    #scale the percent changes to make the percentages relative to 1 trade per hour for a day timeframe
-    scaleby = (baseparams['INTERVAL_TO_TEST']/baseparams['MAX_CYCLES'])/(defaultbaseparams['INTERVAL_TO_TEST']/
+    try:
+        #scale the percent changes to make the percentages relative to 1 trade per hour for a day timeframe
+        scaleby = (baseparams['INTERVAL_TO_TEST']/baseparams['MAX_CYCLES'])/(defaultbaseparams['INTERVAL_TO_TEST']/
                                                                          defaultbaseparams['MAX_CYCLES'])
+    except ZeroDivisionError:
+        print("Normal interval {}".format(baseparams['INTERVAL_TO_TEST']))
+        print("Normal max cycles {}".format(baseparams['MAX_CYCLES']))
+        print("Default interval to test".format(defaultbaseparams['INTERVAL_TO_TEST']))
+        print("Default interval to test".format(defaultbaseparams['MAX_CYCLES']))
+
 
     updateparams = baseparams
 
@@ -1091,8 +1097,13 @@ def main():
 
     # store the multiple processes
     for classnum  in range(int(baseparams['classes'])):
+
+        print("Class {}".format(classnum))
+
         #read the newly updated stored parameters
         params = readParamPickle(direc, 'baseparams.pkl')
+
+        print("params {}".format(params))
 
         typeOfRandom = 3
         current_Max = -10000
@@ -1137,13 +1148,19 @@ def main():
                                                                        paramspassed['hour'], paramspassed['min'],
                                                                        params['CLASS_NUM'], params['VARIATION_NUMBER'],
                                                                        paramspassed['idnum'], paramspassed['lossallowed'],
-                                                                             paramspassed['startmoney']))
+                                                                        paramspassed['startmoney']))
+
+            #print("Variation {}".format(variationNum))
 
             #the standard output from the subprocess
             evaluatoroutput = out[0]
 
+            #print("Output {}".format(evaluatoroutput))
+
             #the standard error from the subprocess
             evaluatorerror = out[1]
+
+            print("Error {}".format(evaluatorerror))
 
             #build the directory string for the parameter dictionary
             directory = buildDirectory(params, paramspassed, dirname, typedirec='training')
@@ -1155,6 +1172,7 @@ def main():
             #store the percentage change from the money started with to the money ended with
             cumulativePerentChangeStore = calcPercentChange(params['START_MONEY'], params['END_MONEY'])
 
+            #print("Made {}".format(cumulativePerentChangeStore))
 
             #add the cumulative percent change of the current bot to the total % returned
             valuesrecorded.update({'totalbotreturn': valuesrecorded['totalbotreturn'] + cumulativePerentChangeStore})
@@ -1170,10 +1188,14 @@ def main():
             if(cumulativePerentChangeStore < 0.0):
                 valuesrecorded.update({'numnegbots': valuesrecorded['numnegbots'] + 1})
 
+            #print("Cycles {}".format(params['CYCLES']))
+
             # if the cumulative Percent Stored is greater than the current Max store it and the parameters it was from
             if (cumulativePerentChangeStore >= current_Max and params['CYCLES'] > baseparams['MIN_CYCLES']):
 
                 current_Max = cumulativePerentChangeStore
+                #print("Current Max {}".format(current_Max))
+
                 bestparams = params
                 newParamCount += 1
 
@@ -1217,9 +1239,16 @@ def main():
     baseparams = updateParams(baseparams, superParams, valuesrecorded)
 
     #update the original training "super param" file
-    writeParamPickle(baseparams, trainingdirec,'{}superparam.pkl'.format(paramspassed['idnum']))
+    writeParamPickle(baseparams, trainingdirec, '{}superparam.pkl'.format(paramspassed['idnum']))
 
+    #if this is running a simulation store the evaluator parameters
+    if paramspassed['directoryprefix'] == 'CryptoTrainer':
+        #print("STORED")
+        writeParamPickle(bestparams, storagedirectory, '{}baseparams.pkl'.format(paramspassed['evalID']))
 
+    print("Final made {}".format(current_Max))
+    print("Final money in best bot {}".format(bestparams['END_MONEY']))
+    print("Final cycles used {}".format(bestparams['CYCLES']))
 
 if __name__ == "__main__":
     main()
