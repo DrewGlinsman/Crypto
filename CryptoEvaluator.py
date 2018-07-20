@@ -11,11 +11,13 @@ import CryptoStats
 import pickle
 import logging
 
+
+from ErrorCodes import ErrorCodes
 from PriceSymbolsUpdater import getStoredSymbols
 from CryptoDistribution import readPickle
 from CryptoTrainer import  minInDay
 from Generics import PARAMETERS, defaultcryptoevaluatorparamspassed, calcPercentChange, mininhour, hourinday, nextDay, implicitcryptodivisions, \
-    normalizationValuesToStore, persistentdataforscoretypenames, numFiles, percenttodecimal
+    normalizationValuesToStore, persistentdataforscoretypenames, numFiles, percenttodecimal, defaulterrorflagsforcryptoevaluator
 
 try:
     from urlib import urlencode
@@ -70,6 +72,8 @@ YES = 1
 NO = 0
 
 realInterval = 0
+
+onehourinmins = 60
 
 #setup the log file for this evaluator
 def setUpLog(logdirectory, logfilename):
@@ -186,17 +190,17 @@ def readTheInput(paramspassed, evaluatorparams, directory):
 #get the balance in bitcoins
 
 #buy the specified crypto currency
-def buyBin(currency, currentMinute, currencyToTrade, closepricedata):
+def buyBin(currency, currentMinute, currencyToTrade, openpricedata):
     """
     :param currency: currency to buy
     :param currentMinute: the current minute of the simulation
     :param currencyToTrade: the currency to sell for the other currency
-    :param closepricedata: the list of close prices by minute for the currency
+    :param openpricedata: the list of close prices by minute for the currency
     :return: the price the crypto was bought at, the true bought price (same as the price right now), the crypto
     symbol owned now
     """
 
-    ratio = getbinanceprice(currency, currentMinute, closepricedata)
+    ratio = getbinanceprice(currency, currentMinute, openpricedata)
     priceBought = ratio
     truePriceBought = ratio
     owned = currency
@@ -219,130 +223,47 @@ def sellBin(currency):
     return 0
 
 
-#TODO add in the weight
-# calculates the weighted moving average over the specified interval for a crypto currency
-
-def setWeightedMovingAverage(currency, startMinute, endMinute, params, openPriceData, closePriceData):
-    """
-    :param currency: the currency to evaluate
-    :param startMinute: the start minute of the interval being looked at
-    :param endMinute: the end minute of the interval being looked at
-    :param params: the parameters used by this bot
-    :param openPriceData: the dictionary of open prices
-    :param closePriceData: the dictionary of close prices
-    :return: the moving average for the period and crypto currency
-    """
-
-    cumulativePrice = 0.0
-
-    slots = endMinute - startMinute - 1
-
-    if openPriceData == []:
-        return 0
-
-    # adds up the cumulative price changes using each interval
-    for x in range(startMinute, endMinute):
-        startPrice = openPriceData[x]
-        endPrice = closePriceData[x]
-        change = calcPercentChange(startPrice, endPrice)
-
-        cumulativePrice += change
-
-    # the scaling of the cumulative price
-    cumulativePrice = (cumulativePrice / slots) * params['CUMULATIVE_PRICE_MODIFIER']
-
-    return cumulativePrice
-
 #TODO this function will update the weighted moving average every second the program runs
 # def updateWeightedMovingAverage(currency, interval, starttime, endtime):
 
 
-# gets the cumulative volume over a period and scales it based on the currency's price
-def getVolume(currency, currentMinute, volumeData, closepricedata):
+#get the cumulative volume of the hour ending at the current minute
+def getVolume(currency, currentMinute, volumeData, openpricedata):
     """
     :param currency: the currency to evaluate
     :param currentMinute: the current minute in the simulation
     :param volumeData: the list of volumes
-    :param closepricedata: the list of close prices for the current crypto
+    :param openpricedata: the list of close prices for the current crypto
     :return:
     """
     volume = []
-    # adds up all the volumes over the interval
-    for x in volumeData:
+    # adds up all the volumes over the interval (starting from an hour from the current minute)
+    for x in volumeData[currentMinute - onehourinmins: currentMinute]:
         if(x != ''):
             x = float(x)
-            x *= float(getbinanceprice(currency, currentMinute, closepricedata))
+            x *= float(getbinanceprice(currency, currentMinute, openpricedata[currency]))
         else:
             x = 0.0
         volume.append(x)
+
     return volume
 
 
-# grabs the list of volumes over the interval and percent changes over the interval
-# then iterates through and calculates a cumulative volume where the volume is considered negative
-# when the percent change was negative and positive when the percent change was positive
-def getModifiedVolume(currency, params, percentChanges, volumeAmounts):
-    """
-    :param currency: currency to get the modified volume of
-    :param params: the parameters used by this bot
-    :param percentChanges: the percent changes between the open and close price each minute
-    :param volumeAmounts: the volume amounts traded for each minute
-    :return: the modified volume for this currency
-    """
-    oldVolume = 0
-
-    #these seem to be for bug checking
-    vols = []
-    volList = []
-
-    #current slot in time
-    currentSlot = 0
-
-    # adds up the volume with negative percent changes in price resulting in the volume
-    # considered to be mostly 'negative', how much is determined by the magnitude
-    # of the percent change in price
-    for i in volumeAmounts:
-
-        # makes each volume % change back into a decimal
-
-        percentChangeScale = (percentChanges[currentSlot])
-
-        if percentChangeScale < 0:
-            vols.append(percentChangeScale * volumeAmounts[currentSlot] *
-                        params['MODIFIED_VOLUME_NEGATIVE_MODIFIER'])
-            volList.append({'volumeofslot': volumeAmounts[currentSlot], 'weight': params['MODIFIED_VOLUME_NEGATIVE_MODIFIER']})
-
-            oldVolume += percentChangeScale * volumeAmounts[currentSlot] * \
-                         params['MODIFIED_VOLUME_NEGATIVE_MODIFIER']
-
-        # todo the below may have not been there for the last set of tests
-        if percentChangeScale >= 0:
-            vols.append(percentChangeScale * volumeAmounts[currentSlot])
-            volList.append({'volumeofslot': volumeAmounts[currentSlot], 'weight': 'NONE'})
-
-            oldVolume += percentChangeScale * volumeAmounts[currentSlot]
-
-        currentSlot += 1
-
-    return float(oldVolume)
 
 # get the binance price of the specified currency
 
 
-def getbinanceprice(currency, currentMinute, closePriceData):
+def getbinanceprice(currency, currentMinute, openpricedata):
     """
     :param currency: the currency to get the price of
     :param currentMinute: the current minute of the simulation
-    :param closePriceData: the dictionary of close prices for each minute for the current crypto
+    :param openpricedata: the dictionary of close prices for each minute for the current crypto
     :return:
     """
-
-    priceDict = closePriceData
-
-    if priceDict == {} or currency == '':
+    if openpricedata == {} or currency == '':
         return 0.0
 
-    binPrice = priceDict[currentMinute]
+    binPrice = openpricedata[currentMinute]
 
     return binPrice
 
@@ -355,14 +276,14 @@ def getbinanceprice(currency, currentMinute, closePriceData):
 # volume changes, percent volume changes, scores, time increasing, and time decreasing
 
 
-def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, closePriceData, volumeData,
+def updateCrypto(firstminindex, lastminindex, ownedcrypto, params, openPriceData, closePriceData, volumeData,
                  highPriceData, lowPriceData, cryptoSymbols, dataForScore, combinedParamData, cryptosSeperated,
                  persistentancillarydataforscore, maxdataforscore, percentChanges, volumeAmounts, volumePercentChanges,
                  scores, currencyToTrade, namesofvaluestostore, maxdataforcombinedparams):
     """
-    :param startMinute: the start minute of the interval to evaluate
-    :param endMinute: the end minute of the interval to evaluate
-    :param currentMinute: the current minute in time of this session of trading
+    :param firstminindex: the start minute of the interval to evaluate
+    :param lastminindex: the end minute of the interval to evaluate
+    :param ownedcrypto: the current crypto owned
     :param params: the parameters used by this bot
     :param openPriceData: the dictionary of all the open prices
     :param closePriceData: the dictionary of all the close prices
@@ -406,21 +327,18 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
         closePriceDataLocal = closePriceData[currency]
         highPriceDataLocal = highPriceData[currency]
         lowPriceDataLocal = lowPriceData[currency]
-        volumeDataLocal = getVolume(currency, currentMinute, volumeData[currency], closePriceData[currency])
+        volumeDataLocal = volumeData[currency]
 
         # todo figure out why this and the one below always starts at 0
 
-        #get the index (minute) for the last minute of the hour interval
-        lastminindex = endMinute - 1
-
         #get the opening volume at the starting minute of the hour interval
-        firstvolume = volumeDataLocal[startMinute]
+        firstvolume = volumeDataLocal[firstminindex]
 
         #get the closing volume at the ending minute of the hour interval
         lastvolume = volumeDataLocal[lastminindex]
 
         #get the open price at the starting minute of the hour interval
-        firstopenprice = openPriceDataLocal[startMinute]
+        firstopenprice = openPriceDataLocal[firstminindex]
 
         #get the last close price from the ending minute of the interval
         lastcloseprice = closePriceDataLocal[lastminindex]
@@ -429,14 +347,14 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
         #get the highest high price for the hour interval (and replace the currently stored highest high price for the
         #whole simulation
         highesthighprice = findhighpriceandupdatehighestoverall(highPriceDataLocal,
-                                                                persistentancillarydataforscore[currency], startMinute,
-                                                                endMinute)
+                                                                persistentancillarydataforscore[currency], firstminindex,
+                                                                lastminindex)
 
         #get the lowest low price for the hour interval (and replace the currently stored lowest low price for the
         #whole simualtion
         lowestlowprice = findlowpriceandupdatehighestoverall(lowPriceDataLocal,
-                                                             persistentancillarydataforscore[currency], startMinute,
-                                                             endMinute)
+                                                             persistentancillarydataforscore[currency], firstminindex,
+                                                             lastminindex)
 
 
         # get the highest high price overall
@@ -478,11 +396,10 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
 
         # iterate through all the open and close prices for the given interval
         percentChanges[currency][:] = []
-        for i in range(startMinute, endMinute - 1):
+        for i in range(firstminindex, lastminindex):
             i += 1
             #caclualte and store the percent changes between the open price of one minute and the close price of the next
             percentChanges[currency].append(calcPercentChange(openPriceDataLocal[i - 1], closePriceDataLocal[i]))
-
 
         #values used to indicate whether this is a weighted calculation
         notweighted = 0
@@ -499,7 +416,7 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
         volumePercentChanges[currency][:] = []
 
         # calculate and store the percent time increasing for volume and price percent changes
-        for w in range(startMinute, endMinute - 1):
+        for w in range(firstminindex, lastminindex):
             w += 1
             volumePercentChanges[currency].append(calcPercentChange(volumeDataLocal[w - 1], volumeDataLocal[w]))
             volumeAmounts[currency].append(volumeDataLocal[w])
@@ -515,10 +432,15 @@ def updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, c
                                                                       percentChanges[currency], volumeAmounts[currency])
 
         # calculate a weightedMovingAverage
-        dataForScore[currency]['MOVING_AVERAGE'] = setWeightedMovingAverage(currency, startMinute, endMinute, params,
+        dataForScore[currency]['MOVING_AVERAGE'] = setWeightedMovingAverage(currency, firstminindex, lastminindex, params,
                                                                    closePriceDataLocal
-                                                                   , openPriceDataLocal)
+                                                                  ,openPriceDataLocal)
 
+        #update whether each crypto has been purchase
+        updatecryptosbought(persistentancillarydataforscore, ownedcrypto)
+
+        #update the counter for how many times each crypto has been owned
+        updatecryptosboughtnumberoftimes(persistentancillarydataforscore, ownedcrypto)
 
     # copy over values that should are persistently stored
     copypersistentdataover(dataForScore, persistentancillarydataforscore)
@@ -789,6 +711,76 @@ def getVolumeTimeIncreasingWeighted(params, volumePercentChanges):
 
     return volumetimeincreasingweighted
 
+#TODO add in the weight
+# calculates the weighted moving average over the specified interval for a crypto currency
+
+def setWeightedMovingAverage(currency, startMinute, endMinute, params, openPriceData, closePriceData):
+    """
+    :param currency: the currency to evaluate
+    :param startMinute: the start minute of the interval being looked at
+    :param endMinute: the end minute of the interval being looked at
+    :param params: the parameters used by this bot
+    :param openPriceData: the dictionary of open prices
+    :param closePriceData: the dictionary of close prices
+    :return: the moving average for the period and crypto currency
+    """
+
+    cumulativePrice = 0.0
+
+    slots = endMinute - startMinute - 1
+
+    if openPriceData == []:
+        return 0
+
+    # adds up the cumulative price changes using each interval
+    for x in range(startMinute, endMinute):
+        startPrice = openPriceData[x]
+        endPrice = closePriceData[x]
+        change = calcPercentChange(startPrice, endPrice)
+
+        cumulativePrice += change
+
+    # the scaling of the cumulative price
+    cumulativePrice = (cumulativePrice / slots) * params['CUMULATIVE_PRICE_MODIFIER']
+
+    return cumulativePrice
+
+# grabs the list of volumes over the interval and percent changes over the interval
+# then iterates through and calculates a cumulative volume where the volume is considered negative
+# when the percent change was negative and positive when the percent change was positive
+def getModifiedVolume(currency, params, percentChanges, volumeAmounts):
+    """
+    :param currency: currency to get the modified volume of
+    :param params: the parameters used by this bot
+    :param percentChanges: the percent changes between the open and close price each minute
+    :param volumeAmounts: the volume amounts traded for each minute
+    :return: the modified volume for this currency
+    """
+    oldVolume = 0.0
+
+    #current slot in time
+    currentSlot = 0
+
+    # adds up the volume with negative percent changes in price resulting in the volume
+    # considered to be mostly 'negative', how much is determined by the magnitude
+    # of the percent change in price
+    for currvolume in volumeAmounts:
+
+        # makes each volume % change back into a decimal
+
+        percentChangeScale = (percentChanges[currentSlot])
+
+        if percentChangeScale < 0:
+            oldVolume += percentChangeScale * float(currvolume) * params['MODIFIED_VOLUME_NEGATIVE_MODIFIER']
+
+        # todo the below may have not been there for the last set of tests
+        if percentChangeScale >= 0:
+            oldVolume += percentChangeScale * float(currvolume)
+
+        currentSlot += 1
+
+    return float(oldVolume)
+
 # method to calculate the "score" that crypto get when they are updated by hour
 # score is a combination of weighted time increasing and % change over hour.
 # for both volume and price
@@ -829,8 +821,14 @@ def getScore(params, maxCryptoCalculationsStored, listofscorevariables,
     for combinedparamdatatypeindex in range(len(params['COMBINED_PARAMS'])):
         #scale the combined parameter data value by the maximum stored combined parameter data value for all cryptos
         #and multiply by the associated parameter modifier
-        newscore += (combinedParamData[combinedparamdatatypeindex] /
-                     maxCombinedParamsCryptoCalculationsStored[combinedparamdatatypeindex])\
+
+        #if the max is zero we do not divide by anything
+        if maxCombinedParamsCryptoCalculationsStored[combinedparamdatatypeindex] == 0:
+            newscore += combinedParamData[combinedparamdatatypeindex] \
+                         * params['COMBINED_PARAMS_MODIFIERS'][combinedparamdatatypeindex]
+        else:
+            newscore += (combinedParamData[combinedparamdatatypeindex] /
+                     maxCombinedParamsCryptoCalculationsStored[combinedparamdatatypeindex]) \
                     * params['COMBINED_PARAMS_MODIFIERS'][combinedparamdatatypeindex]
 
 
@@ -922,6 +920,30 @@ def findlowpriceandupdatehighestoverall(lowprices, persistentdata, startminute, 
             persistentdata['MINS_SINCE_LAST_LOW_PRICE'] += 1
 
     return lowestprice
+
+#change value stored for the passed crypto to 1 to indicate it has been purchased before
+def updatecryptosbought(persistentdataforscore, ownedcrypto):
+    """
+    :param persistentdataforscore: dictionary of persistent data used to calculate score
+    :param ownedcrypto: the owned crypto
+    :return:
+    """
+
+    persistentdataforscore[ownedcrypto].update({'OWNED_BEFORE': 1.0})
+
+
+#increment the counter stored for the passed crypto to indicate it has been purchased another time
+def updatecryptosboughtnumberoftimes(persistentdataforscore, ownedcrypto):
+    """
+    :param persistentdataforscore: dictionary of persistent data used to calculate score
+    :param ownedcrypto: the owned crypto
+    :return:
+    """
+
+    incrementedvalue = persistentdataforscore[ownedcrypto]['OWNED_BEFORE_EACH_TIME'] + 1
+
+    persistentdataforscore[ownedcrypto].update({'OWNED_BEFORE_EACH_TIME': incrementedvalue})
+
 
 # finds the next currency to buy by first whittling down the list of cryptos to those that pass a certain number
 # of the minimum values and then find the one with the highest score of those
@@ -1019,7 +1041,7 @@ def cryptohasadequateminimumvalues(params, dataforscore, combinedparamdata, curr
     for datatype, datavalue in params['PARAMS_CHECKED_FOR_MINIMUM_VALUES'].items():
 
         #if this is a normal data type
-        if datatype in dataforscore:
+        if datatype in dataforscore[currencyname]:
             if dataforscore[currencyname][datatype] > datavalue:
                 minimumdatavaluesbetterthan += 1
         #otherwise check if this is within the combined params list
@@ -1038,159 +1060,162 @@ def cryptohasadequateminimumvalues(params, dataforscore, combinedparamdata, curr
 
 # checks if the current crypto has been decreasing the past ten minutes
 # if yes it forces a new check to see if there is a better crypto
-def checkFailureCondition(currency, timesIncreasing, startMinute, endMinute, openPriceData, closePriceData):
+def checkFailureCondition(currency, timesIncreasing, openPriceData, countervalueforpositiveintervals,
+                          countervalueforzeropercentchangeintervals):
     """
     :param currency: the currency being evaluated
     :param timesIncreasing: the number of times this can be increasing at minimum to not set off the failure flag
-    :param startMinute: the start minute of the interval
-    :param endMinute: the end minute of the interval
     :param openPriceData: the open price data dictionary
-    :param closePriceData: the close price data dictionary
-    :return: 1 if it decreased all intervals and must restart and 0 if nothing needs to be done
+    :param countervalueforpositiveintervals: the amount added to timeincreasingcounter to keep track of the
+        positive changes
+    :param countervalueforzeropercentchangeintervals: the amount added to timeincreasingcounter to keep track
+        of the negative changes
+    :return: True if it decreased all intervals and must restart and False if nothing needs to be done
     """
 
     # get the starting price of the interval
-    startPriceInterval = openPriceData[startMinute]
     timeIncreasingCounter = 0
 
     # iterate through the list of percent changes and add up when the percent change was positive
-    for x in range(startMinute, endMinute):
-        startPrice = openPriceData[x]
-        endPrice = openPriceData[x]
+    for minute in range(1,len(openPriceData[currency])):
+        startPrice = openPriceData[currency][minute - 1]
+        endPrice = openPriceData[currency][minute]
         percentChange = calcPercentChange(startPrice, endPrice)
+
+        #give quarter credit if there was no percent change and full credit if it was a positive percent change
         if(percentChange > 0):
-            timeIncreasingCounter += 1
+            timeIncreasingCounter += countervalueforpositiveintervals
+        elif(percentChange == 0):
+            timeIncreasingCounter += countervalueforzeropercentchangeintervals
 
     if(timeIncreasingCounter <= timesIncreasing):
         logging.info("DECREASED ALL INTERVALS. RESTART")
-        return 1
+        return True
 
-    return 0
+    return False
 
 # checks whether the function has caused too large of negative decrease the specified interval
 
 
-def checkTooNegative(currency, currentMinute, params, openPriceData, closePriceData):
+def checkTooNegative(currency, params, openPriceData, intervallength=1):
     """
     :param currency: the currency being evaluated
-    :param currentMinute: the current minute to check
     :param params: the parameters used by this bot to trade
     :param openPriceData: the dictionary of open prices
-    :param closePriceData: the dictionary of close prices
-    :return: 1 if the flag has been set off and 0 if not. if flag is set up the crypto is sold
+    :param intervallength: the length of the interval to check if the decrease has been too negative (in minutes)
+    :return: True if the flag has been set off and False if not. if flag is set up the crypto is sold
     """
 
-    startPrice = openPriceData[currentMinute]
-    endPrice = closePriceData[currentMinute]
+    startPrice = openPriceData[currency][0]
+    endPrice = openPriceData[currency][0 + intervallength]
     percentChange = calcPercentChange(startPrice, endPrice)
+
 
     # if the percent change is less than the negation of the absolute value of max decrease (ensures it is treated as negative
     if(percentChange < (-1 * abs((params['MAX_DECREASE'])))):
         logging.info("TOO NEGATIVE. RESTART")
-        return 1
+        return True
 
-    return 0
+    return False
 
 # checks to see if the currency has increased or decreased more than is allowed
 # if yes, then the reevaluation process is restarted
 
 
-def checkExitCondition(currency, currentMinute, params, priceBought, closepricedata):
+def checkPercentChangeOverHoldingTooExtreme(currency, currentMinute, params, priceBought, openpricedata):
     """
     :param currency: the currency being evaluated
     :param currentMinute: the current minute to check 
     :param params: the parameters used by the bot to trade
     :param priceBought: the price the currently owned crypto was bought at
-    :param closepricedata: the close price list for the current crypto
-    :return: 1 if a flag was set off requiring a cessation fo the bots trading, 0 if not
+    :param openpricedata: the close price list for the current crypto
+    :return: True if a flag was set off requiring the crypto to be sold, False if not
     """ 
     
     #the current price of the the currency
-    currentPrice = getbinanceprice(currency, currentMinute, closepricedata)
+    currentPrice = getbinanceprice(currency, currentMinute, openpricedata[currency])
     
     #the percent change since the price it was purchased at
     percentChange = calcPercentChange(priceBought, currentPrice)
-    
-    #the stored parameter for the max percent change
-    maxPC = params['MAX_PERCENT_CHANGE']
 
-    # chaeck if the max percent change is negative so that the if statements work correctly
-    if maxPC < 0:
-        multiplyBy = -1
-        multiplyBy2 = 1
-    if maxPC >= 0:
-        multiplyBy = 1
-        multiplyBy2 = -1
 
-    if(percentChange > multiplyBy * params['MAX_PERCENT_CHANGE']):
+    if(percentChange >  params['MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD']):
         logging.info("HIT MAX PERCENT CHANGE")
-        return 1
+        return True
 
-    if(percentChange < multiplyBy2 * params['MAX_PERCENT_CHANGE']):
+    if(percentChange < params['MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD']):
         logging.info("HIT MINIMUM PERCENT CHANGE")
-        return 1
+        return True
 
-    return 0
+    return False
 
 # checks to see if the current currency is too near to its starting point
-def checkTooLow(currency, timesIncreasing, startMinute, endMinute, params, priceBought, closepricedata,
-                openpricedata):
+def checkTooLow(currency, params, priceBought, openpricedataslice):
     """
     :param currency: the currency being looked at
-    :param timesIncreasing: the amount of times it needs to be increasing to not set the flag off
-    :param startMinute: the start minute of the interval
-    :param endMinute: the end minute of the interval
     :param params: the parameters used by the bot for
     :param priceBought: the price that the currently owned cryptocurrency was purchased for
-    :param closepricedata: the list of close prices for the current crypto
-    :param openpricedata: the list of open prices for the current crypto
-    :return: 1 if this failure flag was set and the crypto must be sold, 0 otherwise
+    :param openpricedataslice: the list of open prices for the current crypto for only a slice
+    :return: True if this failure flag was set and the crypto must be sold, False otherwise
     """
 
-    currentPrice = getbinanceprice(currency, startMinute, closepricedata)
+    currentPrice = getbinanceprice(currency, 0, openpricedataslice[currency])
     floorPrice = params['FLOOR_PRICE_MODIFIER'] * float(priceBought)
 
-    # checks to see if the coin was increasing or decreasing over the last 15 minutes. +13 since endMinute is 
+    # checks to see if the coin was increasing or decreasing over the last 15 minutes. +13 since endMinute is
     # already one greater than start minute and +8 since checkFailureCondition uses 10 minute intervals
-    direction = increasingOrDecreasing(currency, startMinute, endMinute + 13,
-                                       openpricedata, closepricedata)
+    direction = increasingOrDecreasing(currency, openpricedataslice[currency])
 
-    #check if we are decreasing in all intervals
-    allIntervalsDecreasing = checkFailureCondition(currency, timesIncreasing, startMinute, endMinute + 8,
-                                                   openpricedata, closepricedata)
 
     # check to see if the current price is too low, the crypto is decreasing over the past 15 minutes
     # and all the intervals are decreasing
-    if(float(currentPrice) < float(floorPrice) and direction == 0 & allIntervalsDecreasing == 1):
+    if(float(currentPrice) < float(floorPrice) and direction == False ):
         logging.info("WAS TOO LOW")
-        return 1
+        return True
 
-    return 0
+    return False
+
+
+# checks to see if the currency has increased or decreased more than is allowed
+# if yes, then the simulation is ended
+def checkPercentChangeOverWholePeriodExitSimulation(params):
+    """
+    :param params: the parameter dictionary
+    :return: True if a flag was set off requiring a cessation fo the bots trading, False if not
+    """
+
+
+    if (params['CUMULATIVE_PERCENT_CHANGE_STORE'] > params['MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD']):
+        logging.info("HIT MAX PERCENT CHANGE")
+        return True
+
+    if (params['CUMULATIVE_PERCENT_CHANGE_STORE'] < params['MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD']):
+        logging.info("HIT MINIMUM PERCENT CHANGE")
+        return True
+
+    return False
 
 # returns whether the specified currency is increasing or decreasing over the interval
 # 0 means decreasing, 1 means stable or increasing
 
 
-def increasingOrDecreasing(currency, startMinute, endMinute, openPriceData, closePriceData):
+def increasingOrDecreasing(currency, openpricedataslicetocheck):
     """
     :param currency: the currency currency being evaluated
-    :param startMinute: the start minute to look at
-    :param endMinute: the end minute to look at
-    :param openPriceData: the open price dictionary
-    :param closePriceData: the close price dictionary
-    :return: 1 if this was increasing and 0 if it was decreasing
+    :param openpricedataslicetocheck: the open price dictionary
+    :return: True if this was increasing and False if it was decreasing
     """
 
 
-    startPrice = openPriceData[startMinute]
-    endPrice = closePriceData[endMinute]
+    startPrice = openpricedataslicetocheck[0]
+    endPrice = openpricedataslicetocheck[-1]
 
     calcPChange = calcPercentChange(startPrice, endPrice)
 
     if(calcPChange >= 0.0):
-        return 1
+        return True
 
-    return 0
+    return False
 
 
 # creates a dictionary with all the different statistic holding dictionaries that are created with each run
@@ -1370,13 +1395,16 @@ def setMaxValue(dataforscore, maxdataforscore):
     for currencyname, datatypedict in dataforscore.items():
         #loop through the types by their names
         for datatype, datatypevalue in datatypedict.items():
+
+            #absolute value for the current data type for the current crypto
+            absolutevaluefordatatype = abs(dataforscore[currencyname][datatype])
+
             #if no max value is stored for the datatype or the current stored max is less than the current
             #value stored for that crypto
-            if maxdataforscore[datatype] == 0 or \
-                    dataforscore[currencyname][datatype] > maxdataforscore[datatype]:
+            if maxdataforscore[datatype] == 0 or absolutevaluefordatatype > maxdataforscore[datatype]:
 
                 #replace the current max value for that datatype with the stored value of the current currency
-                maxdataforscore[datatype] = dataforscore[currencyname][datatype]
+                maxdataforscore[datatype] = absolutevaluefordatatype
 
 #runs through the dictionary of stored calculations for the combined parameters and store the max for each
 def setMaxValuesCombinedParams(dataforcombinedparams, maxdataforcombinedparams):
@@ -1392,13 +1420,20 @@ def setMaxValuesCombinedParams(dataforcombinedparams, maxdataforcombinedparams):
         return
 
     #loop through each crypto and their different datatypes stored
-    for currencyname, combinedparamindex in dataforcombinedparams.items():
-        #if no max value is stored for the combined param datatype or the current stored max is less than the
-        #current value stored for that crypto combined param
-        if maxdataforcombinedparams[combinedparamindex] == 0 or \
-            dataforcombinedparams[currencyname][combinedparamindex] > maxdataforcombinedparams[combinedparamindex]:
-            #replace the current max value for the combined param type with the stored value of the current currency
-            maxdataforcombinedparams[combinedparamindex] = dataforcombinedparams[currencyname][combinedparamindex]
+    for currencyname, combinedparamdictofdata in dataforcombinedparams.items():
+
+        #loop through each combined parameter value stored for the crypto
+        for combinedparamindex in combinedparamdictofdata:
+
+            #the absolute value of the current crypto's data value for the current combined parameter data
+            absolutecryptocombinedparametervalue = abs(dataforcombinedparams[currencyname][combinedparamindex])
+
+            #if no max value is stored for the combined param datatype or the current stored max is less than the
+            #current value stored for that crypto combined param
+            if maxdataforcombinedparams[combinedparamindex] == 0 or  absolutecryptocombinedparametervalue \
+                 > maxdataforcombinedparams[combinedparamindex]:
+                #replace the current max value for the combined param type with the stored value of the current currency
+                maxdataforcombinedparams[combinedparamindex] = absolutecryptocombinedparametervalue
 
 
 #setup the stored crypto calculations dictionary of lists and the corresponding dictionary with the max
@@ -1445,7 +1480,7 @@ def setupStoredCalculationsForCombinedParams(storeCombinedParamsValues, storedCo
         # loop through all the crypto types
         for key, currencyname in cryptoSymbols.items():
             # if the crypto currency name does not have a dictionary for its combined param data
-            if currencyname not in storeCombinedParamsValues.items():
+            if currencyname not in storeCombinedParamsValues:
                 # make a dictionary to hold the data of the current crypto
                 storeCombinedParamsValues.update({currencyname: {}})
 
@@ -1454,7 +1489,7 @@ def setupStoredCalculationsForCombinedParams(storeCombinedParamsValues, storedCo
         #loop through all the crypto types
         for key, currencyname in cryptoSymbols.items():
             #if the crypto currency name does not have a dictionary for its combined param data
-            if currencyname not in storeCombinedParamsValues.items():
+            if currencyname not in storeCombinedParamsValues:
                 #make a dictionary to hold the data of the current crypto
                 storeCombinedParamsValues.update({currencyname: {}})
 
@@ -1463,7 +1498,6 @@ def setupStoredCalculationsForCombinedParams(storeCombinedParamsValues, storedCo
 
         #add a float to hold the max value for each combined parameter calculation type
         storedCombinedParamsValuesMaxs.update({combinedparamindex: -1000.0})
-
 
 #setup the ancillary peristent data dictionary to hold data that needs to carry over between resets of the normal data
 #for score dictionary
@@ -1487,6 +1521,48 @@ def setuppersistentancillaryscoredata(persistentancillaryscoredata, ancillarydat
             #make a dictionary entry for the current data type for the current crypto
             persistentancillaryscoredata[currencyname].update({ancillarydataname: 0.0})
 
+#returns a partioned version of the past dict of data for each type of data where
+# an hour is taken out by default starting from 60 minutes in the past (if you choose an hour)
+# assumes the passed data dicts have lists of data stored for each crypto (so the crypto name is the key for each list)
+def getsliceofdictofdata(datadict, lastminintimeperiod=59, timeperiod=60, currency='none'):
+    """
+    :param datadict: the dictionary of data for each crypto
+    :param lastminintimeperiod: the last minute in the time period
+    :param timeperiod: the length of the time period
+    :param currency: the currency we want to grab the slice for
+    :return: the partitioned data dictionary with the specified slice of data
+    """
+    #the final dictionary of the data partitioned to only hold a time period length slice ending at the designated
+    # last minute of data
+    partitioneddatadict = {}
+
+    #used to account for the fact the last minute is not counted
+    minoffset = 1
+
+    for currencyname, datalist in datadict.items():
+        #store the slice of data for all the currencies if no particular one is specified
+        if currency == 'none' or currencyname == currency:
+            sliceofdata = datalist[lastminintimeperiod + minoffset - timeperiod:lastminintimeperiod + minoffset]
+
+            partitioneddatadict.update({currencyname: sliceofdata})
+
+    return partitioneddatadict
+
+#checks if the restart codes are set off
+def norestartcodessetof(errorcodes):
+    """
+    :param errorcodes: the class object with the error codes
+    :return:
+    """
+
+    for errorflagname, errorflagvalue in defaulterrorflagsforcryptoevaluator.items():
+        if 'RESTART' in errorflagname:
+            actualerrorflagvalue = errorcodes.getvalueofflag(errorflagname)
+
+            if actualerrorflagvalue == True:
+                return True
+
+    return False
 
 def main():
     # setup the relative file path
@@ -1495,23 +1571,7 @@ def main():
 
     ##########################START OF OLD GLOBAL VARIABLES#############################################
 
-    # in bitcoins (before trading)
-    initialBalance = 0.0
-
-    # in bitcoins (after trading)
-    currentBalance = 0.0
-
-    priceList = []
-
-    # cumulative percent change of a crypto's price over the course of owning it
-    CUMULATIVE_PERCENT_CHANGE = 0.0
-
-    # number of minutes we want to iterate backwards
-    startMinute = 0
-    endMinute = 60
     startMinNum = 0
-    endMinNum = 60
-    currentMinute = 0
 
     # true price for the crrpto being bought
     truePriceBought = 0.0
@@ -1522,23 +1582,8 @@ def main():
     # the number of sells
     numSells = 0
 
-
-    # 0 is false, 1 is true
-    # flags used to exit if different exit conditions are met (set with random params from the parameter set)
-    RESTART = 0
-    RESTART_TN = 0
-    RESTART_LOW = 0
-    EXIT = 0
-
     # crypto being bought and held
     currencyToTrade = {}
-
-    # temporary variable that holds currently held crypto right before the logic to test if
-    # a new crypto is better to buy
-    oldCurrency = ''
-
-    # the new crytpo determined as the best one to buy
-    currentCurrency = ''
 
     # the score of each crypto
     scores = {}
@@ -1555,19 +1600,6 @@ def main():
     # volume data for each interval over a specified period fo time
     volumeAmounts = {}
 
-    # the percent price change over an hour, the number of intervals the price increased, and the weighted time where the crypto increased
-    pricePercentData = {}
-
-    # holds the percent volume change over an hour, the number of intervals the volume increased, and the weighted time where the crypto increased
-    volumePercentData = {}
-
-    # the modified cumulative volume over a period (a negative percent change will result in the volume change being counted as negative towards the
-    # cumulative volume stored here
-    modifiedVolume = {}
-
-    # holds the the other stat items in it
-    statDict = {}
-
     #dictionary to allow data to be persistently held and reused for scoring (some is copied over)
     persistentancillarydataforscore = {}
 
@@ -1582,13 +1614,6 @@ def main():
 
     # hold the max values to be used for scaling
     maxdataforscore = {}
-
-    # the different dictionaries used to store the data for the interval
-    openPriceData = {}
-    closePriceData = {}
-    volumeData = {}
-    highPriceData = {}
-    lowPriceData = {}
 
     # the crypto we currently own
     ownCrypto = 'BTCUSDT'
@@ -1640,7 +1665,7 @@ def main():
     realInterval = params['INTERVAL_TO_TEST'] + params['MIN_OFFSET']
 
     #store the different kinds of data for the interval
-    openPriceData = CryptoStats.getOpenPrice(realInterval , params['MINUTES_IN_PAST'], {}, currencies=cryptosymbols)
+    openPriceData = CryptoStats.getOpenPrice(realInterval, params['MINUTES_IN_PAST'], {}, currencies=cryptosymbols)
     closePriceData = CryptoStats.getClosePrice(realInterval, params['MINUTES_IN_PAST'], {}, currencies=cryptosymbols)
     volumeData = CryptoStats.getVolume(realInterval, params['MINUTES_IN_PAST'], {}, currencies=cryptosymbols)
     highPriceData = CryptoStats.getHighPrice(realInterval, params['MINUTES_IN_PAST'], {}, currencies=cryptosymbols)
@@ -1648,7 +1673,7 @@ def main():
 
     # initialize the minutes that will define the period
     startMinute = int(startMinNum + params['MIN_OFFSET'])
-    endMinute = int(endMinNum + params['MIN_OFFSET'])
+    endMinute = int(params['MAX_TIME_CYCLE'] + params['MIN_OFFSET'])
     currentMinute = int(startMinute)
 
     # intitialize the starting currency and the number of cycles the program has run through
@@ -1670,27 +1695,39 @@ def main():
     # (for checking against crypto stats analysis)
     params['START_MONEY'] = passedparams['startmoney']
     currmoney = float(params['START_MONEY'])
-    endmoney =  currmoney
+    endmoney = currmoney
 
     # price each crypto was bought at
     priceBought = openPriceData[ownCrypto][currentMinute]
 
+    #the max time cycle in minutes used to set when a cycle will end
+    minutesinacycle = params['MAX_TIME_CYCLE']
+
+    #error code class to set flags when either the simulation must end or the current holding period must end
+    errorcodes = ErrorCodes(scriptname='CryptoEvaluator')
+
     # runs the bot for a set number of cycles or unless the EXIT condition is met (read the function checkExitCondition)
     # cycles is either a period where a crypto is held and ones where they are bought/sold
-    while(cycles < params['MAX_CYCLES'] and EXIT == 0):
+    while(cycles < params['MAX_CYCLES'] and
+          errorcodes.getvalueofflag('EXIT_MONEY_CHANGED_TOO_EXTREME_WHOLE_PERIOD') == False):
 
+
+        #reset all error flags
+        errorcodes.resetflags()
 
         logging.info("Decision {}".format(cycles))
+
+
+        #used to make something run on multiples of two
+        everymultipleof2 = 2
+        everymultipleof4 = 4
+        everymultipleof10 = 10
 
         # intialize the time the bot will run for
         t = 0
 
         # whether the bot decided not to buy or sell on this trade cycle
         numAbstain = 0
-
-        RESTART = 0
-        RESTART_LOW = 0
-        RESTART_TN = 0
 
         # intialize the checkers that are set whether a buy or sell occured
         didSell = 0
@@ -1699,10 +1736,24 @@ def main():
         # reset current minute to be the start minute
         currentMinute = startMinute
 
+        #count a minute off because the minutes are 0 indexed
+        minoffset = 1
+
+        #each type of data in a dictionary running from 0 (the beginning of the past hour) to 59 (the minute before this
+        # one)
+        openpricedatalasthour = getsliceofdictofdata(openPriceData, lastminintimeperiod=startMinute - minoffset)
+        closepricedatalasthour = getsliceofdictofdata(closePriceData, lastminintimeperiod=startMinute - minoffset)
+        highpricedatalasthour = getsliceofdictofdata(highPriceData, lastminintimeperiod=startMinute - minoffset)
+        lowpricedatalasthour = getsliceofdictofdata(lowPriceData, lastminintimeperiod=startMinute - minoffset)
+        volumedatalasthour = getsliceofdictofdata(volumeData, lastminintimeperiod=startMinute - minoffset)
+
+        #the first and end minute indices for an hour of minute intervals
+        firstminindex = 0
+        lastminindex = 59
 
         # run update crypto to assign scores and sort through all the cryptos and advance a 2 minutes because of how long it takes to run
-        updateCrypto(startMinute, endMinute, currentMinute, params, openPriceData, closePriceData, volumeData,
-                 highPriceData, lowPriceData, cryptosymbols, dataforscore, combinedparamdata, cryptosSeparated,
+        updateCrypto(firstminindex, lastminindex, ownCrypto, params, openpricedatalasthour, closepricedatalasthour, volumedatalasthour,
+                     highpricedatalasthour, lowpricedatalasthour, cryptosymbols, dataforscore, combinedparamdata, cryptosSeparated,
                  persistentancillarydataforscore, maxdataforscore, percentChanges, volumeAmounts, volumePercentChanges,
                  scores, currencyToTrade, normalizationValuesToStore, maxcombinedparamdata)
 
@@ -1721,7 +1772,7 @@ def main():
         if (oldCurrency != currentCurrency) and (currentCurrency != '') and currentCurrency != ownCrypto:
 
             # store the price it was sold at
-            pricesold = getbinanceprice(oldCurrency, currentMinute, closePriceData[oldCurrency])
+            pricesold = getbinanceprice(oldCurrency, currentMinute, openPriceData[oldCurrency])
 
             # sell the old currency
             sellBin(oldCurrency)
@@ -1757,14 +1808,16 @@ def main():
             params['CUMULATIVE_PERCENT_CHANGE'] = truechangewithassumedloss
             params['CUMULATIVE_PERCENT_CHANGE_STORE'] += truechangewithassumedloss
 
+            logging.info("Made {}".format(truechangewithassumedloss))
+
             #set the current money to be end money
             currmoney = endmoney
 
             # writing to the log about when the run sold and what it bought at and what it sold at
             # as well as what was sold and how it changed
-            logging.info("THIS RUN SOLD AT: " + str(currentMinute))
-            logging.info('Selling:  ' + str(oldCurrency) + ' Price bought: ' + str(priceBought) + ' Price sold: ' + str(pricesold) + '\n')
-            logging.info("FINAL percent change over the life of owning this crypto " + str(truePercentChange))
+            logging.info("THIS RUN SOLD AT: {}".format(currentMinute))
+            logging.info('Selling:  {} Price bought: {} Price sold: {}'.format(oldCurrency, priceBought, pricesold))
+            logging.info("FINAL percent change over the life of owning this crypto {}".format(truePercentChange))
 
             # calcualates the length of the list of all the owned cryptos in order and their corresponding lists of percent changesover each crycle
             lenAllOwned = len(allOwnedCryptoPercentChanges)
@@ -1782,7 +1835,7 @@ def main():
         # buy the new cryptocurrency if there was one selected
         if(oldCurrency != currentCurrency) and (currentCurrency != '') and currentCurrency != ownCrypto:
             priceBought, truePriceBought, ownCrypto = buyBin(currentCurrency, currentMinute,
-                                                             currencyToTrade, closePriceData[currentCurrency])
+                                                             currencyToTrade, openPriceData[currentCurrency])
 
             ownCrypto = currentCurrency
 
@@ -1791,7 +1844,7 @@ def main():
 
             #more output to files about the buying
             logging.info("THIS RUN BOUGHT AT: " + str(currentMinute))
-            logging.info("Buying " + str(currentCurrency) + " at price: " + str(priceBought))
+
 
         # if you buy increment the buy counter
         if didBuy == 1:
@@ -1801,37 +1854,64 @@ def main():
 
         # holding of the crypto currency for minutes less than the specied max or until one of the restart conditions is met
         # assuming there is a current currency owned
-        while(t < params['MAX_TIME_CYCLE'] and RESTART == 0 and RESTART_TN == 0 and RESTART_LOW == 0 and currentCurrency != ''):
+        while(t < params['MAX_TIME_CYCLE'] - minoffset and norestartcodessetof(errorcodes) is False
+              and currentCurrency != ''):
+
             #if we are at a multiple of the minutes before we wait to check for this flag and this is not the starting
             # minute of the interval we check if we need to restart and let go of this crypto
             if(t % params['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
-                RESTART = checkFailureCondition(currentCurrency, params['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE'],
-                                                currentMinute, currentMinute + 9,
-                                                openPriceData[currentCurrency], closePriceData[currentCurrency])
+                #a slice of ten minutes of time in the past
+                openpricedatalasttenmin = getsliceofdictofdata(openPriceData,
+                                                               lastminintimeperiod=currentMinute - minoffset,
+                                                               timeperiod=10, currency=currentCurrency)
+                seterrorflag = checkFailureCondition(currentCurrency, params['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE'],
+                                                openpricedatalasttenmin,
+                                                params['valueaddedforapositivepercentchangeforcheckfailureflag'],
+                                                params['valueaddedforazeropercentchangeforcheckoffailureflag'])
+                errorcodes.setflag('RESTART_PRICE_DECREASING_TOO_OFTEN_HOLDING_PERIOD', seterrorflag)
 
-            if(t > params['WAIT_FOR_CHECK_TOO_LOW'] and t % params['WAIT_FOR_CHECK_FAILURE']):
-                RESTART_LOW = checkTooLow(currentCurrency, params['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE'],
-                                          currentMinute, currentMinute + 1, params, priceBought,
-                                          closePriceData[currentCurrency], openPriceData[currentCurrency])
-            #check the third restarting flag value to see if the crypto has gone too negative
-            RESTART_TN = checkTooNegative(currentCurrency, currentMinute, params,
-                                          openPriceData[currentCurrency], closePriceData[currentCurrency])
+
+            if(t > params['WAIT_FOR_CHECK_TOO_LOW'] and t % everymultipleof10 and t != 0):
+                #a slice of the last fifteen minutes
+                openpricedatalastfifteenminutes = getsliceofdictofdata(openPriceData,
+                                                                       lastminintimeperiod=currentMinute - minoffset,
+                                                                       timeperiod=15, currency=currentCurrency)
+                seterrorflag = checkTooLow(currentCurrency,params, priceBought, openpricedatalastfifteenminutes)
+
+                errorcodes.setflag('RESTART_PRICE_DROPPED_TOO_CLOSE_TO_ORIGINAL_HOLDING_PERIOD' ,seterrorflag)
+
+            #if we are a a multiple of the minutes before we wait to check this flag and this is not the
+            # starting minute of the interval
+            if (t > params['WAIT_FOR_CHECK_TOO_NEGATIVE'] and t % everymultipleof2 and t!=0):
+                #get the last two minutes of open price data
+                openpricedatalasttwominutes = getsliceofdictofdata(openPriceData, lastminintimeperiod=currentMinute - minoffset,
+                                                               timeperiod=2, currency=currentCurrency)
+
+                #check the third restarting flag value to see if the crypto has gone too negative
+                seterrorflag = checkTooNegative(currentCurrency, params, openpricedatalasttwominutes)
+
+                errorcodes.setflag('RESTART_PRICE_DROPPED_TOO_MUCH_VALUE_HOLDING_PERIOD', seterrorflag)
+
+
+            #if we are on a multiple of minutes and we have waited the right amount of time
+            # and this is not the starting minute
+            if (t > params['WAIT_FOR_CHECK_TOO_EXTREME'] and t % everymultipleof4 and t != 0):
+                seterrorflag = checkPercentChangeOverHoldingTooExtreme(currentCurrency, currentMinute, params,
+                                      priceBought, openPriceData)
+                errorcodes.setflag('RESTART_PRICE_CHANGED_TOO_EXTREME_HOLDING_PERIOD', seterrorflag)
+
 
             # advance the time and currency minute
             t += 1
             currentMinute += 1
             minpassed += 1
 
-        # check the exit immediately condition
-        if currentCurrency != '' and currentMinute < realInterval:
-            EXIT = checkExitCondition(currentCurrency, currentMinute, params,
-                                      priceBought, closePriceData[currentCurrency])
-
-        # if you kept the same crypto as the last cycle stole the percent chnage you have gotten from the last cycle of holding the crypto or from when it was bought
-        if(oldCurrency == currentCurrency and currentCurrency != '' or EXIT == 1):
+        print("Time {}".format(t))
+        # if you kept the same crypto as the last cycle stole the percent change you have gotten from the last cycle of holding the crypto or from when it was bought
+        if(oldCurrency == currentCurrency and currentCurrency != ''):
 
             # get the new price bought and calculate a percent change over this interval of holding the cyrpto
-            newPrice = getbinanceprice(currentCurrency, currentMinute, closePriceData[currentCurrency])
+            newPrice = getbinanceprice(currentCurrency, currentMinute, openPriceData[currentCurrency])
             cumulativePercentChange = calcPercentChange(priceBought, newPrice)
 
             # adds the percent change to the list of all the crypto currencies that have been owned over this run
@@ -1852,6 +1932,8 @@ def main():
 
             params['CUMULATIVE_PERCENT_CHANGE'] = truecumulativechange
             params['CUMULATIVE_PERCENT_CHANGE_STORE'] += truecumulativechange
+
+            logging.info("Made {}".format(truecumulativechange))
 
             #reset currmoney to reflect the changes in value
             currmoney = endmoney
@@ -1878,6 +1960,7 @@ def main():
 
         #the time we held the owned cyrpto for
         timeHeld = currentMinute - startMinute
+        starttoend = endMinute - startMinute
 
         #advance the counter fo cryptos that have happened so
         cycles += 1
@@ -1886,12 +1969,12 @@ def main():
         #checks if any buys are made because this will be entered even if no trades are made
         if cycles == params['MAX_CYCLES'] and numBuys != 0:
             # sell if there is a crypto left and increment numSells
-            sellBin(currentCurrency)
+            sellBin(ownCrypto)
             numSells += 1
 
-            pricesold = getbinanceprice(currentCurrency, currentMinute, closePriceData[currentCurrency])
+            pricesold = getbinanceprice(ownCrypto, currentMinute, openPriceData[ownCrypto])
 
-            logging.info("Sold {} for {}".format(currentCurrency, pricesold))
+            logging.info("Sold {} for {}".format(ownCrypto, pricesold))
 
             # calculate and store the percent change from when the crypto was bought to when it was sold
             cumulativePercentChange = calcPercentChange(priceBought, pricesold)
@@ -1914,6 +1997,8 @@ def main():
             params['CUMULATIVE_PERCENT_CHANGE'] = truechangewithassumedloss
             params['CUMULATIVE_PERCENT_CHANGE_STORE'] += truechangewithassumedloss
 
+            logging.info("Made {}".format(truechangewithassumedloss))
+
             # set the current money to be end money
             currmoney = endmoney
 
@@ -1931,23 +2016,31 @@ def main():
             endMinute += (currentMinute - temp)
             minpassed += (currentMinute - temp)
 
+        # check the if we must exit the simulation
+        if currentCurrency != '' and currentMinute < realInterval:
+            endsimulationorcontinue = checkPercentChangeOverWholePeriodExitSimulation(params)
+            errorcodes.setflag('EXIT_MONEY_CHANGED_TOO_EXTREME_WHOLE_PERIOD', endsimulationorcontinue)
+
         #empty the dictionary of lists of the implicit divisions made between the cryptos
         resetDecisionsStored(cryptosSeparated)
 
-
-
+        #print error flags
+        errorcodes.printflags()
 
     #print to file the final percent changes over the run
     logging.info("Cumulative percent change over the life of all cryptos owneed so far {}"
                  .format(params['CUMULATIVE_PERCENT_CHANGE_STORE']))
-
 
     #write over the current end money
     params['END_MONEY'] = endmoney
 
     #print to the log the start and end money
     logging.info("Started with {}".format(params['START_MONEY']))
+    print("Started with {}".format(params['START_MONEY']))
     logging.info("Ended with {}".format(params['END_MONEY']))
+    print("Ended with {}".format(params['END_MONEY']))
+
+    print("Params used {}".format(params))
 
     #set the number of cycles of buying and selling to whichever was lower, the number of times buying or selling
     if numBuys > numSells:

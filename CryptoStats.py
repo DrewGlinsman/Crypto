@@ -202,7 +202,7 @@ def getOpenPrice(interval, minutesBack, cryptoOpenPriceLocalData = cryptoOpenPri
 
         #makes a new dictionary if the dicitonary is not made yet and puts the values for each crypto in reverse
         # this is because crypto stat has data ordered newest to oldest and thus it has to be reversed before
-        # it can be used to train oldest to newest in the evalutator
+        # it can be used to train oldest to newest in the evaluator
 
         for key, currencyname in currencies.items():
             reversedData = []
