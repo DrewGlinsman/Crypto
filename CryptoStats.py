@@ -8,9 +8,9 @@ import pickle
 import sys
 import pathlib
 import PriceSymbolsUpdater
-
+import sqlite3
 from Generics import priceSymbols
-
+from PseudoAPI_Datastream import getNumRows, select_by_crypto, select_by_row
 
 #todo figure out if it is better to insert items at front of the lists or to just remake the lists in reverse order
 
@@ -42,6 +42,61 @@ file = open(logPath, "w")
 ONE_DAY = 86400000
 ONE_THIRD_DAY = 28800000
 COUNT = 3
+
+def getDataDatabase(startMinuteBack, endMinuteBack):
+    """
+    :param startMinuteBack: first minute of the interval you want
+    :param endMinuteBack: end minute of the interval desired
+    :return:
+    """
+    global priceSymbols
+
+    priceSymbols = PriceSymbolsUpdater.chooseUpdate('binance')
+
+    #code for writing the values into three text files for each crypto: an open price, close price, and volume file.
+    dirname = os.path.dirname(os.path.realpath(__file__))
+    filename = os.path.join(dirname + '/', '')
+    databasePath = os.path.join(dirname + '/', 'databases/' + 'binance.db')
+    conn = sqlite3.connect(databasePath)
+    cur = conn.cursor()
+
+    openPriceDict = {}
+    closePriceDict = {}
+    volumeDict = {}
+    highPriceDict = {}
+    lowPriceDict = {}
+
+    length = getNumRows(cur, 'openprices')
+    print(length)
+
+    startIndex = length - startMinuteBack - 1
+    endIndex = length - endMinuteBack - 1
+    index = startIndex
+
+    for key, crypto in priceSymbols.items():
+        openPriceDict[crypto] = []
+        closePriceDict[crypto] = []
+        volumeDict[crypto] = []
+        highPriceDict[crypto] = []
+        lowPriceDict[crypto] = []
+
+    while(endIndex < index <= startIndex):
+        for key, crypto in priceSymbols.items():
+            openPrice = select_by_crypto(conn, 'openprices', crypto, index)[0][0]
+            closePrice = select_by_crypto(conn, 'closeprices', crypto, index)[0][0]
+            volume = select_by_crypto(conn, 'volumes', crypto, index)[0][0]
+            highPrice = select_by_crypto(conn, 'highprices', crypto, index)[0][0]
+            lowPrice = select_by_crypto(conn, 'lowprices', crypto, index)[0][0]
+
+            openPriceDict[crypto].append(openPrice)
+            closePriceDict[crypto].append(closePrice)
+            volumeDict[crypto].append(volume)
+            highPriceDict[crypto].append(highPrice)
+            lowPriceDict[crypto].append(lowPrice)
+
+        index -= 1
+        
+    return openPriceDict, closePriceDict, volumeDict, highPriceDict, lowPriceDict
 
 def getDataBinance(numDays):
     """
@@ -379,7 +434,7 @@ def getData(count, website='binance'):
         print("Unimplemented")
 
 def main():
-    getData(COUNT)
+    getDataDatabase(5, 5, 5)
 
 
 
