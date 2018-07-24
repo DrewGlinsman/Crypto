@@ -676,7 +676,7 @@ def main():
 
 
 
-    '''
+    
     #waits for one minute - time spent priming database with 2 hours of data so that the next data we grab is a full minute
     #after we have primed
     time.sleep(60.0 - ((time.time() - buffertimestart) % 60.0))
@@ -693,8 +693,6 @@ def main():
 
         params['mins'] += 1
 
-
-    '''
     connection.commit()
     close_connection(connection)
 
