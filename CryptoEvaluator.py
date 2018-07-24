@@ -10,14 +10,15 @@ import pathlib
 import CryptoStats
 import pickle
 import logging
+import random
 
 
 from ErrorCodes import ErrorCodes
 from PriceSymbolsUpdater import getStoredSymbols
 from CryptoDistribution import readPickle
-from CryptoTrainer import  minInDay
+from CryptoTrainer import  minInDay, randomizeParamDictofCryptoScoreModifiers
 from Generics import PARAMETERS, defaultcryptoevaluatorparamspassed, calcPercentChange, mininhour, hourinday, nextDay, implicitcryptodivisions, \
-    normalizationValuesToStore, persistentdataforscoretypenames, numFiles, percenttodecimal, defaulterrorflagsforcryptoevaluator
+    normalizationValuesToStore, persistentdataforscoretypenames, numFiles, percenttodecimal, defaulterrorflagsforcryptoevaluator, superParams
 
 try:
     from urlib import urlencode
@@ -100,6 +101,7 @@ def initdirectories(paramspassed, dirname, paramstostore, typedirec='storage'):
     #if none is currently in the directory
     if numFiles(directory) == 0 and paramspassed['directoryprefix'] == 'CryptoEvaluator':
         writeParamPickle(paramstostore, directory, '{}param.pkl'.format(paramspassed['variationNum']))
+
 
 #reads pickle from a file into the passed parameter dictionary
 def readParamPickle( directory, filename):
@@ -190,12 +192,13 @@ def readTheInput(paramspassed, evaluatorparams, directory):
 #get the balance in bitcoins
 
 #buy the specified crypto currency
-def buyBin(currency, currentMinute, currencyToTrade, openpricedata):
+def buyBin(currency, currentMinute, currencyToTrade, openpricedata, scores):
     """
     :param currency: currency to buy
     :param currentMinute: the current minute of the simulation
     :param currencyToTrade: the currency to sell for the other currency
     :param openpricedata: the list of close prices by minute for the currency
+    :param scores: the scores
     :return: the price the crypto was bought at, the true bought price (same as the price right now), the crypto
     symbol owned now
     """
@@ -206,7 +209,7 @@ def buyBin(currency, currentMinute, currencyToTrade, openpricedata):
     owned = currency
 
     # mark item as the current crypto being traded and save the buy price at for failure condition
-    entry = {currency: {'buyPrice': ratio, 'timestamp': 0}}
+    entry = {currency: scores[currency]}
     currencyToTrade.clear()
     currencyToTrade.update(entry)
 
@@ -436,11 +439,11 @@ def updateCrypto(firstminindex, lastminindex, ownedcrypto, params, openPriceData
                                                                    closePriceDataLocal
                                                                   ,openPriceDataLocal)
 
-        #update whether each crypto has been purchase
-        updatecryptosbought(persistentancillarydataforscore, ownedcrypto)
+    #update whether each crypto has been purchase
+    updatecryptosbought(persistentancillarydataforscore, ownedcrypto)
 
-        #update the counter for how many times each crypto has been owned
-        updatecryptosboughtnumberoftimes(persistentancillarydataforscore, ownedcrypto)
+    #update the counter for how many times each crypto has been owned
+    updatecryptosboughtnumberoftimes(persistentancillarydataforscore, ownedcrypto)
 
     # copy over values that should are persistently stored
     copypersistentdataover(dataForScore, persistentancillarydataforscore)
@@ -459,12 +462,14 @@ def updateCrypto(firstminindex, lastminindex, ownedcrypto, params, openPriceData
     for key, currencyname in cryptoSymbols.items():
 
         # use the calculations to get a score
-        calc_score = getScore(params, maxdataforscore, namesofvaluestostore, dataForScore[currencyname],
+        calc_score = getScore(currencyname, params, maxdataforscore, namesofvaluestostore, dataForScore[currencyname],
                               combinedParamData[currencyname],
                               maxdataforcombinedparams)
         new_score = {currencyname: calc_score}
         scores.update(new_score)
 
+    #normalize the scores
+    #normalizescores(scores)
 
     # add cryptos and their scores to dictionary of currencies to trade if they are above the minimum score
     for currencyname, scoreforcurrency in scores.items():
@@ -473,7 +478,7 @@ def updateCrypto(firstminindex, lastminindex, ownedcrypto, params, openPriceData
         entry = {currencyname: scoreforcurrency}
 
         #if the score is higher than the minimum score
-        if (scoreforcurrency > params['MINIMUM_SCORE']):
+        if (scoreforcurrency > params['MINIMUM_SCORE'] and scoreforcurrency < params['MAXIMUM_SCORE']):
             #add the crypto-score pair to the dictionary of tradeable currencies
             currencyToTrade.update(entry)
 
@@ -485,7 +490,7 @@ def updateCrypto(firstminindex, lastminindex, ownedcrypto, params, openPriceData
             cryptosSeperated['Disregarded'].append(currencyname)
 
     #logging.info("Currrenty to trade: " + str(currencyToTrade))
-
+    #print("Currencies that can be traded {}".format(currencyToTrade))
 #copy any data that has to be shared from the persistent data store to the normal data store dictionary
 def copypersistentdataover(dataforscore, persistentancillarydataforscore):
 
@@ -786,9 +791,10 @@ def getModifiedVolume(currency, params, percentChanges, volumeAmounts):
 # for both volume and price
 
 
-def getScore(params, maxCryptoCalculationsStored, listofscorevariables,
+def getScore(currency, params, maxCryptoCalculationsStored, listofscorevariables,
              dataForScore, combinedParamData, maxCombinedParamsCryptoCalculationsStored):
     """
+    :param currency: the currency being looked at
     :param params: the parameters used by the bot to trade with
     :param maxCryptoCalculationsStored: the dictionary of the max of each calculated value for each variable used in score
     :param listofscorevariables: the list with the key name for each variable used in calcualting the score
@@ -831,7 +837,8 @@ def getScore(params, maxCryptoCalculationsStored, listofscorevariables,
                      maxCombinedParamsCryptoCalculationsStored[combinedparamdatatypeindex]) \
                     * params['COMBINED_PARAMS_MODIFIERS'][combinedparamdatatypeindex]
 
-
+    #modify by the stored modifier for this crypto currency
+    newscore *= params['CRYPTO_SCORE_MODIFIERS'][currency]
     return newscore
 
 #find the high price for the hour interval and update the currently stored highest price for the currency
@@ -963,6 +970,8 @@ def priceChecker(params, currencyToTrade, scores, dataforscore, combinedparamdat
     #whittle down the list to just the cryptos that have elements higher than the minimum amounts specified in
     # our minimum params dictionary
     currencyToTrade = removecryptoswithoutadequateminimumvalues(params, currencyToTrade, dataforscore, combinedparamdata)
+
+    #print("Adequate choices {}".format(currencyToTrade))
 
     # Compares the two price lists and sets the currencyToBuy to be
     # the coin with the highest score that also is above the minimum moving average
@@ -1521,6 +1530,25 @@ def setuppersistentancillaryscoredata(persistentancillaryscoredata, ancillarydat
             #make a dictionary entry for the current data type for the current crypto
             persistentancillaryscoredata[currencyname].update({ancillarydataname: 0.0})
 
+#normalize the scores
+def normalizescores(scores):
+    """
+    :param scores: the dictionary of scores
+    :return:
+    """
+    maxscore = scores['BTCUSDT']
+
+    for currency, scorevalue in scores.items():
+
+        if abs(scorevalue) > maxscore:
+            maxscore = abs(scorevalue)
+
+    for currency, scorevalue in scores.items():
+        newscore = scorevalue / maxscore
+
+        scores.update({currency: newscore})
+
+
 #returns a partioned version of the past dict of data for each type of data where
 # an hour is taken out by default starting from 60 minutes in the past (if you choose an hour)
 # assumes the passed data dicts have lists of data stored for each crypto (so the crypto name is the key for each list)
@@ -1563,6 +1591,49 @@ def norestartcodessetof(errorcodes):
                 return True
 
     return False
+
+#get a crypto closest to the ideal score
+def getcryptoclosesttoidealscore(scores, params, cryptosymbols):
+    bestcurrentsymbol = ''
+    bestcurrentmagnitude = 10000
+
+    for currency, symbol in cryptosymbols.items():
+        currentmagnitude = abs(params['IDEAL_SCORE'] - scores[symbol])
+
+        if currentmagnitude < bestcurrentmagnitude:
+            bestcurrentsymbol = symbol
+            bestcurrentmagnitude = currentmagnitude
+
+    return bestcurrentsymbol
+
+
+#write data back into the parameter dictionary at the end of the file
+def writedatabacktoparams(params, numBuys, cycles, persistentdata, endmoney):
+    """
+    :param params: the parameter dictionary for this file
+    :param numBuys: the number of buys made
+    :param cycles: the number of holding periods
+    :param persistentdata: the dictionary of stored data
+    :param endmoney: the ending money
+    :return:
+    """
+
+    # write over the current end money
+    params['END_MONEY'] = endmoney
+
+    # write over the number of buys
+    params['NUM_BUYS'] = numBuys
+
+    # write over the number of cycles
+    params['CYCLES'] = cycles
+
+    #store the number of times each crypto was purchased
+    for currencyname, currencydatadict in persistentdata.items():
+        if currencyname in params['OWNED_BEFORE_EACH_TIME']:
+            params['OWNED_BEFORE_EACH_TIME'].pop(currencyname)
+        if currencydatadict['OWNED_BEFORE_EACH_TIME'] != 0:
+            params['OWNED_BEFORE_EACH_TIME'].update({currencyname: currencydatadict['OWNED_BEFORE_EACH_TIME']})
+
 
 def main():
     # setup the relative file path
@@ -1627,6 +1698,11 @@ def main():
     cryptosSeparated = implicitcryptodivisions
 
     ######################END OF OLD GLOBAL VARIABLES ###########################################################
+    ###########################################################################################################
+    ###########################################################################################################
+    ###########################################################################################################
+    ###########################################################################################################
+    ###########################################################################################################
 
     #reads in the input, usually from the cryptotrainer
     passedparams, dirname = readTheInput(defaultcryptoevaluatorparamspassed, PARAMETERS, homedirectory)
@@ -1658,6 +1734,10 @@ def main():
     # the file name for the parameter file
     paramfilename = '{}param.pkl'.format(passedparams['variationNum'])
 
+
+    #TODO have Drew write a way for them to find their parameters if this is being run by a CryptoTradingManager
+    #TODO basically they will need to navigate to the trading directory NOT the training directory and pull a baseparams
+    #TODO corresponding to their classnum
     #get the parameters needed for this trading set
     params = readParamPickle(classdirectory, paramfilename)
 
@@ -1705,6 +1785,12 @@ def main():
 
     #error code class to set flags when either the simulation must end or the current holding period must end
     errorcodes = ErrorCodes(scriptname='CryptoEvaluator')
+
+
+    # if this is being run by itself verify the stored symbols and the parameter crypto symbols modifiers
+    if passedparams['directoryprefix'] == 'CryptoEvaluator':
+        randomizeParamDictofCryptoScoreModifiers(params, superParams,  'lower', passedparams, homedirectory)
+
 
     # runs the bot for a set number of cycles or unless the EXIT condition is met (read the function checkExitCondition)
     # cycles is either a period where a crypto is held and ones where they are bought/sold
@@ -1765,8 +1851,13 @@ def main():
 
         # set the current currency to be whatever the price checker returns
         # can be a nothing string, the same crypto, or a new one
+
         currentCurrency = priceChecker(params, currencyToTrade, scores, dataforscore, combinedparamdata,
                                        cryptosSeparated)
+
+        #arbitraryholdtime = getarbitraryholdtime(scores, params, currentCurrency)
+
+        print("picked {} for {}".format(currentCurrency, 0))
 
         # sell the current crypto if you want to buy a new one
         if (oldCurrency != currentCurrency) and (currentCurrency != '') and currentCurrency != ownCrypto:
@@ -1800,7 +1891,7 @@ def main():
             buyandsell = 2
 
             #change the end money to include the assumed loss from the current money
-            endmoney = endmoney + (endmoney * (float(passedparams['lossallowed']) / percenttodecimal)) * buyandsell
+            endmoney = endmoney + (endmoney * (float(0.0) / percenttodecimal)) * buyandsell
 
             #calculate what the real loss would be with an assumed loss and a change based in the money
             truechangewithassumedloss = calcPercentChange(currmoney, endmoney)
@@ -1835,7 +1926,7 @@ def main():
         # buy the new cryptocurrency if there was one selected
         if(oldCurrency != currentCurrency) and (currentCurrency != '') and currentCurrency != ownCrypto:
             priceBought, truePriceBought, ownCrypto = buyBin(currentCurrency, currentMinute,
-                                                             currencyToTrade, openPriceData[currentCurrency])
+                                                             currencyToTrade, openPriceData[currentCurrency], scores)
 
             ownCrypto = currentCurrency
 
@@ -1853,18 +1944,19 @@ def main():
             numSells += 1
 
         # holding of the crypto currency for minutes less than the specied max or until one of the restart conditions is met
-        # assuming there is a current currency owned
-        while(t < params['MAX_TIME_CYCLE'] - minoffset and norestartcodessetof(errorcodes) is False
-              and currentCurrency != ''):
+        # assuming there is a current currency owned, the minutes off set is set to twice its normal number
+        # because sometimes it goes two minutes too long for one of the error flags
+        while(t < params['MAX_TIME_CYCLE'] - minoffset * 2 and norestartcodessetof(errorcodes) is False
+              and ownCrypto != ''):
 
             #if we are at a multiple of the minutes before we wait to check for this flag and this is not the starting
             # minute of the interval we check if we need to restart and let go of this crypto
-            if(t % params['WAIT_FOR_CHECK_FAILURE'] == 0 and t != 0):
+            if(t > params['WAIT_FOR_CHECK_FAILURE'] == 0 and t % everymultipleof4 and t != 0):
                 #a slice of ten minutes of time in the past
                 openpricedatalasttenmin = getsliceofdictofdata(openPriceData,
                                                                lastminintimeperiod=currentMinute - minoffset,
-                                                               timeperiod=10, currency=currentCurrency)
-                seterrorflag = checkFailureCondition(currentCurrency, params['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE'],
+                                                               timeperiod=10, currency=ownCrypto)
+                seterrorflag = checkFailureCondition(ownCrypto, params['NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE'],
                                                 openpricedatalasttenmin,
                                                 params['valueaddedforapositivepercentchangeforcheckfailureflag'],
                                                 params['valueaddedforazeropercentchangeforcheckoffailureflag'])
@@ -1875,20 +1967,20 @@ def main():
                 #a slice of the last fifteen minutes
                 openpricedatalastfifteenminutes = getsliceofdictofdata(openPriceData,
                                                                        lastminintimeperiod=currentMinute - minoffset,
-                                                                       timeperiod=15, currency=currentCurrency)
-                seterrorflag = checkTooLow(currentCurrency,params, priceBought, openpricedatalastfifteenminutes)
+                                                                       timeperiod=15, currency=ownCrypto)
+                seterrorflag = checkTooLow(ownCrypto,params, priceBought, openpricedatalastfifteenminutes)
 
                 errorcodes.setflag('RESTART_PRICE_DROPPED_TOO_CLOSE_TO_ORIGINAL_HOLDING_PERIOD' ,seterrorflag)
 
             #if we are a a multiple of the minutes before we wait to check this flag and this is not the
             # starting minute of the interval
-            if (t > params['WAIT_FOR_CHECK_TOO_NEGATIVE'] and t % everymultipleof2 and t!=0):
+            if (t > params['WAIT_FOR_CHECK_TOO_NEGATIVE'] and t % everymultipleof4 and t!=0):
                 #get the last two minutes of open price data
                 openpricedatalasttwominutes = getsliceofdictofdata(openPriceData, lastminintimeperiod=currentMinute - minoffset,
-                                                               timeperiod=2, currency=currentCurrency)
+                                                               timeperiod=2, currency=ownCrypto)
 
                 #check the third restarting flag value to see if the crypto has gone too negative
-                seterrorflag = checkTooNegative(currentCurrency, params, openpricedatalasttwominutes)
+                seterrorflag = checkTooNegative(ownCrypto, params, openpricedatalasttwominutes)
 
                 errorcodes.setflag('RESTART_PRICE_DROPPED_TOO_MUCH_VALUE_HOLDING_PERIOD', seterrorflag)
 
@@ -1896,7 +1988,7 @@ def main():
             #if we are on a multiple of minutes and we have waited the right amount of time
             # and this is not the starting minute
             if (t > params['WAIT_FOR_CHECK_TOO_EXTREME'] and t % everymultipleof4 and t != 0):
-                seterrorflag = checkPercentChangeOverHoldingTooExtreme(currentCurrency, currentMinute, params,
+                seterrorflag = checkPercentChangeOverHoldingTooExtreme(ownCrypto, currentMinute, params,
                                       priceBought, openPriceData)
                 errorcodes.setflag('RESTART_PRICE_CHANGED_TOO_EXTREME_HOLDING_PERIOD', seterrorflag)
 
@@ -1989,7 +2081,7 @@ def main():
             buyandsell = 2
 
             # change the end money to include the assumed loss from the current money
-            endmoney = endmoney + (endmoney * (float(passedparams['lossallowed']) / percenttodecimal)) * buyandsell
+            endmoney = endmoney + (endmoney * (float(0.0) / percenttodecimal)) * buyandsell
 
             # calculate what the real loss would be with an assumed loss and a change based in the money
             truechangewithassumedloss = calcPercentChange(currmoney, endmoney)
@@ -2024,15 +2116,14 @@ def main():
         #empty the dictionary of lists of the implicit divisions made between the cryptos
         resetDecisionsStored(cryptosSeparated)
 
-        #print error flags
-        errorcodes.printflags()
+        print("Percent Change of that run {}".format(params['CUMULATIVE_PERCENT_CHANGE']))
 
     #print to file the final percent changes over the run
     logging.info("Cumulative percent change over the life of all cryptos owneed so far {}"
                  .format(params['CUMULATIVE_PERCENT_CHANGE_STORE']))
 
-    #write over the current end money
-    params['END_MONEY'] = endmoney
+    #write data back to params dictionary that was gathered
+    writedatabacktoparams(params, numBuys, cycles, persistentancillarydataforscore, endmoney)
 
     #print to the log the start and end money
     logging.info("Started with {}".format(params['START_MONEY']))
@@ -2040,17 +2131,19 @@ def main():
     logging.info("Ended with {}".format(params['END_MONEY']))
     print("Ended with {}".format(params['END_MONEY']))
 
-    print("Params used {}".format(params))
 
-    #set the number of cycles of buying and selling to whichever was lower, the number of times buying or selling
-    if numBuys > numSells:
-        params['CYCLES'] = numSells
-    else:
-        params['CYCLES'] = numBuys
+
 
     #write back to the param pickle file
     writeParamPickle(params, classdirectory, '{}param.pkl'.format(passedparams['variationNum']))
 
+    print("Params {}".format(params))
+    print("Arbitrary Seed {}".format(params['ARBITRARY_SEED']))
+    print("Num buys {}".format(numBuys))
+    print(persistentancillarydataforscore)
+    print("Buy breakdown:")
+    print(params['OWNED_BEFORE_EACH_TIME'])
+    print("Minimums used {}".format(params['PARAMS_CHECKED_FOR_MINIMUM_VALUES']))
 
 if __name__ == "__main__":
     main()

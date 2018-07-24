@@ -16,7 +16,7 @@ from Generics import UNCHANGED_PARAMS, superParams, defaulttrainerparamspassed, 
     calcPercentChange, listparms, removeEmptyInnerLists, paramsthatcanbecombined, numFiles, \
     SPECIAL_PARAMS,  dictparams, SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION
 
-
+from PriceSymbolsUpdater import getStoredSymbols
 
 
 # will hold the specific parameter given to each list
@@ -93,7 +93,7 @@ def writeParamPickle(storeval, path, filename):
 # type 3 means none
 
 def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams, specialparameterslist,
-                    specialparametersrandomizationranges):
+                    specialparametersrandomizationranges, paramspassed, homedirectory):
     """
     :param paramDict: the parameter dictionary
     :param typeOfRandom: the integer corresponding to the way to randomize
@@ -102,6 +102,8 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams, speci
     :param specialparameterslist: the list of the lists of parameters that have special ranges to be randomized with
     :param specialparametersrandomizationranges: the list of ranges that each special parameter list of parameters
         is randomized using.
+    :param paramspassed: the parameters passed to this file
+    :param homedirectory: the primary directory of the file
     :return:
     """
 
@@ -139,7 +141,7 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams, speci
             #if the parameter is a dict
             elif check == isadictparameter:
 
-                randomizeParamsDict(paramDict, baseparams, key, combinableparams, 'lower')
+                randomizeParamsDict(paramDict, baseparams, key, combinableparams, 'lower', paramspassed, homedirectory)
 
             #if the parameter is a special parameter with its own range value
             elif check == isaspecialparameter:
@@ -173,7 +175,7 @@ def randomizeParams(paramDict, typeOfRandom, baseparams, combinableparams, speci
             # if the parameter is a dict
             elif check == isadictparameter:
 
-                randomizeParamsDict(paramDict, baseparams, key, combinableparams, 'upper')
+                randomizeParamsDict(paramDict, baseparams, key, combinableparams, 'upper', paramspassed, homedirectory)
 
             #if the param is a special param with its own range values
             elif check == isaspecialparameter:
@@ -276,12 +278,16 @@ def randomizeParamsList(params, keytochange, randcheckrange, checkthreshold, ran
             modifiyparamdecision = int(random.uniform(0,1) * upperlimitofrange)
 
             #while the decision value is not to add or remove a parameter or when there are no parameters left in the list
-            while(modifiyparamdecision > stopchangingparamsthreshold or len(listofcombinedparams) == 0):
+            while(modifiyparamdecision > stopchangingparamsthreshold and len(listofcombinedparams) != 0):
                 #if we choose to remove a parameter
                 if modifiyparamdecision <= removeparamsthreshold:
-                    #generate a value corresponding to an index in the list of parameters to combined
-                    #the value is used to decide which parameter to remove
-                    indexofparamtoremove = int(random.uniform(0,1) * len(listofcombinedparams))
+
+                    indexofparamtoremove = len(listofcombinedparams)
+
+                    while indexofparamtoremove == len(listofcombinedparams):
+                        #generate a value corresponding to an index in the list of parameters to combined
+                        #the value is used to decide which parameter to remove
+                        indexofparamtoremove = int(random.uniform(0,1) * len(listofcombinedparams))
 
                     #remove the specified parameter
                     del listofcombinedparams[indexofparamtoremove]
@@ -450,11 +456,23 @@ def addmodifiertocombinedparammodifierlist(listofcombinedparametermodifiers, ran
     listofcombinedparametermodifiers.append(newmodifiervalue)
 
 #randomize the parameter that is a dictionary by selecting the right dictionary randomization function
-def randomizeParamsDict(params, baseparams, key, normaparamslist, upperorlowervalues):
+def randomizeParamsDict(params, baseparams, key, normaparamslist, upperorlowervalues, paramspassed, homedirectory):
+    """
+    :param params: the parameter dictionary used by the evaluators
+    :param baseparams: the base params for the trainer
+    :param key: current parameter key looked at (of params)
+    :param normaparamslist: the normal parameter list
+    :param upperorlowervalues: whether these are upper or lower values
+    :param paramspassed: the parameters passed to this file
+    :param homedirectory: the primary directory of the file
+    :return:
+    """
 
 
     if key == 'PARAMS_CHECKED_FOR_MINIMUM_VALUES':
-        randomizeParamDictofMinimumParameterValues(params, baseparams,normaparamslist, upperorlowervalues)
+        randomizeParamDictofMinimumParameterValues(params, baseparams, normaparamslist, upperorlowervalues)
+    elif key == 'CRYPTO_SCORE_MODIFIERS':
+        randomizeParamDictofCryptoScoreModifiers(params, baseparams, upperorlowervalues, paramspassed, homedirectory)
     else:
         logging.error("Not a valid key {}".format(key))
         quit(-1)
@@ -687,6 +705,44 @@ def removeparameterusedasaminimum(params):
         logging.error("Not a valid remove decision {}".format(decisiononwhethertoremove))
         quit(-1)
 
+#randomize the dictionary of crypto score modifiers
+def randomizeParamDictofCryptoScoreModifiers(params, baseparams, upperorlowervalues, paramspassed, homedirectory):
+    """
+    :param params: the parameters used by the evaluator bots
+    :param baseparams: the base parameters used by this trainer
+    :param upperorlowervalues: whether these are using the upper or lower range of values for randomization
+    :param paramspassed: the parameters passed to this file
+    :param homedirectory: the primary directory of the file
+    :return:
+    """
+
+    #check to make sure all the cryptos are represented in this dictionary
+    verifyintegrityoflistofcryptosymbolmodifiers(params['CRYPTO_SCORE_MODIFIERS'], paramspassed, homedirectory)
+
+    for currencyname, currencyscoremodifier in params['CRYPTO_SCORE_MODIFIERS'].items():
+        if 'upper' == upperorlowervalues:
+            randomvalue = random.uniform(-1,1) * baseparams['bigrange']
+        else:
+            randomvalue = random.uniform(-1,1) * baseparams['smallrange']
+
+        newvalue = currencyscoremodifier + randomvalue
+
+        params['CRYPTO_SCORE_MODIFIERS'].update({currencyname: newvalue})
+
+#adds any cryptos to the list of score modifiers if they are not already present
+def verifyintegrityoflistofcryptosymbolmodifiers(dictofcryptosymbolsandtheirmodifiers, paramspassed, homedirectory):
+    """
+    :param dictofcryptosymbolsandtheirmodifiers: the dictionary of crypto symbols and their modifiers
+    :param paramspassed: the parameters passed to this file
+    :param homedirectory: the primary directory of the file
+    :return:
+    """
+
+    storedsymbolsdict = getStoredSymbols(paramspassed['website'], homedirectory, list=False)
+
+    for currencyname, symbol in storedsymbolsdict.items():
+        if symbol not in dictofcryptosymbolsandtheirmodifiers:
+            dictofcryptosymbolsandtheirmodifiers.update({symbol: 1.0})
 
 
 #randomizes the special parameters. each has a special range corresponding to it.
@@ -1095,6 +1151,8 @@ def main():
     absolute_Max = 0
     absolute_Min = 0
 
+
+
     # store the multiple processes
     for classnum  in range(int(baseparams['classes'])):
 
@@ -1102,6 +1160,9 @@ def main():
 
         #read the newly updated stored parameters
         params = readParamPickle(direc, 'baseparams.pkl')
+
+        # make sure we verify the crypto score modifiers
+        verifyintegrityoflistofcryptosymbolmodifiers(params['CRYPTO_SCORE_MODIFIERS'], paramspassed, homedirectory)
 
         print("params {}".format(params))
 
@@ -1125,7 +1186,7 @@ def main():
             reform = ''
             # randomize parameters and send the bot their class and variation num
             params = randomizeParams(params, typeOfRandom, baseparams, paramsthatcanbecombined, SPECIAL_PARAMS,
-                                     SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION)
+                                     SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION, paramspassed, homedirectory)
 
             params['CLASS_NUM'] = classnum
             params['VARIATION_NUMBER'] = int(variationNum)
@@ -1150,12 +1211,12 @@ def main():
                                                                        paramspassed['idnum'], paramspassed['lossallowed'],
                                                                         paramspassed['startmoney']))
 
-            #print("Variation {}".format(variationNum))
+            print("Variation {}".format(variationNum))
 
             #the standard output from the subprocess
             evaluatoroutput = out[0]
 
-            #print("Output {}".format(evaluatoroutput))
+            print("Output {}".format(evaluatoroutput))
 
             #the standard error from the subprocess
             evaluatorerror = out[1]
@@ -1191,7 +1252,8 @@ def main():
             #print("Cycles {}".format(params['CYCLES']))
 
             # if the cumulative Percent Stored is greater than the current Max store it and the parameters it was from
-            if (cumulativePerentChangeStore >= current_Max and params['CYCLES'] > baseparams['MIN_CYCLES']):
+            if (cumulativePerentChangeStore >= current_Max and params['CYCLES'] > baseparams['MIN_CYCLES']
+                and params['NUM_BUYS'] != 0):
 
                 current_Max = cumulativePerentChangeStore
                 #print("Current Max {}".format(current_Max))
@@ -1249,6 +1311,6 @@ def main():
     print("Final made {}".format(current_Max))
     print("Final money in best bot {}".format(bestparams['END_MONEY']))
     print("Final cycles used {}".format(bestparams['CYCLES']))
-
+    print("Final buys {}".format(bestparams['NUM_BUYS']))
 if __name__ == "__main__":
     main()

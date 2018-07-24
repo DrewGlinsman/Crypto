@@ -231,8 +231,12 @@ def runBots(procs, paramspassed, idnummax, relativedirectory):
         #the standard output returned from the bot
         traineroutput = out[0]
 
+        print(traineroutput)
+
         #the standard error returned from the bot
         trainererror = out[1]
+
+        print(trainererror)
 
         #add the trainer and evaluator id as a key: value pair where the value is a list of evaluator files that have
         # been trained because multiple versions of the same trainer can be used with different evaluator use ids
@@ -410,7 +414,7 @@ def randomizeParams(paramDict, rangeVals = 20):
 
     #go through the paramDict and randomize any that are not supposed to be unchanged
     for key, value in paramDict.items():
-        randVal = int(random.uniform(-1, 1) * rangeVals)
+        randVal = random.uniform(-1, 1) * rangeVals
 
         # if the current parameter does not need special changes
         # and it is not marked as unchanging
@@ -426,7 +430,7 @@ def randomizeParams(paramDict, rangeVals = 20):
     groupnum = 0
     for group in specialSuperParams: #change each group of special parameters together
         # generate a random value to change the special param group members by
-        randVal = int(random.uniform(-1, 1) * specialRange[groupnum])
+        randVal = random.uniform(-1, 1) * specialRange[groupnum]
 
         #go through each parameter key in that special param group list and change all the values by the same amount
         for paramkey in group:
@@ -487,7 +491,7 @@ def changeparamvalueifthecurrentvalueisnonvalidandisnotpartofspecialgroup(paramD
     elif paramkey in nonnegorzero:
         # if the current value is 0 then add a non negative random number to it to make it positive
         if currentvalue == 0:
-            modifiedcurrentvalue = currentvalue + int(random.uniform(0, 1) * rangevals)
+            modifiedcurrentvalue = currentvalue + random.uniform(0, 1) * rangevals
         # if the current value is negative then change the current value to its absolute value
         elif currentvalue < 0:
             modifiedcurrentvalue = abs(currentvalue)
@@ -534,7 +538,7 @@ def  changeparamvalueifthecurrentvalueisnonvalidandispartofspecialgroup(paramDic
     elif group[0] in nonnegorzero:
         # if the current value is 0 then add a non negative random number to it to make it positive
         if currentvalue == 0:
-            modifiedcurrentvalue = currentvalue + int(random.uniform(0, 1) * specialRange[groupnum])
+            modifiedcurrentvalue = currentvalue + random.uniform(0, 1) * specialRange[groupnum]
         # if the current value is negative then change the current value to its absolute value
         elif currentvalue < 0:
             modifiedcurrentvalue = abs(currentvalue)
