@@ -522,3 +522,14 @@ ErrorFlags
 
 ErrorFlagsCryptoEvaluator
 -handles the error flags for the crypto evaluator specifically
+
+7/23/18
+
+CryptoTradingEnvironment
+-CryptoEvaluators only pick parameters that have been recently trained
+
+CryptoTradingManager
+-now checks if seconds and milliseconds are 0 when running the evaluators and supertrainers
+-now runs supertrainers 20 minutes before the associated cryptoevaluators start trading
+
+
