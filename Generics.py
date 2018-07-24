@@ -419,7 +419,7 @@ defaulttrainerparamspassed = {'directoryprefix': 'CryptoTrainer','website': 'bin
 #startmoney: the amount of starting money the bots will use to train with
 defaultcryptoevaluatorparamspassed = {'directoryprefix': 'CryptoEvaluator', 'website': 'binance', 'day': 'monday', 'hour': 9, 'min': 0,
                'classNum': -1, 'variationNum': -1,  'idnum': 0,
-               'lossallowed': -1, 'startmoney': 100}
+               'lossallowed': -1, 'startmoney': 100, 'hotrun' : False}
 
 #parameters passed to PseudoAPI-Datastream
 #website: the website used to gather data, train on, and buy/sell on

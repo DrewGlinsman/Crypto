@@ -102,7 +102,7 @@ def initdirectories(paramspassed, dirname, paramstostore, typedirec='storage'):
         writeParamPickle(paramstostore, directory, '{}param.pkl'.format(paramspassed['variationNum']))
 
 #reads pickle from a file into the passed parameter dictionary
-def readParamPickle( directory, filename):
+def readParamPickle(directory, filename):
     """
     :param directory:
     :param filename:
@@ -213,8 +213,6 @@ def buyBin(currency, currentMinute, currencyToTrade, openpricedata):
     return priceBought, truePriceBought, owned
 
 # sell the specified crypto
-
-
 def sellBin(currency):
     """
     :param currency: the currency to buy
@@ -1183,8 +1181,6 @@ def checkPercentChangeOverWholePeriodExitSimulation(params):
     :param params: the parameter dictionary
     :return: True if a flag was set off requiring a cessation fo the bots trading, False if not
     """
-
-
     if (params['CUMULATIVE_PERCENT_CHANGE_STORE'] > params['MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD']):
         logging.info("HIT MAX PERCENT CHANGE")
         return True
