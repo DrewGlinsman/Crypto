@@ -17,15 +17,6 @@ priceSymbols = {'bitcoin': 'BTCUSDT', 'ripple': "XRPBTC",
 # the binance intervals, their symbols, and their time in milliseconds
 intervalTypes = {'1m': {'symbol': '1m', 'inMS': 60000}, '3m': {'symbol': '3m', 'inMS': 180000}, '5m': {'symbol': '5m', 'inMS': 300000}, '15m': {'symbol': '15m', 'inMS': 900000}, '30m': {'symbol': '30m', 'inMS': 1800000}, '1h': {'symbol': '1h', 'inMS': 3600000}, '2h': {'symbol': '2h', 'inMS': 7200000}, '4h': {'symbol': '4h', 'inMS': 14400000}, '6h': {'symbol': '6h', 'inMS': 21600000}, '8h': {'symbol': '8h', 'inMS': 28800000}, '12h': {'symbol': '12h', 'inMS': 43200000}, '1d': {'symbol': '1d', 'inMS': 86400000}, '3d': {'symbol': '3d', 'inMS': 259200000}, '1w': {'symbol': '1w', 'inMS': 604800000}, '1M': {'symbol': '1M', 'inMS': 2629746000}}
 
-#The parameters used to make a CryptoTradingEnvironment
-"""
-"""
-defaultcryptotradingenvironmentparams = {'directoryprefix': 'CryptoTradingManager', 'website': 'binance',
-                                         'lossallowed': -1, 'minstartmoney': 50, 'maxstartmoney': 100,
-                                         'currmoneyinaccount': 200, 'maxmoneyinuse': 100,
-                                         'minsofdatagatheredsofar': 0, 'maxminutestograbdata': 10000000,
-                                         'minutesofdatatoprimedatabase': 1440, 'wipedatabaseatstart': False,
-                                         'userid': 0}
 
 
 # EXPLANATION OF THE PARAMETERS
@@ -34,7 +25,8 @@ defaultcryptotradingenvironmentparams = {'directoryprefix': 'CryptoTradingManage
  PERCENT_QUANTITY_TO_SPEND: the amount of the balance calculated to be spent that we can spend (based on the small fee) #todo look more at why this exists
  PERCENT_TO_SPEND: the amount of the balance of bitcoin to spend. Should be calculated by how many bots are made
  MINIMUM_PERCENT_INCREASE: lowest percent increase for a cryptocurrency to be considered in the start of the bot
- MINIMUM_SCORE: the lowest score for a crypto to be addded to the list of scores to be checked for the remaineder of a run
+ MINIMUM_SCORE: the lowest score for a crypto to be added to the list of scores to be checked for the remainder of a run
+ MAXIMUM_SCORE: the highest score for a crypto to be added to the list of scores to be checked for the remainder of a run
  MAX_DECREASE: the maximum allowed decrease over a short (<15m) interval
  MAX_TIME_CYCLE: the maximum time the bot will run for in ticks (they are counted by a incrementing variable)
  MAX_CYCLES: the maximum amount of times the bot will buy and sell
@@ -124,9 +116,14 @@ MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD: the negative percentage that will set 
     0.5 in one or 1.0 in the other and their goal is to get to a value over the interval of 5.0)
  valueaddedforazeropercentchangeforcheckoffailureflag: the value added to the counter inside of the check failure flag
     so that each bot treats the error flag summations differently
+ CRYPTO_SCORE_MODIFIERS: the dictionary of score modifiers to modify each score by
+ ARBITRARY_SEED: the numerical seed used to randomily decide what cryptos are picked and for how long they are held 
+ IDEAL_SCORE: the ideal score that when choosing we pick the crypto closest to it
+ NUM_BUYS: the number of buying choices made
+ OWNED_BEFORE_EACH_TIME: a dictionary hold the number of times each crypto was bought in this run
 """
 PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMUM_PERCENT_INCREASE': 5.0,
-              'MINIMUM_SCORE': 0.000001, 'MAX_DECREASE': -2.0, 'MAX_TIME_CYCLE': 60.0,
+              'MINIMUM_SCORE': -5.0, 'MAXIMUM_SCORE': 5.0, 'MAX_DECREASE': -2.0, 'MAX_TIME_CYCLE': 60.0,
               'MAX_CYCLES': 24, 'CYCLES': 0, 'MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD': 5.0,
               'MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD': -5.0, 'MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD': 50,
               'MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD': -50, 'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE': 0,
@@ -150,25 +147,26 @@ PARAMETERS = {'PERCENT_QUANTITY_TO_SPEND': 0.9, 'PERCENT_TO_SPEND': 1.0, 'MINIMU
               'TIMES_REACH_OR_FALL_BELOW_LOW_PRICE_MODIFIER': 1.0, 'DIFF_HIGH_AND_LOW_PRICE_OVERALL_MODIFIER': 1.0,
               'FLOOR_PRICE_MODIFIER': 1.005, 'MODIFIED_VOLUME_MODIFIER': 1.0, 'MOVING_AVERAGE_MODIFIER': 1.0,
               'OWNED_BEFORE_MODIFIER': 1.0, 'OWNED_BEFORE_EACH_TIME_MODIFIER': 1.0,
-              'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 5.0,
-              'WAIT_FOR_CHECK_TOO_LOW': 10.0, 'WAIT_FOR_CHECK_TOO_NEGATIVE': 4.0, 'WAIT_FOR_CHECK_TOO_EXTREME': 6.0,
+              'CUMULATIVE_PRICE_MODIFIER': 1.0, 'PRIMARY_MODIFIED_VOLUME_SCALER': 1.0, 'WAIT_FOR_CHECK_FAILURE': 20.0,
+              'WAIT_FOR_CHECK_TOO_LOW': 20.0, 'WAIT_FOR_CHECK_TOO_NEGATIVE': 20.0, 'WAIT_FOR_CHECK_TOO_EXTREME': 12.0,
               'VARIATION_NUMBER': 0.0, 'CLASS_NUM': -1, 'MIN_OFFSET': 120.0,
               'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0, 'START_MONEY': 100, 'END_MONEY': 100,
               'COMBINED_PARAMS': [], 'COMBINED_PARAMS_MODIFIERS': [], 'PARAMS_CHECKED_FOR_MINIMUM_VALUES': {},
               'minnumberofparameterminimumstopassforconsideration': 1.0,
               'valueaddedforapositivepercentchangeforcheckfailureflag': 1.0,
-              'valueaddedforazeropercentchangeforcheckoffailureflag': 0.1}
+              'valueaddedforazeropercentchangeforcheckoffailureflag': 0.1, 'CRYPTO_SCORE_MODIFIERS': {},
+              'ARBITRARY_SEED': 1.0, 'IDEAL_SCORE': 1.0, 'NUM_BUYS': 0.0, 'OWNED_BEFORE_EACH_TIME': {}}
 
 
 #any lists stored in the parameters that have to be iterated through and randomized individually
 listparms = ['COMBINED_PARAMS', 'COMBINED_PARAMS_MODIFIERS']
 
 #any dicts stored in the parameters that have to be itereated through and randomized individually
-dictparams = ['PARAMS_CHECKED_FOR_MINIMUM_VALUES']
+dictparams = ['PARAMS_CHECKED_FOR_MINIMUM_VALUES', 'CRYPTO_SCORE_MODIFIERS']
 
 #parameters used by CryptoEvaluator that are specifically ignored when randomizing
-UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND' , 'MAX_DECREASE', 'MAX_TIME_CYCLE', 'MAX_CYCLES',
-                    'CYCLES','MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD', 'MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD',
+UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND', 'MAX_DECREASE', 'MAX_TIME_CYCLE', 'MAX_CYCLES',
+                    'CYCLES', 'MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD', 'MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD',
                     'MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD', 'MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD',
                     'NUM_TIMES_INCREASING_MIN_FAILURE_FLAG_VALUE',
                     'CUMULATIVE_PERCENT_CHANGE','CUMULATIVE_PERCENT_CHANGE_STORE',
@@ -178,13 +176,13 @@ UNCHANGED_PARAMS = ['PERCENT_QUANTITY_TO_SPEND', 'PERCENT_TO_SPEND' , 'MAX_DECRE
                     'INTERVAL_TO_TEST', 'MINUTES_IN_PAST', 'START_MONEY', 'END_MONEY',
                     'minnumberofparameterminimumstopassforconsideration',
                     'valueaddedforapositivepercentchangeforcheckfailureflag',
-                    'valueaddedforazeropercentchangeforcheckoffailureflag']
+                    'valueaddedforazeropercentchangeforcheckoffailureflag', 'NUM_BUYS', 'OWNED_BEFORE_EACH_TIME']
 
 #parameters to be changed by specific amounts (each inner list has a corresponding range specified in the list below)
-SPECIAL_PARAMS = [['MINIMUM_SCORE']]
+SPECIAL_PARAMS = [['MINIMUM_SCORE'], ['MAXIMUM_SCORE']]
 
 #the range of the special params to be changed by
-SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION = [1]
+SPECIAL_PARAMS_RANGE_OF_RANDOMIZATION = [1,1]
 
 #names for different calculations to be stored and used to find the max in the bots with each update
 #the max of each of these values is used to normalize each value for scoring (and for the scores themselves)
@@ -299,13 +297,13 @@ valueaddedforazeropercentchangeforcheckoffailureflag: the value added to the cou
     so that each bot treats the error flag summations differently
 """
 # the parameters used by the supertrainer given to each trainer
-superParams = {'smallrange': 2,'bigrange': 10, 'lowoffirstrange': 0, 'lowofsecondrange': 0, 'randcheckrangeone': 10,
-               'randcheckrangetwo': 50, 'lowercheckthreshold': 5,'uppercheckthreshold': 7, 'upperstopcheckthreshold': 2,
+superParams = {'smallrange': 2,'bigrange': 10, 'lowoffirstrange': 0, 'lowofsecondrange': 0, 'randcheckrangeone': 8,
+               'randcheckrangetwo': 20, 'lowercheckthreshold': 5,'uppercheckthreshold': 7, 'upperstopcheckthreshold': 2,
                'upperremovecheckthreshold' : 4, 'lowerstopcheckthreshold' : 2, 'lowerremovecheckthreshold' : 4,
-               'classes': 1, 'variations': 1, 'percentpositivebots': 0, 'percentnegativebots': 0,
+               'classes': 10, 'variations': 3, 'percentpositivebots': 0, 'percentnegativebots': 0,
                'worstbotreturnsaved': 0, 'bestbotreturnsaved': 0, 'averagebotreturnsaved': 0, 'MAX_TIME_CYCLE': 60.0,
-               'MAX_CYCLES': 24, 'MIN_CYCLES': 4, 'WAIT_FOR_CHECK_FAILURE': 5.0, 'WAIT_FOR_CHECK_TOO_LOW': 10.0,
-               'WAIT_FOR_CHECK_TOO_NEGATIVE': 4.0, 'WAIT_FOR_CHECK_TOO_EXTREME': 6.0,
+               'MAX_CYCLES': 24, 'MIN_CYCLES': 4, 'WAIT_FOR_CHECK_FAILURE': 40.0, 'WAIT_FOR_CHECK_TOO_LOW': 40.0,
+               'WAIT_FOR_CHECK_TOO_NEGATIVE': 40.0, 'WAIT_FOR_CHECK_TOO_EXTREME': 12.0,
                'MAX_PERCENT_CHANGE_POSITIVE_HOLDING_PERIOD': 5.0, 'MAX_PERCENT_CHANGE_NEGATIVE_HOLDING_PERIOD': -5.0,
                 'MAX_PERCENT_CHANGE_POSITIVE_WHOLE_PERIOD': 50, 'MAX_PERCENT_CHANGE_NEGATIVE_WHOLE_PERIOD': -50,
                'MIN_OFFSET': 120.0, 'INTERVAL_TO_TEST': 1440.0, 'MINUTES_IN_PAST': 0.0,
@@ -349,7 +347,7 @@ specialRange = [10,10,10,2,5,10,5,5,3,2,2,2,2,2,2,2,2,2,2,2,1,1]
 # parameter in the corresponding inner list within the specialSuperParams list) (does not have to be a special param)
 nonnegorzero = ['classes', 'variations', 'replacementvalue', 'maxparameterstouseasminimums',
                 'minnumberofparameterminimumstopassforconsideration', 'MAX_TIME_CYCLE', 'WAIT_FOR_CHECK_FAILURE',
-                'WAIT_FOR_CHECK_TOO_NEGATIVE', 'WAIT_FOR_CHECK_TOO_LOW', 'MAX_DECREASE']
+                'WAIT_FOR_CHECK_TOO_NEGATIVE', 'WAIT_FOR_CHECK_TOO_LOW', 'MAX_DECREASE', 'MIN_CYCLES']
 
 #special parameters used by the trainers that cannot be negative (only need to identify the first parameter
 # in the corresponding inner list within the specialSuperParams list) (Does not have to be a special param)
@@ -433,7 +431,88 @@ defaultdatastreamparamspassed = {'website': 'binance',  'mins': 0, 'minmax': 144
 defaultcryptodistributionparamspassed = {'website': 'binance', 'lossallowed': -1}
 
 
+#parameters passed to CryptoTradingManager #TODO GIVE THIS THE PARAMETERS FOR SUPERTRAINERS AND CRYPTOEVALUATORS
+"""
+    directoryprefix: the name of the script at the top of the system running all other scripts
+    numberoftrainerpertimeslottraining: the number of trainer each supertrainer will simulate per time slot
+    numberofnonrandomtrainerpertimeslot: the number of trainers per time slot that will be not randomized
+    lossallowed: the percent loss allowed with each trade
+    numberofbotsrunpertimeslottrading: the number of evaluator bots that will be trading starting at a time slot
+    timebetweentrading: the number of minutes between the start of trading
+    maxnumbotstradingsimulatenously: the maximum number of bots that can be trading at the same time regardless
+        of when they started
+    websites: a list of the websites we are making trading environments for 
+    accounts: a list of lists where each sub-list has the index of the account id for an account on a website
+    minstartmoney: the minimum amount of money a bot can start with
+    maxstartmoney: the maximum amount of money a bot can start with
+    currmoneyinaccount: the current money in the account
+    maxmoneyinuse: the maximum money allowed to be trading
+    minsodatagatherdsofar: the mins of data gathered at the start of the PseudoAPI-Datastream script 
+    maxminutestograbdata: the maximum minutes the pseudoAPI-Datastream script will grab before it restarts
+    minutesofdatatoprimedatabase: the minutes of data to prime a database with when starting pseudoAPI_Datastream
+    wipedatabaseatstart: wipe the PseudoAPI_Datastream at the start of a cycle
+    #numsessions: the number of trainers we want to use (think of this like the number of classrooms in a school)
+    #oldidnummax: the number of trainers that will be used and not randomized before training
+    #classNum: the class number that this bot is stored in THE TRAINING DIRECTORY
+    #variationNum: the number indicating what number has been assigned to it in the TRAINING DIRECTORY within a particular class
+    #idnum: the id number that this trainer is stored with IN THE TRAINING DIRECTORY (so this could differ from its original id
+        #since trainers are essentially grabbed at random by the super trainer), used by the evaluators to help store them under
+        #the right trainer file
+"""
+defaultcryptotradingmanagerparamspassed = {'directoryprefix': 'CryptoTradingManager',
+                                           'numberoftrainerpertimeslottraining': 2,
+                                           'numberofnonrandomtrainerpertimeslot': 1, 'lossallowed': -1,
+                                           'numberofbotsrunpertimeslottrading': 1,
+                                           'timebetweentrading': 60, 'maxnumbotstradingsimulatenously': 1,
+                                           'websites': ['binance'], 'accounts': [[0]], 'minstartmoney': 50,
+                                           'maxstartmoney': 100,
+                                           'currmoneyinaccount': 200, 'maxmoneyinuse': 100,
+                                           'minsofdatagatheredsofar': 0, 'maxminutestograbdata': 10000000,
+                                           'minutesofdatatoprimedatabase': 1440, 'wipedatabaseatstart': False,
+                                           'numsessions': 1, 'oldidnummax': 5, 'classNum': -1, 'variationNum': -1,
+                                           'idnum': 0}
 
+#The default set of parameters used by a CryptoTradingEnvironment
+"""
+    directoryprefix: the name of the script at the top of the system running all other scripts
+    website: the website being traded on
+    minstartmoney: the minimum amount of money a bot can start with
+    maxstartmoney: the maximum amount of money a bot can start with
+    currmoneyinaccount: the current money in the account
+    maxmoneyinuse: the maximum money allowed to be trading
+    minsodatagatherdsofar: the mins of data gathered at the start of the PseudoAPI-Datastream script 
+    maxminutestograbdata: the maximum minutes the pseudoAPI-Datastream script will grab before it restarts
+    minutesofdatatoprimedatabase: the minutes of data to prime a database with when starting pseudoAPI_Datastream
+    wipedatabaseatstart: wipe the PseudoAPI_Datastream at the start of a cycle    
+    userid: the user id of the crypto
+"""
+defaultcryptotradingenvironmentparams = {'directoryprefix': 'CryptoTradingManager', 'website': 'binance',
+                                         'lossallowed': -1, 'minstartmoney': 50, 'maxstartmoney': 100,
+                                         'currmoneyinaccount': 200, 'maxmoneyinuse': 100,
+                                         'minsofdatagatheredsofar': 0, 'maxminutestograbdata': 10000000,
+                                         'minutesofdatatoprimedatabase': 1440, 'wipedatabaseatstart': False,
+                                         'userid': 0}
+
+#The default set of parameters used by a BinanceTradingEnvironment
+"""
+    directoryprefix: the name of the script at the top of the system running all other scripts
+    website: the website being traded on
+    minstartmoney: the minimum amount of money a bot can start with
+    maxstartmoney: the maximum amount of money a bot can start with
+    currmoneyinaccount: the current money in the account
+    maxmoneyinuse: the maximum money allowed to be trading
+    minsodatagatherdsofar: the mins of data gathered at the start of the PseudoAPI-Datastream script 
+    maxminutestograbdata: the maximum minutes the pseudoAPI-Datastream script will grab before it restarts
+    minutesofdatatoprimedatabase: the minutes of data to prime a database with when starting pseudoAPI_Datastream
+    wipedatabaseatstart: wipe the PseudoAPI_Datastream at the start of a cycle    
+    userid: the user id of the crypto
+"""
+defaultbinancetradingenvironmentparams = {'directoryprefix': 'CryptoTradingManager', 'website': 'binance',
+                                         'lossallowed': -1, 'minstartmoney': 50, 'maxstartmoney': 100,
+                                         'currmoneyinaccount': 200, 'maxmoneyinuse': 100,
+                                         'minsofdatagatheredsofar': 0, 'maxminutestograbdata': 10000000,
+                                         'minutesofdatatoprimedatabase': 1440, 'wipedatabaseatstart': False,
+                                         'userid': 0}
 
 ######################VALUES RELATED TO TIME
 
@@ -463,6 +542,16 @@ mininhour = 60
 
 #hours in a day
 hourinday = 24
+
+#secondsinaminute
+secondsinmin = 60
+
+#days in a week
+daysinweek = 7
+
+weekdays = {0: 'monday', 1: 'tuesday', 2: 'wednesday', 3: 'thurday', 4: 'friday', 5: 'saturday', 6: 'sunday'}
+
+weekdaytonum = {'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
 
 
 ##############################Error Flags############################################################
